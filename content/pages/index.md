@@ -32,7 +32,7 @@ sections:
         elementId: ''
         type: Link
     media:
-      url: /images/download.jfif
+      url: /images/favicon.svg
       altText: Unblock your team boost your time to production preview
       elementId: ''
       type: ImageBlock
