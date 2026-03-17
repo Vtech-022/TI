@@ -25,32 +25,7 @@ bottomSections:
           - pb-7
           - pr-7
     type: DividerSection
-  - items:
-      - title: ''
-        tagline: ''
-        subtitle: ''
-        image:
-          altText: Company logo
-          styles:
-            self:
-              margin:
-                - ml-3
-          type: ImageBlock
-        colors: bg-light-fg-dark
-        styles:
-          self:
-            padding:
-              - pt-6
-              - pl-6
-              - pb-6
-              - pr-6
-            textAlign: left
-            borderColor: border-neutralAlt
-            borderStyle: none
-            borderWidth: 0
-            borderRadius: none
-            flexDirection: row
-        type: FeaturedItem
+  - items: []
     variant: small-list
     colors: bg-light-fg-dark
     styles:
