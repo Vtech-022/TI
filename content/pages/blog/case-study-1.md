@@ -27,7 +27,7 @@ bottomSections:
     type: DividerSection
   - items:
       - title: ''
-        tagline: This is the tagline
+        tagline: ''
         subtitle: ''
         image:
           altText: Company logo
