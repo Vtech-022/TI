@@ -27,7 +27,7 @@
             "label": "Click Aqui",
             "url": "tecnological.netlify.app",
             "icon": "arrowRight",
-            "iconPosition": "left",
+            "iconPosition": "right",
             "style": "primary",
             "type": "Button"
         }
