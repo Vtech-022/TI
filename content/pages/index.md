@@ -46,6 +46,7 @@ sections:
         padding:
           - pt-10
           - pb-10
+          - pr-10
       subtitle:
         textAlign: left
   - title: Divider
