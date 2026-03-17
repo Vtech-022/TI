@@ -28,10 +28,7 @@ bottomSections:
   - items:
       - title: About Company
         tagline: This is the tagline
-        subtitle: >-
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ante
-          lorem, tincidunt ac leo efficitur, feugiat tempor odio. Curabitur at
-          auctor sapien.
+        subtitle: ''
         image:
           url: /images/telus-logo.svg
           altText: Company logo
