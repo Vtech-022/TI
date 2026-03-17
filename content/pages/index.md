@@ -43,6 +43,8 @@ sections:
       self:
         flexDirection: row
         justifyContent: center
+        padding:
+          - pt-10
       subtitle:
         textAlign: left
   - title: Divider
