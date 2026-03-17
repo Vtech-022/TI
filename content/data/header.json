@@ -25,7 +25,7 @@
     "secondaryLinks": [
         {
             "label": "Log in",
-            "url": "/",
+            "url": "tecnological.netlify.app",
             "icon": "arrowRight",
             "iconPosition": "right",
             "style": "primary",
