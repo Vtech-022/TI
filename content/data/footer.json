@@ -13,14 +13,6 @@
                 "type": "Link"
             },
             {
-                "label": "Pricing",
-                "url": "/pricing",
-                "icon": "arrowRight",
-                "iconPosition": "right",
-                "style": "secondary",
-                "type": "Link"
-            },
-            {
                 "label": "Documentation",
                 "url": "/",
                 "icon": "arrowRight",
