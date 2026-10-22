@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarRange, Diamond, FileText, GitMerge, Kanban, List, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, CalendarRange, Lock, Diamond, FileText, GitMerge, Kanban, List, Pencil, Plus, Trash2 } from 'lucide-react';
 import { ReactElement, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { emptyProject, projectBody, ProjectForm } from './Projects';
@@ -28,7 +28,7 @@ function Tree({ tasks }: { tasks: TaskView[] }) {
           </ul>
           {t.blockers.length > 0 && (
             <div className="small" style={{ padding: '0 18px 10px 56px', color: 'var(--blocked)' }}>
-              <GitMerge size={12} style={{ verticalAlign: -1 }} /> Depende de: {t.blockers.map((b) => `${b.title}${b.status === 'concluida' ? ' ✓' : ''}${b.certainty === 'inferida' ? ' (inferida)' : ''}`).join(' · ')}
+              <GitMerge size={12} style={{ verticalAlign: -1 }} /> Depende de: {t.blockers.map((b) => `${b.title}${b.status === 'concluida' ? ' (concluída)' : ''}${b.certainty === 'inferida' ? ' (inferida)' : ''}`).join(' · ')}
             </div>
           )}
         </div>,
@@ -154,7 +154,7 @@ function Timeline({ tasks, milestones, today }: { tasks: TaskView[]; milestones:
             return (
               <div className="gantt-row" key={t.id}>
                 <button className="gantt-label" style={{ background: 'none', border: 0, textAlign: 'left', cursor: 'pointer' }} onClick={() => openTask(t.id)} title={t.title}>
-                  {t.is_blocked ? '🔒 ' : ''}
+                  {t.is_blocked && <Lock size={12} style={{ verticalAlign: -1, marginRight: 4, color: 'var(--blocked)' }} aria-label="Bloqueada" />}
                   {t.title}
                 </button>
                 <div className="gantt-track">

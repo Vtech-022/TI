@@ -73,7 +73,7 @@ export default function Waiting() {
           {groups.map(([party, items]) => (
             <Panel key={party} title={party} icon={<Users />} count={`${items.length} item(ns)`} flush>
               {items.length >= 2 && status === 'aguardando' && (
-                <div className="small" style={{ padding: '10px 18px', background: 'var(--gold-100)', color: '#5c4a17' }}>
+                <div className="small" style={{ padding: '10px 18px', background: 'var(--gold-100)', color: 'var(--quote-fg)' }}>
                   {items.length} pendências aguardam {party}: um único contato pode resolver todas.
                 </div>
               )}

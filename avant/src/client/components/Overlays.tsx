@@ -319,10 +319,9 @@ export const SHORTCUTS: [string, string][] = [
   ['Ctrl + K  ou  /', 'Pesquisa global'],
   ['Alt + C', 'Captura rápida'],
   ['Alt + N', 'Nova tarefa'],
-  ['Alt + A', 'Abrir agenda'],
   ['Alt + P', 'Prioridades críticas'],
   ['Alt + H', 'Foco de hoje'],
-  ['Alt + 1 … 9', 'Navegar pelas áreas'],
+  ['Alt + 1 … 7', 'Navegar pelas áreas'],
   ['Esc', 'Fechar janela ou painel'],
   ['?', 'Mostrar atalhos']
 ];

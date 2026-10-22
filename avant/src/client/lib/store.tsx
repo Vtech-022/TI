@@ -35,20 +35,29 @@ interface Store {
   track: <T>(p: Promise<T>) => Promise<T>;
   prefs: Prefs;
   setPrefs: (p: Partial<Prefs>) => void;
+  dark: boolean;
 }
 
 export interface Prefs {
   reduceMotion: boolean;
   sidebarCollapsed: boolean;
+  theme: 'sistema' | 'claro' | 'escuro';
 }
 
 const Ctx = createContext<Store | null>(null);
 
+function systemPrefersDark(): boolean {
+  const host = document.documentElement.getAttribute('data-theme');
+  if (host === 'dark') return true;
+  if (host === 'light') return false;
+  return !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+}
+
 function loadPrefs(): Prefs {
   try {
-    return { reduceMotion: false, sidebarCollapsed: false, ...JSON.parse(localStorage.getItem('avant:prefs') ?? '{}') };
+    return { reduceMotion: false, sidebarCollapsed: false, theme: 'sistema', ...JSON.parse(localStorage.getItem('avant:prefs') ?? '{}') };
   } catch {
-    return { reduceMotion: false, sidebarCollapsed: false };
+    return { reduceMotion: false, sidebarCollapsed: false, theme: 'sistema' };
   }
 }
 
@@ -119,9 +128,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
   }, [prefs.reduceMotion]);
 
+  // Tema: escolha do usuário ou, em "sistema", o tema do ambiente (claude.ai ou sistema operacional).
+  const [systemDark, setSystemDark] = useState(() => systemPrefersDark());
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const update = () => setSystemDark(systemPrefersDark());
+    mq?.addEventListener?.('change', update);
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => {
+      mq?.removeEventListener?.('change', update);
+      obs.disconnect();
+    };
+  }, []);
+  const dark = prefs.theme === 'escuro' || (prefs.theme === 'sistema' && systemDark);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-avant-theme', dark ? 'dark' : 'light');
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  }, [dark]);
+
   const value = useMemo(
-    () => ({ meta, version, refresh, toast, toasts, dismissToast, fail, busy, track, prefs, setPrefs }),
-    [meta, version, refresh, toast, toasts, dismissToast, fail, busy, track, prefs, setPrefs]
+    () => ({ meta, version, refresh, toast, toasts, dismissToast, fail, busy, track, prefs, setPrefs, dark }),
+    [meta, version, refresh, toast, toasts, dismissToast, fail, busy, track, prefs, setPrefs, dark]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

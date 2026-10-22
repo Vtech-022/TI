@@ -1,5 +1,5 @@
 // Componentes visuais reutilizáveis.
-import { AlertTriangle, Ban, Check, CheckCircle2, Clock, Info, Lock, X } from 'lucide-react';
+import { AlertTriangle, Ban, Check, CheckCircle2, Clock, Info, Lock, PenLine, X } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import { CERTAINTY_LABEL, PRIORITY_LABEL, STATUS_LABEL } from '../lib/types';
 import type { Certainty, Priority, TaskStatus } from '../lib/types';
@@ -10,7 +10,7 @@ export function PriorityBadge({ p, manual }: { p: Priority; manual?: boolean }) 
     <span className={`badge p-${p}`} title={manual ? 'Prioridade ajustada manualmente' : 'Prioridade calculada'}>
       {p === 'critica' && <AlertTriangle aria-hidden />}
       {PRIORITY_LABEL[p]}
-      {manual ? ' ·M' : ''}
+      {manual && <PenLine aria-label="ajuste manual" />}
     </span>
   );
 }
@@ -98,6 +98,9 @@ export function ErrorBox({ error }: { error: { message: string } | null }) {
 
 function useFocusTrap(open: boolean, onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null);
+  // A função de fechar muda a cada renderização; guardá-la em ref evita reposicionar o foco a cada tecla digitada.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
@@ -107,7 +110,7 @@ function useFocusTrap(open: boolean, onClose: () => void) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        closeRef.current();
       }
       if (e.key === 'Tab' && el) {
         const items = [...el.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter((x) => x.offsetParent !== null);
@@ -127,7 +130,7 @@ function useFocusTrap(open: boolean, onClose: () => void) {
       document.removeEventListener('keydown', onKey, true);
       prev?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
   return ref;
 }
 

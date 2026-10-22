@@ -167,9 +167,9 @@ await check('Celular: layout responsivo e menu recolhível', async () => {
   assert(!overflow, 'Rolagem horizontal na página inicial');
   await mp.screenshot({ path: path.join(SHOTS, '12-celular.png') });
   await mp.getByRole('button', { name: 'Abrir menu' }).click();
-  await mp.getByRole('link', { name: /Agenda/ }).click();
-  await mp.getByRole('heading', { name: 'Agenda', level: 1 }).waitFor();
-  await mp.screenshot({ path: path.join(SHOTS, '13-celular-agenda.png') });
+  await mp.getByRole('link', { name: /Projetos/ }).click();
+  await mp.getByRole('heading', { name: 'Projetos', level: 1 }).waitFor();
+  await mp.screenshot({ path: path.join(SHOTS, '13-celular-projetos.png') });
   await m.close();
 });
 

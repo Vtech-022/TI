@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Flag, ChevronLeft, ChevronRight, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useOpenTask } from '../components/TaskRow';
@@ -436,7 +436,7 @@ export default function Agenda() {
                       }}
                       title={`Prazo: ${t.title}`}
                     >
-                      ⚑ {t.title}
+                      <Flag size={11} aria-hidden style={{ verticalAlign: -1 }} /> {t.title}
                     </button>
                   ))}
                   {evs.length + dues.length > 5 && <div className="small muted">+{evs.length + dues.length - 5}</div>}
@@ -455,7 +455,7 @@ export default function Agenda() {
                 {[...(byDay.get(d) ?? []).filter((e) => e.all_day)].map(evButton)}
                 {(dueByDay.get(d) ?? []).map((t) => (
                   <button key={`t${t.id}`} className="ev due" onClick={() => openTask(t.id)} title={`Prazo: ${t.title}`}>
-                    ⚑ {t.title}
+                    <Flag size={11} aria-hidden style={{ verticalAlign: -1 }} /> {t.title}
                   </button>
                 ))}
               </div>

@@ -1,4 +1,4 @@
-import { History as HistoryIcon, Undo2 } from 'lucide-react';
+import { History as HistoryIcon, Undo2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useOpenTask } from '../components/TaskRow';
@@ -51,7 +51,7 @@ export default function HistoryPage() {
         <input className="input" type="date" value={f.to} onChange={(e) => set('to', e.target.value)} aria-label="Até" />
         {f.capture_id && (
           <button className="btn sm ghost" onClick={() => set('capture_id', '')}>
-            Captura #{f.capture_id} ✕
+            Captura #{f.capture_id} <X size={13} aria-label="remover filtro" />
           </button>
         )}
       </div>

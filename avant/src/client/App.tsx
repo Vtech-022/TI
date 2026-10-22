@@ -1,19 +1,18 @@
 import {
   BarChart3,
-  CalendarDays,
   ChevronsLeft,
   ChevronsRight,
   FileStack,
   FolderKanban,
-  History,
   Hourglass,
   Keyboard,
   LayoutDashboard,
   ListChecks,
   Menu,
+  Moon,
   Plus,
   Search,
-  Settings,
+  Sun,
   Target,
   Zap
 } from 'lucide-react';
@@ -29,15 +28,11 @@ import { useApi, useStore } from './lib/store';
 export const NAV = [
   { to: '/', label: 'Visão Geral', icon: LayoutDashboard, section: 'Operação' },
   { to: '/foco', label: 'Foco de Hoje', icon: Target },
-  { to: '/captura', label: 'Captura Inteligente', icon: Zap },
   { to: '/pendencias', label: 'Minhas Pendências', icon: ListChecks, section: 'Gestão' },
   { to: '/projetos', label: 'Projetos', icon: FolderKanban },
-  { to: '/agenda', label: 'Agenda', icon: CalendarDays },
   { to: '/terceiros', label: 'Aguardando Terceiros', icon: Hourglass },
   { to: '/arquivos', label: 'Arquivos e Documentos', icon: FileStack, section: 'Registro' },
-  { to: '/historico', label: 'Histórico', icon: History },
-  { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
-  { to: '/configuracoes', label: 'Configurações', icon: Settings }
+  { to: '/relatorios', label: 'Relatórios', icon: BarChart3 }
 ];
 
 export function Logo() {
@@ -51,7 +46,7 @@ export function Logo() {
 }
 
 export default function App() {
-  const { meta, prefs, setPrefs, busy } = useStore();
+  const { meta, prefs, setPrefs, busy, dark } = useStore();
   const [palette, setPalette] = useState(false);
   const [capture, setCapture] = useState(false);
   const [newTask, setNewTask] = useState(false);
@@ -78,7 +73,6 @@ export default function App() {
         const map: Record<string, () => void> = {
           KeyC: () => setCapture(true),
           KeyN: () => setNewTask(true),
-          KeyA: () => navigate('/agenda'),
           KeyP: () => navigate('/pendencias?priority=critica'),
           KeyH: () => navigate('/foco')
         };
@@ -160,6 +154,14 @@ export default function App() {
           </button>
           <div className="header-actions">
             {meta && <span className="today desktop-only">{longDate(meta.today)}</span>}
+            <button
+              className="icon-btn"
+              onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })}
+              aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+              title={dark ? 'Modo claro' : 'Modo escuro'}
+            >
+              {dark ? <Sun /> : <Moon />}
+            </button>
             <button className="icon-btn desktop-only" onClick={() => setHelp(true)} aria-label="Atalhos de teclado">
               <Keyboard />
             </button>
