@@ -90,7 +90,7 @@ export function computePriority(task: Task, ctx: PriorityContext): PriorityResul
       `Tarefa necessária para concluir ${dependents.length === 1 ? `"${dependents[0].t.title}"` : `${dependents.length} outras tarefas`}${inferredLink ? ' (dependência inferida)' : ''}.`
     );
     const highImpact = dependents.find((d) => effectiveImpact(d.t, ctx.tasks).impact === 'alto');
-    if (highImpact) add(10, `Libera uma entrega de alto impacto: "${highImpact.t.title}".`);
+    if (highImpact) add(10, dependents.length === 1 ? 'A tarefa dependente é de alto impacto.' : `Libera uma entrega de alto impacto: "${highImpact.t.title}".`);
     const nearDue = dependents
       .filter((d) => d.t.due_date)
       .map((d) => ({ ...d, days: diffDays(ctx.today, d.t.due_date!) }))

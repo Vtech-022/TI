@@ -180,7 +180,7 @@ export function parseDates(text: string, ref: string): DateMatch[] {
   const reRel = /\b(depois de amanha|amanha|hoje)\b/g;
   while ((m = reRel.exec(t))) {
     const n = m[1] === 'hoje' ? 0 : m[1] === 'amanha' ? 1 : 2;
-    push({ date: addDays(ref, n), certainty: 'inferida', index: m.index, len: m[0].length, note: `"${m[1]}" interpretado a partir de ${formatBr(ref)}.` });
+    push({ date: addDays(ref, n), certainty: 'inferida', index: m.index, len: m[0].length, note: `"${text.slice(m.index, m.index + m[0].length)}" interpretado a partir de ${formatBr(ref)}.` });
   }
 
   // dia de semana com modificadores
@@ -193,7 +193,7 @@ export function parseDates(text: string, ref: string): DateMatch[] {
     const mod = m[1] ?? '';
     const suffix = (m[3] ?? '').trim();
     let alternatives: string[] | undefined;
-    let note = `"${m[0].trim()}" interpretado a partir de ${formatBr(ref)} (${WEEKDAY_NAMES[cur]}).`;
+    let note = `"${text.slice(m.index, m.index + m[0].length).trim()}" interpretado a partir de ${formatBr(ref)} (${WEEKDAY_NAMES[cur]}).`;
     if (suffix.includes('semana')) {
       const nextMonday = addDays(startOfWeek(ref), 7);
       push({ date: addDays(nextMonday, target === 0 ? 6 : target - 1), certainty: 'inferida', index: m.index, len: m[0].length, note });
@@ -250,7 +250,7 @@ export function parseDates(text: string, ref: string): DateMatch[] {
       push({ date: nextFriday, certainty: 'inferida', index: m.index, len: s.length, note: '"próxima semana" sem dia definido; considerada a sexta-feira da próxima semana como limite.' });
     } else {
       const n = Number(m[3]);
-      push({ date: addDays(ref, n), certainty: 'inferida', index: m.index, len: s.length, note: `"${s}" contado a partir de ${formatBr(ref)}.` });
+      push({ date: addDays(ref, n), certainty: 'inferida', index: m.index, len: s.length, note: `"${text.slice(m.index, m.index + s.length)}" contado a partir de ${formatBr(ref)}.` });
     }
   }
 

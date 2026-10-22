@@ -19,7 +19,7 @@ describe('motor de priorização com as nove frentes da carga inicial', () => {
     const planilhas = getTask(ctx, taskByTitle(ctx, 'Acompanhar a liberação das planilhas das unidades').id);
     const texts = planilhas.priority_reasons.map((r) => r.text).join(' ');
     expect(texts).toContain('Tarefa necessária para concluir "Estruturar o painel de Educação" (dependência inferida)');
-    expect(texts).toContain('Libera uma entrega de alto impacto');
+    expect(texts).toContain('A tarefa dependente é de alto impacto.');
 
     const painel = getTask(ctx, taskByTitle(ctx, 'Estruturar o painel de Educação').id);
     expect(painel.priority_reasons.map((r) => r.text).join(' ')).toContain('Data inferida (28/10/2026) — precisa de confirmação');

@@ -211,7 +211,7 @@ export function recommendations(ctx: Ctx, s: Snapshot = snapshot(ctx)): Recommen
         kind: 'data_inferida',
         severity: t.days_to_due != null && t.days_to_due <= 3 ? 'alta' : 'media',
         message: `A data registrada para "${t.title}" foi inferida e precisa de confirmação.`,
-        reason: t.due_note ? `Anotação original: ${t.due_note}` : `Data interpretada: ${formatBr(t.due_date)}.`,
+        reason: t.due_note ? (/^anota/i.test(t.due_note) ? t.due_note : `Anotação original: ${t.due_note}`) : `Data interpretada: ${formatBr(t.due_date)}.`,
         evidence: [ev(t)]
       });
     }
