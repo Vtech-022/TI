@@ -69,7 +69,7 @@ function TaskDrawer({ id, onClose }: { id: number; onClose: () => void }) {
           <div className="small muted" style={{ marginBottom: 2 }}>
             {t?.project_name ?? 'Sem projeto'} {t?.parent_title ? `› ${t.parent_title}` : ''}
           </div>
-          <h2 style={{ fontSize: 18, fontFamily: 'var(--font-display)', fontWeight: 600 }}>{t?.title ?? 'Carregando…'}</h2>
+          <h2>{t?.title ?? 'Carregando…'}</h2>
           {t && (
             <div className="btn-row" style={{ marginTop: 8 }}>
               <PriorityBadge p={t.effective_priority} manual={!!t.priority_override} />

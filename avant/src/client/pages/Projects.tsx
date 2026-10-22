@@ -78,7 +78,7 @@ export default function Projects() {
                 {p.critical > 0 && <span className="badge p-critica">{p.critical} crítica(s)</span>}
                 {p.overdue > 0 && <span className="badge overdue">{p.overdue} atrasada(s)</span>}
               </div>
-              <h2 style={{ fontSize: 16, fontFamily: 'var(--font-display)' }}>{p.name}</h2>
+              <h2 className="project-name" style={{ fontSize: 19 }}>{p.name}</h2>
               {p.objective && <p className="small muted" style={{ marginTop: 4 }}>{p.objective}</p>}
               <div style={{ display: 'flex', justifyContent: 'space-between', margin: '14px 0 6px' }} className="small">
                 <span className="mono">

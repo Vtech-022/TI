@@ -96,7 +96,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   );
 }
 
-export function NotificationsButton() {
+export function NotificationsButton({ side = false }: { side?: boolean }) {
   const [open, setOpen] = useState(false);
   const { data } = useApi<{ alerts: Alert[]; recommendations: Recommendation[] }>('/api/dashboard');
   const navigate = useNavigate();
@@ -120,12 +120,20 @@ export function NotificationsButton() {
   const urgent = items.filter((i) => i.sev === 'alta').length;
   return (
     <div style={{ position: 'relative' }} ref={ref}>
-      <button className="icon-btn" aria-label={`Notificações (${items.length})`} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        <Bell />
-        {items.length > 0 && <span className="dot">{items.length}</span>}
-      </button>
+      {side ? (
+        <button aria-label={`Notificações (${items.length})`} aria-expanded={open} onClick={() => setOpen((o) => !o)} title="Notificações">
+          <Bell aria-hidden />
+          <span className="nav-label">Notificações</span>
+          {items.length > 0 && <span className={`nav-count${urgent ? ' alert' : ''}`}>{items.length}</span>}
+        </button>
+      ) : (
+        <button className="icon-btn" aria-label={`Notificações (${items.length})`} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          <Bell />
+          {items.length > 0 && <span className="dot">{items.length}</span>}
+        </button>
+      )}
       {open && (
-        <div className="popover" role="dialog" aria-label="Notificações">
+        <div className={`popover${side ? ' side' : ''}`} role="dialog" aria-label="Notificações">
           <div className="panel-head">
             <h2>Alertas operacionais</h2>
             <span className="spacer" />

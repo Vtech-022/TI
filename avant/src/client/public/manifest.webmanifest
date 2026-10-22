@@ -1,0 +1,10 @@
+{
+  "name": "AVANT — Central Inteligente de Gestão",
+  "short_name": "AVANT",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f5f9",
+  "theme_color": "#0b1d38",
+  "lang": "pt-BR",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

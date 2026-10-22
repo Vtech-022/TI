@@ -5,7 +5,6 @@ import {
   FileStack,
   FolderKanban,
   Hourglass,
-  Keyboard,
   LayoutDashboard,
   ListChecks,
   Menu,
@@ -134,6 +133,13 @@ export default function App() {
             </div>
           ))}
         </nav>
+        <div className="nav-utils">
+          <NotificationsButton side />
+          <button onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'} title={dark ? 'Modo claro' : 'Modo escuro'}>
+            {dark ? <Sun aria-hidden /> : <Moon aria-hidden />}
+            <span className="nav-label">{dark ? 'Modo claro' : 'Modo escuro'}</span>
+          </button>
+        </div>
         <div className="sidebar-foot">
           <button className="icon-btn desktop-only" onClick={() => setPrefs({ sidebarCollapsed: !prefs.sidebarCollapsed })} aria-label={prefs.sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}>
             {prefs.sidebarCollapsed ? <ChevronsRight /> : <ChevronsLeft />}
@@ -149,24 +155,12 @@ export default function App() {
           </button>
           <button className="search-trigger" onClick={() => setPalette(true)} aria-label="Pesquisa global">
             <Search aria-hidden />
-            <span>Pesquisar tarefas, projetos, pessoas…</span>
+            <span>Buscar</span>
             <kbd className="desktop-only">Ctrl K</kbd>
           </button>
           <div className="header-actions">
             {meta && <span className="today desktop-only">{longDate(meta.today)}</span>}
-            <button
-              className="icon-btn"
-              onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })}
-              aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'}
-              title={dark ? 'Modo claro' : 'Modo escuro'}
-            >
-              {dark ? <Sun /> : <Moon />}
-            </button>
-            <button className="icon-btn desktop-only" onClick={() => setHelp(true)} aria-label="Atalhos de teclado">
-              <Keyboard />
-            </button>
-            <NotificationsButton />
-            <button className="btn desktop-only" onClick={() => setNewTask(true)} title="Nova tarefa (Alt+N)">
+            <button className="btn header-new" onClick={() => setNewTask(true)} title="Nova tarefa (Alt+N)">
               <Plus /> Tarefa
             </button>
             <button className="btn gold" onClick={() => setCapture(true)} title="Captura rápida (Alt+C)">
@@ -184,6 +178,28 @@ export default function App() {
       <button className="fab" onClick={() => setNewTask(true)} aria-label="Nova tarefa">
         <Plus />
       </button>
+      <nav className="tabbar" aria-label="Navegação rápida">
+        <NavLink to="/" end>
+          <LayoutDashboard aria-hidden />
+          Início
+        </NavLink>
+        <NavLink to="/pendencias">
+          <ListChecks aria-hidden />
+          Pendências
+        </NavLink>
+        <button className="tab-main" onClick={() => setCapture(true)} aria-label="Captura rápida">
+          <Zap aria-hidden />
+          Capturar
+        </button>
+        <NavLink to="/projetos">
+          <FolderKanban aria-hidden />
+          Projetos
+        </NavLink>
+        <button onClick={() => setNewTask(true)} aria-label="Nova tarefa">
+          <Plus aria-hidden />
+          Tarefa
+        </button>
+      </nav>
       <SearchPalette open={palette} onClose={() => setPalette(false)} />
       <QuickCapture open={capture} onClose={() => setCapture(false)} />
       <NewTaskModal open={newTask} onClose={() => setNewTask(false)} />

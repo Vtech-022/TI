@@ -1,8 +1,9 @@
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-mono/500.css';
-import '@fontsource/fraunces/600.css';
+import '@fontsource/noto-sans/400.css';
+import '@fontsource/noto-sans/500.css';
+import '@fontsource/noto-sans/600.css';
+import '@fontsource/oswald/400.css';
+import '@fontsource/oswald/500.css';
+import '@fontsource/oswald/600.css';
 import './styles/app.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -19,3 +20,8 @@ createRoot(document.getElementById('root')!).render(
     </StoreProvider>
   </StrictMode>
 );
+
+// Versão hospedada: permite instalar o AVANT como aplicativo.
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}

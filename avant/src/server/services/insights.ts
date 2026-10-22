@@ -262,7 +262,7 @@ export function recommendations(ctx: Ctx, s: Snapshot = snapshot(ctx)): Recommen
       key: `duplicidade:${Math.min(d.a.id, d.b.id)}-${Math.max(d.a.id, d.b.id)}`,
       kind: 'possivel_duplicidade',
       severity: 'media',
-      message: 'Duas tarefas parecem representar a mesma entrega.',
+      message: `Possível duplicidade: "${d.a.title}" e "${d.b.title}".`,
       reason: `"${d.a.title}" e "${d.b.title}" têm ${Math.round(d.score * 100)}% de semelhança. Avalie se devem ser unificadas ou relacionadas.`,
       evidence: [ev(d.a), ev(d.b)]
     });
