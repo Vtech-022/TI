@@ -9,9 +9,6 @@ const css = fs.readFileSync(path.join(dir, files.find((f) => f.endsWith('.css'))
 
 const page = `<title>AVANT</title>
 <meta name="description" content="AVANT — Central Inteligente de Gestão">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&family=Oswald:wght@400;500;600&display=swap">
 <style>
 :root { color-scheme: light; }
 ${css}

@@ -5,6 +5,7 @@ import { emptyProject, projectBody, ProjectForm } from './Projects';
 import { TaskRow, useOpenTask } from '../components/TaskRow';
 import { Cert, ConfirmDialog, Empty, ErrorBox, Modal, Panel, PriorityBadge, ProgressBar, Skeleton } from '../components/ui';
 import { api } from '../lib/api';
+import { labelColor } from '../lib/colors';
 import { addDays, dateBr, diffDays, localDate, localDateTime } from '../lib/format';
 import { useApi, useMutation, useStore } from '../lib/store';
 import type { ProjectDetail as Detail, TaskStatus, TaskView } from '../lib/types';
@@ -44,7 +45,7 @@ const COLUMNS: { key: string; label: string; statuses: TaskStatus[]; target: Tas
   { key: 'concluida', label: 'Concluída', statuses: ['concluida'], target: 'concluida' }
 ];
 
-function KanbanBoard({ tasks }: { tasks: TaskView[] }) {
+export function KanbanBoard({ tasks }: { tasks: TaskView[] }) {
   const mutate = useMutation();
   const openTask = useOpenTask();
   const [over, setOver] = useState<string | null>(null);
@@ -88,6 +89,13 @@ function KanbanBoard({ tasks }: { tasks: TaskView[] }) {
                   tabIndex={0}
                   role="button"
                 >
+                  {t.project_name && (
+                    <div className="labels">
+                      <span className="label" style={{ background: labelColor(t.project_name) }}>
+                        {t.project_name}
+                      </span>
+                    </div>
+                  )}
                   <div className="t">{t.title}</div>
                   <div className="btn-row">
                     {t.status !== 'concluida' && <PriorityBadge p={t.effective_priority} />}

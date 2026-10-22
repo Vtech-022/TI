@@ -11,6 +11,7 @@ import Projects from './pages/Projects';
 import Reports from './pages/Reports';
 import SettingsPage from './pages/Settings';
 import Tasks from './pages/Tasks';
+import Team from './pages/Team';
 import Waiting from './pages/Waiting';
 
 
@@ -27,6 +28,7 @@ export const routes: RouteObject[] = [
       { path: 'projetos/:id', element: <ProjectDetail /> },
       { path: 'agenda', element: <Agenda /> },
       { path: 'terceiros', element: <Waiting /> },
+      { path: 'equipe', element: <Team /> },
       { path: 'arquivos', element: <Documents /> },
       { path: 'historico', element: <HistoryPage /> },
       { path: 'relatorios', element: <Reports /> },

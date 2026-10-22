@@ -4,7 +4,7 @@ import { ConfirmationCard } from '../components/CaptureResultView';
 import { UpcomingList } from '../components/Insights';
 import { TaskRow, useOpenTask } from '../components/TaskRow';
 import { Empty, ErrorBox, Panel, ProgressBar, Skeleton } from '../components/ui';
-import { longDate } from '../lib/format';
+import { longDate, monthName, weekdayName } from '../lib/format';
 import { useApi, useStore } from '../lib/store';
 import type { Dashboard } from '../lib/types';
 
@@ -65,11 +65,20 @@ export default function Overview() {
     <>
       <div className="page-head">
         <div>
-          <div className="eyebrow">{longDate(data.today)}</div>
+          <div className="eyebrow">Visão geral</div>
           <h1>
             {greeting(meta.now, meta.tz)}, Victor
           </h1>
           <p>{data.focus[0] ? `Próximo passo recomendado: ${data.focus[0].task.title}.` : 'Nenhuma tarefa livre para execução agora.'}</p>
+        </div>
+        <div className="date-card" aria-label={longDate(data.today)}>
+          <span className="dc-day">{Number(data.today.slice(8))}</span>
+          <span className="dc-text">
+            <span className="dc-wd">{weekdayName(data.today).replace(/^./, (c) => c.toUpperCase())}</span>
+            <span className="dc-my">
+              {monthName(Number(data.today.slice(5, 7)))} de {data.today.slice(0, 4)}
+            </span>
+          </span>
         </div>
       </div>
 

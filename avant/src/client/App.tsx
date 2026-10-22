@@ -1,18 +1,15 @@
 import {
   BarChart3,
-  ChevronsLeft,
-  ChevronsRight,
   FileStack,
   FolderKanban,
   Hourglass,
   LayoutDashboard,
   ListChecks,
   Menu,
-  Moon,
   Plus,
   Search,
-  Sun,
   Target,
+  Users,
   Zap
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -20,7 +17,6 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, ShortcutsHelp } from './components/Overlays';
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
-import { longDate } from './lib/format';
 import { runtime } from './lib/runtime';
 import { useApi, useStore } from './lib/store';
 
@@ -30,6 +26,7 @@ export const NAV = [
   { to: '/pendencias', label: 'Minhas Pendências', icon: ListChecks, section: 'Gestão' },
   { to: '/projetos', label: 'Projetos', icon: FolderKanban },
   { to: '/terceiros', label: 'Aguardando Terceiros', icon: Hourglass },
+  { to: '/equipe', label: 'Atividades da equipe', icon: Users, section: 'Equipe' },
   { to: '/arquivos', label: 'Arquivos e Documentos', icon: FileStack, section: 'Registro' },
   { to: '/relatorios', label: 'Relatórios', icon: BarChart3 }
 ];
@@ -45,7 +42,7 @@ export function Logo() {
 }
 
 export default function App() {
-  const { meta, prefs, setPrefs, busy, dark } = useStore();
+  const { meta, setPrefs, busy, dark } = useStore();
   const [palette, setPalette] = useState(false);
   const [capture, setCapture] = useState(false);
   const [newTask, setNewTask] = useState(false);
@@ -110,12 +107,11 @@ export default function App() {
   };
 
   return (
-    <div className={`shell${prefs.sidebarCollapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
+    <div className={`shell${mobileOpen ? ' mobile-open' : ''}`}>
       {busy > 0 && <div className="loading-bar" aria-hidden />}
       <div className="mobile-scrim" onClick={() => setMobileOpen(false)} />
       <aside className="sidebar" aria-label="Navegação principal">
         <div className="brand">
-          <Logo />
           <div className="brand-text">
             <span className="brand-name">AVANT</span>
             <span className="brand-sub">Central Inteligente de Gestão</span>
@@ -126,7 +122,6 @@ export default function App() {
             <div key={n.to}>
               {n.section && <div className="nav-section">{n.section}</div>}
               <NavLink to={n.to} end={n.to === '/'} title={`${n.label} (Alt+${i + 1 <= 9 ? i + 1 : ''})`}>
-                <n.icon aria-hidden />
                 <span className="nav-label">{n.label}</span>
                 {badge(n.to)}
               </NavLink>
@@ -135,15 +130,12 @@ export default function App() {
         </nav>
         <div className="nav-utils">
           <NotificationsButton side />
-          <button onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'} title={dark ? 'Modo claro' : 'Modo escuro'}>
-            {dark ? <Sun aria-hidden /> : <Moon aria-hidden />}
-            <span className="nav-label">{dark ? 'Modo claro' : 'Modo escuro'}</span>
+          <button onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} role="switch" aria-checked={dark} aria-label="Modo escuro">
+            <span className="nav-label">Modo escuro</span>
+            <span className={`switch${dark ? ' on' : ''}`} aria-hidden />
           </button>
         </div>
         <div className="sidebar-foot">
-          <button className="icon-btn desktop-only" onClick={() => setPrefs({ sidebarCollapsed: !prefs.sidebarCollapsed })} aria-label={prefs.sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}>
-            {prefs.sidebarCollapsed ? <ChevronsRight /> : <ChevronsLeft />}
-          </button>
           <span className="sidebar-foot-text">{runtime.Status ? <runtime.Status /> : <>Dados locais · {meta?.tz ?? '—'}</>}</span>
         </div>
       </aside>
@@ -155,16 +147,14 @@ export default function App() {
           </button>
           <button className="search-trigger" onClick={() => setPalette(true)} aria-label="Pesquisa global">
             <Search aria-hidden />
-            <span>Buscar</span>
-            <kbd className="desktop-only">Ctrl K</kbd>
+            <span>Buscar tarefas, projetos e pessoas</span>
           </button>
           <div className="header-actions">
-            {meta && <span className="today desktop-only">{longDate(meta.today)}</span>}
             <button className="btn header-new" onClick={() => setNewTask(true)} title="Nova tarefa (Alt+N)">
               <Plus /> Tarefa
             </button>
             <button className="btn gold" onClick={() => setCapture(true)} title="Captura rápida (Alt+C)">
-              <Zap /> <span className="desktop-only">Captura rápida</span>
+              <Zap /> <span className="desktop-only">Capturar</span>
             </button>
           </div>
         </header>

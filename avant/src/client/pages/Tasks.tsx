@@ -2,6 +2,7 @@ import { ArrowDownUp, ListChecks, Plus, Search, SlidersHorizontal, X } from 'luc
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { NewTaskModal } from '../components/Overlays';
+import { KanbanBoard } from './ProjectDetail';
 import { TaskRow } from '../components/TaskRow';
 import { Empty, ErrorBox, Field, Panel, Skeleton } from '../components/ui';
 import { qs } from '../lib/api';
@@ -25,6 +26,21 @@ export default function Tasks() {
   const barRef = useRef<HTMLDivElement>(null);
   const f = Object.fromEntries(FILTER_KEYS.map((k) => [k, params.get(k) ?? ''])) as Record<Key, string>;
   const [text, setText] = useState(f.q);
+  const [view, setView] = useState<'lista' | 'quadro'>(() => {
+    try {
+      return (localStorage.getItem('avant:tasks-view') as 'lista' | 'quadro') || 'lista';
+    } catch {
+      return 'lista';
+    }
+  });
+  const changeView = (v: 'lista' | 'quadro') => {
+    setView(v);
+    try {
+      localStorage.setItem('avant:tasks-view', v);
+    } catch {
+      /* preferência vale só nesta visita */
+    }
+  };
   const { data, error, loading } = useApi<TaskView[]>(`/api/tasks${qs(f)}`);
 
   const set = (k: Key, v: string) => {
@@ -229,8 +245,27 @@ export default function Tasks() {
       )}
 
       <ErrorBox error={error} />
-      <Panel title="Tarefas" icon={<ListChecks />} count={data ? `${data.length} resultado(s)` : undefined} flush>
-        {loading && !data ? (
+      <Panel
+        title="Tarefas"
+        icon={<ListChecks />}
+        count={data ? `${data.length} resultado(s)` : undefined}
+        flush
+        actions={
+          <div className="seg" role="group" aria-label="Visualização">
+            <button aria-pressed={view === 'lista'} onClick={() => changeView('lista')}>
+              Lista
+            </button>
+            <button aria-pressed={view === 'quadro'} onClick={() => changeView('quadro')}>
+              Quadro
+            </button>
+          </div>
+        }
+      >
+        {view === 'quadro' && data ? (
+          <div style={{ padding: 14 }}>
+            <KanbanBoard tasks={data} />
+          </div>
+        ) : loading && !data ? (
           <Skeleton rows={8} />
         ) : data && data.length ? (
           <ul className="task-list">

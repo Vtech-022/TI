@@ -1,9 +1,3 @@
-import '@fontsource/noto-sans/400.css';
-import '@fontsource/noto-sans/500.css';
-import '@fontsource/noto-sans/600.css';
-import '@fontsource/oswald/400.css';
-import '@fontsource/oswald/500.css';
-import '@fontsource/oswald/600.css';
 import './styles/app.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

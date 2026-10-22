@@ -1,4 +1,5 @@
-import { CalendarClock, Check, FolderKanban, GitBranch, Hourglass, Sparkles, User } from 'lucide-react';
+import { CalendarClock, Check, GitBranch, Hourglass, Sparkles, User } from 'lucide-react';
+import { labelColor } from '../lib/colors';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
@@ -143,8 +144,7 @@ export function TaskRow({ task, rank, why, showProject = true, compact }: { task
         <div className="task-title">{task.title}</div>
         <div className="task-meta">
           {showProject && task.project_name && (
-            <span>
-              <FolderKanban aria-hidden />
+            <span className="label" style={{ background: labelColor(task.project_name) }} title={`Projeto: ${task.project_name}`}>
               {task.project_name}
             </span>
           )}

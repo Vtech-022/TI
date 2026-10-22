@@ -12,6 +12,7 @@ import { recomputePriorities } from '../server/services/tasks';
 import { createLocalApi } from './localApi';
 import { flush, hasPending, loadSnapshot, onSaveState, SaveState, scheduleSave, watchRemote } from './persist';
 import { openBrowserDatabase } from './sqlite';
+import { createTeamStore } from './team';
 
 const rootEl = document.getElementById('root')!;
 const toast = (text: string, kind: 'ok' | 'error' = 'ok') => window.dispatchEvent(new CustomEvent('avant:toast', { detail: { text, kind } }));
@@ -84,8 +85,9 @@ async function boot() {
 
   runtime.mode = 'online';
   runtime.Status = SaveStatus;
+  runtime.team = createTeamStore();
   const hash = location.hash.replace(/^#/, '');
-  const known = ['foco', 'captura', 'pendencias', 'projetos', 'agenda', 'terceiros', 'arquivos', 'historico', 'relatorios', 'configuracoes'];
+  const known = ['equipe', 'foco', 'captura', 'pendencias', 'projetos', 'agenda', 'terceiros', 'arquivos', 'historico', 'relatorios', 'configuracoes'];
   const router = createMemoryRouter(routes, { initialEntries: [known.includes(hash) ? `/${hash}` : '/'] });
 
   // Links internos navegam pelo roteador; links da API viram downloads com confirmação.

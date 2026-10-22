@@ -122,7 +122,6 @@ export function NotificationsButton({ side = false }: { side?: boolean }) {
     <div style={{ position: 'relative' }} ref={ref}>
       {side ? (
         <button aria-label={`Notificações (${items.length})`} aria-expanded={open} onClick={() => setOpen((o) => !o)} title="Notificações">
-          <Bell aria-hidden />
           <span className="nav-label">Notificações</span>
           {items.length > 0 && <span className={`nav-count${urgent ? ' alert' : ''}`}>{items.length}</span>}
         </button>
