@@ -2,7 +2,7 @@
 import type { CertaintyMap, Priority, Task, TaskLink, TaskStatus } from '../../shared/types';
 import { OPEN_STATUSES, PRIORITY_LABEL, STATUS_LABEL } from '../../shared/types';
 import { AppError, Ctx, notFound, nowIso, today } from '../context';
-import { transaction } from '../db/database';
+import { transaction } from '../db/tx';
 import { toColumns, toLink, toTask, toWait } from '../db/rows';
 import { computePriority } from '../domain/priority';
 import { Meta, record } from './history';

@@ -11,6 +11,13 @@ export class ApiError extends Error {
 }
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
+  // Edição online: a API roda dentro do próprio navegador.
+  if (window.__avantLocal) {
+    const r = await window.__avantLocal(method, url, body);
+    const d = r.data as any;
+    if (r.status >= 400) throw new ApiError(r.status, d?.error ?? 'erro', d?.message ?? `Erro ${r.status}`, d?.details);
+    return d as T;
+  }
   let res: Response;
   try {
     res = await fetch(url, {

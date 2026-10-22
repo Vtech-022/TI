@@ -1,4 +1,4 @@
-import type { DB } from './db/database';
+import type { DB } from './db/tx';
 import { dateInTz } from './domain/dates';
 
 export interface Ctx {

@@ -1,7 +1,7 @@
 // Histórico de alterações e desfazer.
 import type { HistoryEntry } from '../../shared/types';
 import { AppError, Ctx, nowIso, notFound } from '../context';
-import { transaction } from '../db/database';
+import { transaction } from '../db/tx';
 import { toColumns, toHistory } from '../db/rows';
 
 export type EntityType = HistoryEntry['entity_type'];

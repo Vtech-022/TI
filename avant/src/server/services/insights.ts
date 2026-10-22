@@ -9,7 +9,7 @@ import { isOpen } from '../domain/priority';
 import { computeProgress, subtree } from '../domain/progress';
 import { normalize } from '../domain/text';
 import { listConfirmations } from './captures';
-import { listDocuments } from './documents';
+import { listDocuments } from './documents-core';
 import { listEvents } from './events';
 import { listProjects, summarizeProject } from './projects';
 import { effectivePriority, listLinks, listTasks } from './tasks';

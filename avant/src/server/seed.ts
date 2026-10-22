@@ -2,7 +2,7 @@
 // Tudo começa como pendente; nada é marcado como concluído sem confirmação.
 import type { Ctx } from './context';
 import { nowIso } from './context';
-import { transaction } from './db/database';
+import { transaction } from './db/tx';
 import { Meta } from './services/history';
 import { createProject } from './services/projects';
 import { addLink, createTask, recomputePriorities } from './services/tasks';

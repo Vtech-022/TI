@@ -100,6 +100,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .catch(fail);
   }, [version, fail]);
 
+  // Outras partes da página (ex.: downloads da edição online) podem pedir notificações.
+  useEffect(() => {
+    const onToast = (e: Event) => {
+      const d = (e as CustomEvent<{ text: string; kind?: Toast['kind'] }>).detail;
+      toast(d.text, d.kind ?? 'ok');
+    };
+    const onRefresh = () => refresh();
+    window.addEventListener('avant:toast', onToast);
+    window.addEventListener('avant:refresh', onRefresh);
+    return () => {
+      window.removeEventListener('avant:toast', onToast);
+      window.removeEventListener('avant:refresh', onRefresh);
+    };
+  }, [toast, refresh]);
+
   useEffect(() => {
     document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
   }, [prefs.reduceMotion]);

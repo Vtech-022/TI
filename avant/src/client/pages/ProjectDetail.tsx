@@ -200,7 +200,13 @@ export default function ProjectDetail() {
   const { meta } = useStore();
   const navigate = useNavigate();
   const mutate = useMutation();
-  const [view, setView] = useState<View>(() => (sessionStorage.getItem('avant:project-view') as View) || 'lista');
+  const [view, setView] = useState<View>(() => {
+    try {
+      return (sessionStorage.getItem('avant:project-view') as View) || 'lista';
+    } catch {
+      return 'lista';
+    }
+  });
   const [editing, setEditing] = useState<Record<string, string> | null>(null);
   const [askDelete, setAskDelete] = useState(false);
   const [milestone, setMilestone] = useState({ title: '', due_date: '' });

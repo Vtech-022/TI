@@ -2,7 +2,7 @@
 import type { CertaintyMap, Confirmation, Task } from '../../shared/types';
 import { CERTAINTY_LABEL, EVENT_TYPE_LABEL } from '../../shared/types';
 import { AppError, Ctx, notFound, nowIso, today } from '../context';
-import { dryRun, transaction } from '../db/database';
+import { dryRun, transaction } from '../db/tx';
 import { toConfirmation } from '../db/rows';
 import { formatBr, zonedToUtc } from '../domain/dates';
 import { Candidate, extract } from '../domain/extraction';

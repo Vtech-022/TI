@@ -17,7 +17,8 @@
     "start": "node --disable-warning=ExperimentalWarning dist/server/index.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "node scripts/e2e.mjs"
+    "test:e2e": "node scripts/e2e.mjs",
+    "build:artifact": "vite build -c vite.artifact.config.ts && node scripts/build-artifact.mjs"
   },
   "dependencies": {
     "@fastify/multipart": "^10.1.6",
@@ -44,6 +45,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4",
+    "sql.js": "^1.13.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",

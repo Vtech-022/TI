@@ -2,6 +2,7 @@ import { Database, Keyboard, MonitorSmartphone, Plug } from 'lucide-react';
 import { SHORTCUTS } from '../components/Overlays';
 import { Panel } from '../components/ui';
 import { longDate } from '../lib/format';
+import { runtime } from '../lib/runtime';
 import { useStore } from '../lib/store';
 
 export default function SettingsPage() {
@@ -36,7 +37,11 @@ export default function SettingsPage() {
             <dt>Data de referência</dt>
             <dd>{meta ? longDate(meta.today) : '—'}</dd>
             <dt>Armazenamento</dt>
-            <dd>SQLite local (data/avant.db) e arquivos originais em data/uploads</dd>
+            <dd>
+              {runtime.mode === 'online'
+                ? 'Edição online: banco SQLite no navegador, salvo na sua área privada do artifact (só você lê). Arquivos originais ficam no navegador onde foram importados.'
+                : 'SQLite local (data/avant.db) e arquivos originais em data/uploads'}
+            </dd>
             <dt>Limite por arquivo</dt>
             <dd>{meta?.max_upload_mb} MB</dd>
             <dt>Formatos interpretados</dt>

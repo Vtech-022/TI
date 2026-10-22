@@ -23,6 +23,7 @@ import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, Shortcu
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
 import { longDate } from './lib/format';
+import { runtime } from './lib/runtime';
 import { useApi, useStore } from './lib/store';
 
 export const NAV = [
@@ -143,7 +144,7 @@ export default function App() {
           <button className="icon-btn desktop-only" onClick={() => setPrefs({ sidebarCollapsed: !prefs.sidebarCollapsed })} aria-label={prefs.sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}>
             {prefs.sidebarCollapsed ? <ChevronsRight /> : <ChevronsLeft />}
           </button>
-          <span className="sidebar-foot-text">Dados locais · {meta?.tz ?? '—'}</span>
+          <span className="sidebar-foot-text">{runtime.Status ? <runtime.Status /> : <>Dados locais · {meta?.tz ?? '—'}</>}</span>
         </div>
       </aside>
 

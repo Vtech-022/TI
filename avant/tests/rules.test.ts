@@ -43,7 +43,7 @@ describe('persistência', () => {
     const ctx = makeCtx({ seed: false });
     const t = createTask(ctx, { title: 'Tarefa persistente' }, meta);
     updateTask(ctx, t.id, { responsible: 'Victor' }, meta);
-    ctx.db.close();
+    (ctx.db as unknown as { close(): void }).close();
     const reopened = makeCtx({ dir: ctx.dir, seed: false });
     expect(getTask(reopened, t.id)).toMatchObject({ title: 'Tarefa persistente', responsible: 'Victor' });
     expect(listHistory(reopened, { entity_type: 'task', entity_id: t.id })).toHaveLength(2);

@@ -1,0 +1,25 @@
+// Gera dist/artifact/avant.html: página única (JS e CSS embutidos) para publicar como artifact.
+import fs from 'node:fs';
+import path from 'node:path';
+
+const dir = 'dist/artifact/assets';
+const files = fs.readdirSync(dir);
+const js = fs.readFileSync(path.join(dir, files.find((f) => f.endsWith('.js'))), 'utf8').replace(/<\/script/gi, '<\\/script').replace(/\uFFFD/g, '\\uFFFD');
+const css = fs.readFileSync(path.join(dir, files.find((f) => f.endsWith('.css'))), 'utf8').replace(/<\/style/gi, '<\\/style');
+
+const page = `<title>AVANT</title>
+<meta name="description" content="AVANT — Central Inteligente de Gestão">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root { color-scheme: light; }
+${css}
+.boot { min-height: 60vh; display: grid; place-items: center; font-family: var(--font); color: var(--text-2); padding: 24px; text-align: center; }
+.boot.error { color: var(--critica); }
+</style>
+<div id="root"></div>
+<script type="module">${js}</script>
+`;
+fs.writeFileSync('dist/artifact/avant.html', page);
+console.log(`dist/artifact/avant.html: ${(page.length / 1048576).toFixed(2)} MB`);
