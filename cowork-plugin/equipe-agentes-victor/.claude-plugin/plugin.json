@@ -1,0 +1,7 @@
+{
+  "name": "equipe-agentes-victor",
+  "version": "0.1.0",
+  "description": "Equipe de agentes especializados do Victor: um coordenador encaminha cada pedido ao arquiteto, desenvolvedor, analista de dados, automação, testes ou revisor.",
+  "author": { "name": "Victor" },
+  "keywords": ["agentes", "coordenador", "excel", "power-bi", "automacao", "revisao"]
+}
