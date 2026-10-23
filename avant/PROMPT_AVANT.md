@@ -34,7 +34,17 @@ Regras de conduta:
 
 ---
 
-## 3. Identidade visual (referências: Outlook e Trello)
+## 3. Identidade visual (referência atual: painel com trilho de ícones e gráficos)
+
+**Versão atual (prevalece sobre os itens abaixo quando houver conflito):**
+- Fundo azul-lavanda suave em degradê; cartões translúcidos brancos com cantos de 18px e sombra leve.
+- Trilho vertical à esquerda: logotipo em pílula azul (letra A + linha de pulso) e navegação em ícones circulares dentro de uma faixa arredondada; item ativo em círculo azul com degradê; nome da área aparece ao passar o mouse.
+- Topo: saudação "Boa tarde, Victor" com data e entregas concluídas na semana; à direita, pesquisa em pílula e pílula de ações (captura rápida, nova tarefa, notificações, modo claro/escuro, avatar).
+- Visão Geral: 4 cartões de indicadores com ícone em círculo contornado; gráfico de barras "Pendências por projeto" (Abertas/Concluídas/Todas); gráfico de rosca "Distribuição por prioridade" com rótulos e legenda (Abertas/Com prazo/Com terceiros); tabela "Minhas pendências" com cabeçalho em faixa azul-clara e prioridade em etiquetas contornadas; "Precisa de atenção" e "Próximos 14 dias" lado a lado.
+- Cores dos gráficos validadas para daltonismo: Crítica #e5484d, Alta #f59e0b, Normal #2f6bff, Baixa #0fa3a3 (modo escuro: #e0434b, #c08a00, #4a78ff, #0f9e9e). Azul principal #2f6bff.
+- Modo escuro com fundo preto e cartões #141519.
+
+**Base anterior (referências: Outlook e Trello):**
 
 - **Estrutura no estilo Outlook:** painel lateral de pastas **somente em texto, sem ícones**, fundo cinza-claro, item ativo em azul-claro com traço azul à esquerda; área de conteúdo limpa; barra superior branca e discreta.
 - **Cartões no estilo Trello:** tarefas como cartões separados, com espaço entre eles, etiquetas coloridas e visualização em quadro (colunas).

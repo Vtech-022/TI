@@ -6,8 +6,10 @@ import {
   LayoutDashboard,
   ListChecks,
   Menu,
+  Moon,
   Plus,
   Search,
+  Sun,
   Target,
   Users,
   Zap
@@ -18,6 +20,7 @@ import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, Shortcu
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
 import { runtime } from './lib/runtime';
+import { longDate } from './lib/format';
 import { useApi, useStore } from './lib/store';
 
 export const NAV = [
@@ -39,6 +42,11 @@ export function Logo() {
       <path d="M14.5 23.5h11" stroke="#c49a2c" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
+}
+
+function greeting(now: string, tz: string) {
+  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hour12: false }).format(new Date(now)));
+  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
 }
 
 export default function App() {
@@ -100,62 +108,73 @@ export default function App() {
     const c = counts?.counts;
     if (!c) return null;
     if (to === '/foco' && c.critical + c.overdue > 0) return <span className="nav-count alert">{c.critical + c.overdue}</span>;
-    if (to === '/pendencias') return <span className="nav-count">{c.open}</span>;
-    if (to === '/terceiros' && c.waiting) return <span className="nav-count">{c.waiting}</span>;
+
     if (to === '/captura' && counts?.confirmations.length) return <span className="nav-count alert">{counts.confirmations.length}</span>;
     return null;
   };
 
+  const home = location.pathname === '/';
+  const greet = meta ? greeting(meta.now, meta.tz) : 'Olá';
+  const done = counts?.counts?.done_last_7_days ?? 0;
+
   return (
-    <div className={`shell${mobileOpen ? ' mobile-open' : ''}`}>
+    <div className={`shell shell-rail${mobileOpen ? ' mobile-open' : ''}`}>
       {busy > 0 && <div className="loading-bar" aria-hidden />}
       <div className="mobile-scrim" onClick={() => setMobileOpen(false)} />
-      <aside className="sidebar" aria-label="Navegação principal">
-        <div className="brand">
-          <div className="brand-text">
-            <span className="brand-name">AVANT</span>
-            <span className="brand-sub">Central Inteligente de Gestão</span>
-          </div>
-        </div>
-        <nav className="nav">
-          {NAV.map((n, i) => (
-            <div key={n.to}>
-              {n.section && <div className="nav-section">{n.section}</div>}
-              <NavLink to={n.to} end={n.to === '/'} title={`${n.label} (Alt+${i + 1 <= 9 ? i + 1 : ''})`}>
-                <span className="nav-label">{n.label}</span>
-                {badge(n.to)}
-              </NavLink>
-            </div>
+      <aside className="rail" aria-label="Navegação principal">
+        <NavLink to="/" end className="rail-brand" aria-label="AVANT — Visão geral" title="AVANT · Central Inteligente de Gestão">
+          <span className="rb-letter">A</span>
+          <svg viewBox="0 0 40 14" className="rb-pulse" aria-hidden>
+            <path d="M0 7h10l3-6 4 12 4-9 3 3h16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+          </svg>
+        </NavLink>
+        <nav className="rail-nav">
+          {NAV.map((n) => (
+            <NavLink key={n.to} to={n.to} end={n.to === '/'} className="rail-item" aria-label={n.label} data-tip={n.label}>
+              <n.icon aria-hidden />
+              <span className="rail-label">{n.label}</span>
+              {badge(n.to)}
+            </NavLink>
           ))}
         </nav>
-        <div className="nav-utils">
-          <NotificationsButton side />
-          <button onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} role="switch" aria-checked={dark} aria-label="Modo escuro">
-            <span className="nav-label">Modo escuro</span>
-            <span className={`switch${dark ? ' on' : ''}`} aria-hidden />
-          </button>
-        </div>
-        <div className="sidebar-foot">
-          <span className="sidebar-foot-text">{runtime.Status ? <runtime.Status /> : <>Dados locais · {meta?.tz ?? '—'}</>}</span>
-        </div>
+        <div className="rail-foot">{runtime.Status ? <runtime.Status /> : <>Dados locais</>}</div>
       </aside>
 
       <div className="main">
-        <header className="header">
+        <header className="header topbar">
           <button className="icon-btn mobile-only" onClick={() => setMobileOpen(true)} aria-label="Abrir menu">
             <Menu />
           </button>
-          <button className="search-trigger" onClick={() => setPalette(true)} aria-label="Pesquisa global">
+          <div className="greet">
+            {home ? (
+              <>
+                <h1>
+                  {greet}, Victor
+                </h1>
+                <p>
+                  {meta ? longDate(meta.today).replace(/^./, (ch) => ch.toUpperCase()) : ''} · {done === 1 ? '1 entrega concluída' : `${done} entregas concluídas`} nesta semana
+                </p>
+              </>
+            ) : null}
+          </div>
+          <button className="search-pill" onClick={() => setPalette(true)} aria-label="Pesquisa global">
             <Search aria-hidden />
-            <span>Buscar tarefas, projetos e pessoas</span>
+            <span>Buscar</span>
           </button>
-          <div className="header-actions">
-            <button className="btn header-new" onClick={() => setNewTask(true)} title="Nova tarefa (Alt+N)">
-              <Plus /> Tarefa
+          <div className="action-pill">
+            <button className="icon-btn" onClick={() => setCapture(true)} aria-label="Captura rápida" title="Captura rápida">
+              <Zap />
             </button>
-            <button className="btn gold" onClick={() => setCapture(true)} title="Captura rápida (Alt+C)">
-              <Zap /> <span className="desktop-only">Capturar</span>
+            <button className="icon-btn" onClick={() => setNewTask(true)} aria-label="Nova tarefa" title="Nova tarefa">
+              <Plus />
             </button>
+            <NotificationsButton />
+            <button className="icon-btn" onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'} title={dark ? 'Modo claro' : 'Modo escuro'}>
+              {dark ? <Sun /> : <Moon />}
+            </button>
+            <span className="avatar me" aria-label="Victor" title="Victor">
+              V
+            </span>
           </div>
         </header>
         <main className="content" id="conteudo">

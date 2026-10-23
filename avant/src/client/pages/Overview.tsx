@@ -1,157 +1,209 @@
-import { CalendarClock, FolderKanban, HelpCircle, ShieldAlert, Target } from 'lucide-react';
+import { AlarmClock, CalendarClock, CheckCircle2, Hourglass, ListChecks, ListFilter, ShieldAlert } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, DonutChart, Slice } from '../components/Charts';
 import { ConfirmationCard } from '../components/CaptureResultView';
 import { UpcomingList } from '../components/Insights';
-import { TaskRow, useOpenTask } from '../components/TaskRow';
-import { Empty, ErrorBox, Panel, ProgressBar, Skeleton } from '../components/ui';
-import { longDate, monthName, weekdayName } from '../lib/format';
+import { useOpenTask } from '../components/TaskRow';
+import { Empty, ErrorBox, Panel, Skeleton } from '../components/ui';
+import { dateBr } from '../lib/format';
 import { useApi, useStore } from '../lib/store';
-import type { Dashboard } from '../lib/types';
+import { PRIORITY_LABEL } from '../lib/types';
+import type { Dashboard, Priority, TaskView } from '../lib/types';
 
-function greeting(now: string, tz: string) {
-  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hour12: false }).format(new Date(now)));
-  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+const PRIO_ORDER: Priority[] = ['critica', 'alta', 'normal', 'baixa'];
+const PRIO_COLOR: Record<'light' | 'dark', Record<Priority, string>> = {
+  light: { critica: '#e5484d', alta: '#f59e0b', normal: '#2f6bff', baixa: '#0fa3a3' },
+  dark: { critica: '#e0434b', alta: '#c08a00', normal: '#4a78ff', baixa: '#0f9e9e' }
+};
+
+function shortName(name: string): string {
+  const words = name.split(/\s+/);
+  return words.length > 2 ? `${words.slice(0, 2).join(' ')}…` : name;
 }
 
 export default function Overview() {
   const { data, error } = useApi<Dashboard>('/api/dashboard');
-  const { meta } = useStore();
+  const all = useApi<TaskView[]>('/api/tasks?include_closed=1');
+  const { dark } = useStore();
   const navigate = useNavigate();
   const openTask = useOpenTask();
+  const [barMode, setBarMode] = useState<'abertas' | 'concluidas' | 'todas'>('abertas');
+  const [donutMode, setDonutMode] = useState<'abertas' | 'com_prazo' | 'terceiros'>('abertas');
+
+  const tasks = all.data ?? [];
+  const open = tasks.filter((t) => t.status !== 'concluida' && t.status !== 'cancelada');
+
+  const bars = useMemo(() => {
+    const base = barMode === 'abertas' ? open : barMode === 'concluidas' ? tasks.filter((t) => t.status === 'concluida') : tasks.filter((t) => t.status !== 'cancelada');
+    const m = new Map<string, number>();
+    for (const t of base) m.set(t.project_name ?? 'Sem projeto', (m.get(t.project_name ?? 'Sem projeto') ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([full, value]) => ({ full, label: shortName(full), value }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.data, barMode]);
+
+  const slices: Slice[] = useMemo(() => {
+    const base = donutMode === 'abertas' ? open : donutMode === 'com_prazo' ? open.filter((t) => t.due_date) : open.filter((t) => t.waits.some((w) => w.status === 'aguardando'));
+    const pal = PRIO_COLOR[dark ? 'dark' : 'light'];
+    return PRIO_ORDER.map((p) => ({ key: p, label: PRIORITY_LABEL[p], value: base.filter((t) => t.effective_priority === p).length, color: pal[p] }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.data, donutMode, dark]);
+
   if (error) return <ErrorBox error={error} />;
-  if (!data || !meta) return <Skeleton rows={8} />;
+  if (!data) return <Skeleton rows={8} />;
   const c = data.counts;
   const urgent = c.critical + c.overdue;
+  const table = [...open].sort((a, b) => (a.days_to_due ?? 999) - (b.days_to_due ?? 999) || PRIO_ORDER.indexOf(a.effective_priority) - PRIO_ORDER.indexOf(b.effective_priority)).slice(0, 8);
 
-  // Um único bloco de atenção: alertas operacionais e as recomendações mais relevantes.
   const attention = [
-    ...data.alerts.map((a) => ({
-      key: a.kind + a.message,
-      sev: a.kind === 'conflito_agenda' || a.kind === 'atrasada' ? 'alta' : 'media',
-      text: a.message,
-      go: () => {
-        const r = a.refs[0];
-        if (a.kind === 'atrasada') navigate('/pendencias?due=atrasadas');
-        else if (a.kind === 'data_ambigua') navigate('/pendencias?due=inferidas');
-        else if (a.kind === 'confirmacao_pendente') navigate('/captura');
-        else if (r?.type === 'event') navigate(`/agenda?evento=${r.id}`);
-        else if (r?.type === 'task') openTask(r.id);
-        else navigate('/pendencias');
-      }
-    })),
-    ...data.recommendations
-      .filter((r) => r.severity !== 'baixa' && r.kind !== 'data_inferida')
-      .map((r) => ({
-        key: r.key,
-        sev: r.severity,
-        text: r.message,
-        go: () => {
-          const e = r.evidence[0];
-          if (e?.type === 'task') openTask(e.id);
-          else if (e?.type === 'project') navigate(`/projetos/${e.id}`);
-          else navigate('/terceiros');
-        }
-      }))
-  ].slice(0, 6);
+    ...data.alerts.map((a) => ({ key: a.kind + a.message, sev: a.kind === 'conflito_agenda' || a.kind === 'atrasada' ? 'alta' : 'media', text: a.message, ref: a.refs[0] })),
+    ...data.recommendations.filter((r) => r.severity !== 'baixa' && r.kind !== 'data_inferida').map((r) => ({ key: r.key, sev: r.severity, text: r.message, ref: r.evidence[0] as any }))
+  ].slice(0, 5);
 
-  const stats = [
-    { n: c.open, l: 'Pendências abertas', to: '/pendencias' },
-    { n: urgent, l: urgent === 1 ? 'Crítica ou atrasada' : 'Críticas ou atrasadas', to: c.overdue ? '/pendencias?due=atrasadas' : '/pendencias?priority=critica', warn: urgent > 0 },
-    { n: c.waiting, l: 'Aguardando terceiros', to: '/terceiros' },
-    { n: c.done_last_7_days, l: 'Concluídas na semana', to: '/relatorios' }
+  const kpis = [
+    { label: 'Pendências abertas', value: c.open, icon: ListChecks, to: '/pendencias', tone: 'blue' },
+    { label: 'Críticas ou atrasadas', value: urgent, icon: ShieldAlert, to: c.overdue ? '/pendencias?due=atrasadas' : '/pendencias?priority=critica', tone: urgent ? 'red' : 'blue' },
+    { label: 'Aguardando terceiros', value: c.waiting, icon: Hourglass, to: '/terceiros', tone: 'violet' },
+    { label: 'Concluídas na semana', value: c.done_last_7_days, icon: CheckCircle2, to: '/relatorios', tone: 'green' }
   ];
 
   return (
-    <>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">Visão geral</div>
-          <h1>
-            {greeting(meta.now, meta.tz)}, Victor
-          </h1>
-          <p>{data.focus[0] ? `Próximo passo recomendado: ${data.focus[0].task.title}.` : 'Nenhuma tarefa livre para execução agora.'}</p>
-        </div>
-        <div className="date-card" aria-label={longDate(data.today)}>
-          <span className="dc-day">{Number(data.today.slice(8))}</span>
-          <span className="dc-text">
-            <span className="dc-wd">{weekdayName(data.today).replace(/^./, (c) => c.toUpperCase())}</span>
-            <span className="dc-my">
-              {monthName(Number(data.today.slice(5, 7)))} de {data.today.slice(0, 4)}
+    <div className="ov">
+      <div className="kpi-cards">
+        {kpis.map((k) => (
+          <button key={k.label} className={`kpi-card tone-${k.tone}`} onClick={() => navigate(k.to)}>
+            <span className="kc-head">
+              <span className="kc-icon">
+                <k.icon aria-hidden />
+              </span>
+              {k.label}
             </span>
-          </span>
-        </div>
-      </div>
-
-      <div className="stat-strip">
-        {stats.map((s) => (
-          <button key={s.l} className="stat" onClick={() => navigate(s.to)}>
-            <div className={`n${s.warn ? ' warn' : ''}`}>{s.n}</div>
-            <div className="l">{s.l}</div>
+            <span className="kc-value">{k.value}</span>
           </button>
         ))}
       </div>
 
       {data.confirmations.length > 0 && (
-        <div style={{ marginBottom: 18 }}>
-          <Panel title="Aguardando sua confirmação" icon={<HelpCircle />} count={data.confirmations.length} accent>
-            {data.confirmations.slice(0, 2).map((cf) => (
-              <ConfirmationCard key={cf.id} c={cf} />
-            ))}
-          </Panel>
-        </div>
+        <Panel title="Aguardando sua confirmação" count={data.confirmations.length}>
+          {data.confirmations.slice(0, 2).map((cf) => (
+            <ConfirmationCard key={cf.id} c={cf} />
+          ))}
+        </Panel>
       )}
 
-      <div className="overview-grid">
-        <Panel title="Foco de hoje" icon={<Target />} flush accent actions={<button className="btn sm ghost" onClick={() => navigate('/foco')}>Ver tudo</button>}>
-          {data.focus.length ? (
-            <ul className="task-list">
-              {data.focus.slice(0, 5).map((f, i) => (
-                <TaskRow key={f.task.id} task={f.task} rank={i + 1} why={f.why.slice(0, 1)} />
-              ))}
-            </ul>
+      <div className="ov-charts">
+        <Panel
+          title="Pendências por projeto"
+          actions={
+            <select className="pill-select" value={barMode} onChange={(e) => setBarMode(e.target.value as typeof barMode)} aria-label="Conjunto do gráfico de barras">
+              <option value="abertas">Abertas</option>
+              <option value="concluidas">Concluídas</option>
+              <option value="todas">Todas</option>
+            </select>
+          }
+        >
+          {all.data ? (
+            bars.length ? (
+              <BarChart data={bars} unit="tarefa(s)" onSelect={(full) => {
+                const p = data.projects.find((x) => x.name === full);
+                navigate(p ? `/projetos/${p.id}` : '/pendencias?project_id=none');
+              }} />
+            ) : (
+              <Empty title="Nenhuma tarefa neste conjunto" />
+            )
           ) : (
-            <Empty title="Nenhuma tarefa livre para execução">Todas as pendências abertas estão bloqueadas ou concluídas.</Empty>
+            <Skeleton rows={5} />
           )}
         </Panel>
+        <Panel
+          title="Distribuição por prioridade"
+          actions={
+            <select className="pill-select" value={donutMode} onChange={(e) => setDonutMode(e.target.value as typeof donutMode)} aria-label="Conjunto do gráfico de rosca">
+              <option value="abertas">Abertas</option>
+              <option value="com_prazo">Com prazo</option>
+              <option value="terceiros">Com terceiros</option>
+            </select>
+          }
+        >
+          {all.data ? <DonutChart slices={slices} centerLabel="tarefas" onSelect={(p) => navigate(`/pendencias?priority=${p}`)} /> : <Skeleton rows={5} />}
+        </Panel>
+      </div>
 
-        <div className="grid">
-          <Panel title="Precisa de atenção" icon={<ShieldAlert />} count={attention.length || undefined} flush>
-            {attention.length ? (
-              <ul className="list-simple attention">
-                {attention.map((a) => (
-                  <li key={a.key} className="clickable small" onClick={a.go}>
-                    <span className="dot" style={{ background: a.sev === 'alta' ? 'var(--critica)' : 'var(--gold-500)' }} />
-                    <span>{a.text}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Empty title="Tudo em ordem">Sem conflitos, bloqueios ou datas a confirmar.</Empty>
-            )}
-          </Panel>
-          <Panel title="Próximos 14 dias" icon={<CalendarClock />} flush>
-            <UpcomingList tasks={data.upcoming.tasks.slice(0, 6)} events={data.upcoming.events.slice(0, 4)} today={data.today} />
-          </Panel>
-          <Panel title="Projetos" icon={<FolderKanban />} flush actions={<button className="btn sm ghost" onClick={() => navigate('/projetos')}>Ver todos</button>}>
-            {data.projects.length === 0 && <Empty title="Nenhum projeto ativo" />}
-            <ul className="list-simple">
-              {data.projects.map((p) => (
-                <li key={p.id} className="clickable" onClick={() => navigate(`/projetos/${p.id}`)}>
-                  <div className="project-line">
-                    <span className="project-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 15 }} title={p.name}>
-                      {p.name}
-                    </span>
-                    <ProgressBar value={p.progress.percent} label={`Progresso de ${p.name}`} />
-                    <span className="mono small" style={{ textAlign: 'right' }}>
-                      {p.progress.percent ?? 0}%
-                    </span>
-                  </div>
+      <Panel
+        title="Minhas pendências"
+        actions={
+          <button className="icon-btn outline" onClick={() => navigate('/pendencias')} aria-label="Abrir todas as pendências com filtros" title="Filtrar">
+            <ListFilter />
+          </button>
+        }
+        flush
+      >
+        <div className="table-wrap">
+          <table className="data soft">
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Projeto</th>
+                <th>Responsável</th>
+                <th>Prazo</th>
+                <th>Prioridade</th>
+              </tr>
+            </thead>
+            <tbody>
+              {table.map((t) => (
+                <tr key={t.id} className="clickable" onClick={() => openTask(t.id)}>
+                  <td className="td-title">{t.title}</td>
+                  <td className="muted">{t.project_name ?? 'Sem projeto'}</td>
+                  <td className="muted">{t.responsible ?? '—'}</td>
+                  <td className={t.days_to_due != null && t.days_to_due < 0 ? 'late' : 'muted'}>
+                    {t.due_date ? dateBr(t.due_date) : '—'}
+                    {t.certainty.due_date === 'inferida' && <span className="cert c-inferida" style={{ marginLeft: 6 }}>inferida</span>}
+                  </td>
+                  <td>
+                    <span className={`pill p-${t.effective_priority}`}>{PRIORITY_LABEL[t.effective_priority]}</span>
+                  </td>
+                </tr>
+              ))}
+              {!table.length && (
+                <tr>
+                  <td colSpan={5}>
+                    <Empty title="Nenhuma pendência aberta" />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
+
+      <div className="ov-bottom">
+        <Panel title="Precisa de atenção" icon={<AlarmClock />} flush>
+          {attention.length ? (
+            <ul className="list-simple attention">
+              {attention.map((a) => (
+                <li
+                  key={a.key}
+                  className="clickable small"
+                  onClick={() => {
+                    if (a.ref?.type === 'task') openTask(a.ref.id);
+                    else if (a.ref?.type === 'event') navigate(`/agenda?evento=${a.ref.id}`);
+                    else if (a.ref?.type === 'project') navigate(`/projetos/${a.ref.id}`);
+                    else navigate('/pendencias');
+                  }}
+                >
+                  <span className="dot" style={{ background: a.sev === 'alta' ? 'var(--critica)' : 'var(--gold-500)' }} />
+                  <span>{a.text}</span>
                 </li>
               ))}
             </ul>
-          </Panel>
-        </div>
+          ) : (
+            <Empty title="Tudo em ordem" />
+          )}
+        </Panel>
+        <Panel title="Próximos 14 dias" icon={<CalendarClock />} flush>
+          <UpcomingList tasks={data.upcoming.tasks.slice(0, 6)} events={data.upcoming.events.slice(0, 4)} today={data.today} />
+        </Panel>
       </div>
-    </>
+    </div>
   );
 }
