@@ -187,6 +187,22 @@ export function registerRoutes(app: Router, ctx: Ctx): void {
     dismissRecommendation(ctx, key);
     return { ok: true };
   });
+  // Anotações livres do dia (uma por data), guardadas na tabela de configurações.
+  app.get('/api/notes', async (req) => {
+    const date = parse(isoDate, (req.query as any).date ?? today(ctx));
+    const row = ctx.db.prepare('SELECT value FROM settings WHERE key = ?').get(`note:${date}`) as { value: string } | undefined;
+    const recent = (ctx.db.prepare("SELECT key, value FROM settings WHERE key LIKE 'note:%' AND key < ? ORDER BY key DESC LIMIT 14").all(`note:${date}`) as { key: string; value: string }[])
+      .map((r) => ({ date: r.key.slice(5), ...(JSON.parse(r.value) as { text: string; updated_at: string }) }))
+      .filter((n) => n.text.trim());
+    return { date, ...(row ? JSON.parse(row.value) : { text: '', updated_at: null }), recent };
+  });
+  app.post('/api/notes', async (req) => {
+    const { date, text } = parse(z.object({ date: isoDate, text: z.string().max(20000) }).strict(), req.body);
+    const value = JSON.stringify({ text, updated_at: ctx.now().toISOString() });
+    if (text.trim()) ctx.db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(`note:${date}`, value);
+    else ctx.db.prepare('DELETE FROM settings WHERE key = ?').run(`note:${date}`);
+    return { ok: true };
+  });
   app.get('/api/reports', async () => reports(ctx));
   app.get('/api/search', async (req) => search(ctx, String((req.query as any).q ?? '')));
 

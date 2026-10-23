@@ -20,37 +20,39 @@ import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, Shortcu
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
 import { runtime } from './lib/runtime';
-import { longDate } from './lib/format';
 import { useApi, useStore } from './lib/store';
 
 export const NAV = [
-  { to: '/', label: 'Visão Geral', icon: LayoutDashboard, section: 'Operação' },
-  { to: '/foco', label: 'Foco de Hoje', icon: Target },
-  { to: '/pendencias', label: 'Minhas Pendências', icon: ListChecks, section: 'Gestão' },
-  { to: '/projetos', label: 'Projetos', icon: FolderKanban },
+  { to: '/', label: 'Meu dia', icon: LayoutDashboard, section: 'Operação' },
+  { to: '/foco', label: 'Prioridades', icon: Target },
+  { to: '/pendencias', label: 'Minhas tarefas', icon: ListChecks, section: 'Gestão' },
+  { to: '/projetos', label: 'Frentes de trabalho', icon: FolderKanban },
   { to: '/terceiros', label: 'Aguardando Terceiros', icon: Hourglass },
   { to: '/equipe', label: 'Atividades da equipe', icon: Users, section: 'Equipe' },
   { to: '/arquivos', label: 'Arquivos e Documentos', icon: FileStack, section: 'Registro' },
-  { to: '/relatorios', label: 'Relatórios', icon: BarChart3 }
+  { to: '/relatorios', label: 'Acompanhamento', icon: BarChart3 }
 ];
 
-export function Logo() {
+/** Marca AVANT: o "A" tem a perna direita transformada em sinal de concluído que avança para fora da letra. */
+export function BrandMark({ size = 44 }: { size?: number }) {
   return (
-    <svg className="brand-mark" viewBox="0 0 40 40" aria-hidden>
-      <rect x="0.5" y="0.5" width="39" height="39" rx="9" fill="rgba(255,255,255,0.04)" stroke="rgba(214,177,84,0.45)" />
-      <path d="M11 30 20 9l9 21" fill="none" stroke="#fff" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-      <path d="M14.5 23.5h11" stroke="#c49a2c" strokeWidth="3" strokeLinecap="round" />
+    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden className="brand-mark">
+      <defs>
+        <linearGradient id="avant-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#2f6bff" />
+          <stop offset="1" stopColor="#7b4dff" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="60" height="60" rx="19" fill="url(#avant-g)" />
+      <path d="M18 47 L30.6 17 Q32 14 33.4 17 L39.5 31.5" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 37 L28.5 43 L47 24.5" fill="none" stroke="#ffb23f" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="47.5" cy="45.5" r="3.4" fill="#fff" />
     </svg>
   );
 }
 
-function greeting(now: string, tz: string) {
-  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hour12: false }).format(new Date(now)));
-  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-}
-
 export default function App() {
-  const { meta, setPrefs, busy, dark } = useStore();
+  const { setPrefs, busy, dark } = useStore();
   const [palette, setPalette] = useState(false);
   const [capture, setCapture] = useState(false);
   const [newTask, setNewTask] = useState(false);
@@ -113,20 +115,15 @@ export default function App() {
     return null;
   };
 
-  const home = location.pathname === '/';
-  const greet = meta ? greeting(meta.now, meta.tz) : 'Olá';
-  const done = counts?.counts?.done_last_7_days ?? 0;
 
   return (
     <div className={`shell shell-rail${mobileOpen ? ' mobile-open' : ''}`}>
       {busy > 0 && <div className="loading-bar" aria-hidden />}
       <div className="mobile-scrim" onClick={() => setMobileOpen(false)} />
       <aside className="rail" aria-label="Navegação principal">
-        <NavLink to="/" end className="rail-brand" aria-label="AVANT — Visão geral" title="AVANT · Central Inteligente de Gestão">
-          <span className="rb-letter">A</span>
-          <svg viewBox="0 0 40 14" className="rb-pulse" aria-hidden>
-            <path d="M0 7h10l3-6 4 12 4-9 3 3h16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
+        <NavLink to="/" end className="rail-brand" aria-label="AVANT — Meu dia" title="AVANT · Central Inteligente de Gestão">
+          <BrandMark size={46} />
+          <span className="rb-word">avant</span>
         </NavLink>
         <nav className="rail-nav">
           {NAV.map((n) => (
@@ -145,18 +142,7 @@ export default function App() {
           <button className="icon-btn mobile-only" onClick={() => setMobileOpen(true)} aria-label="Abrir menu">
             <Menu />
           </button>
-          <div className="greet">
-            {home ? (
-              <>
-                <h1>
-                  {greet}, Victor
-                </h1>
-                <p>
-                  {meta ? longDate(meta.today).replace(/^./, (ch) => ch.toUpperCase()) : ''} · {done === 1 ? '1 entrega concluída' : `${done} entregas concluídas`} nesta semana
-                </p>
-              </>
-            ) : null}
-          </div>
+          <div className="greet" />
           <button className="search-pill" onClick={() => setPalette(true)} aria-label="Pesquisa global">
             <Search aria-hidden />
             <span>Buscar</span>
@@ -194,7 +180,7 @@ export default function App() {
         </NavLink>
         <NavLink to="/pendencias">
           <ListChecks aria-hidden />
-          Pendências
+          Tarefas
         </NavLink>
         <button className="tab-main" onClick={() => setCapture(true)} aria-label="Captura rápida">
           <Zap aria-hidden />
@@ -202,7 +188,7 @@ export default function App() {
         </button>
         <NavLink to="/projetos">
           <FolderKanban aria-hidden />
-          Projetos
+          Frentes
         </NavLink>
         <button onClick={() => setNewTask(true)} aria-label="Nova tarefa">
           <Plus aria-hidden />

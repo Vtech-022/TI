@@ -36,8 +36,12 @@ Regras de conduta:
 
 ## 3. Identidade visual (referência atual: painel com trilho de ícones e gráficos)
 
-**Versão atual (prevalece sobre os itens abaixo quando houver conflito):**
-- Fundo azul-lavanda suave em degradê; cartões translúcidos brancos com cantos de 18px e sombra leve.
+**Versão atual — Revisão 6 (prevalece sobre os itens abaixo quando houver conflito):**
+- Tom de **central pessoal de acompanhamento do trabalho**, não de sistema técnico ou de chamados: linguagem próxima ("Meu dia", "Ficou para trás", "Feito hoje", "Frentes de trabalho", "Acompanhamento").
+- **Logotipo:** quadrado de cantos bem arredondados em degradê azul `#2f6bff` → violeta `#7b4dff`; dentro, um "A" branco cuja perna direita vira um sinal de concluído laranja `#ffb23f` que avança para fora da letra, e um ponto branco. Palavra "avant" em minúsculas abaixo, no trilho. O mesmo desenho é o ícone da aba do navegador.
+- **Tela inicial "Meu dia":** cartão de boas-vindas em degradê azul→violeta com brilho laranja (data, saudação, frase sobre o dia, atalhos "atrasadas", "esperando alguém", "feitas nos últimos 7 dias") e anel de progresso do dia; lista "Meu dia" com campo "O que você precisa fazer hoje?" (cria tarefa com prazo hoje) e seções Ficou para trás, Para hoje, Em andamento, Sugestões para hoje (quando nada vence hoje; não altera prazos) e Feito hoje (riscado); conclusão em um clique; bloco **Anotações do dia** em estilo folha de caderno amarela, salvo automaticamente, com anotações anteriores; Agenda de hoje; Ritmo da semana (concluídas por dia, 7 dias); Frentes de trabalho com barra de progresso; Próximos dias.
+- **Situação livre:** no painel da tarefa, a caixa de situação aceita qualquer opção, inclusive "Concluída" (aplica as mesmas regras de dependências/verificação da bolinha, só pedindo algo quando a tarefa realmente exige).
+- Fundo em degradê suave lavanda → pêssego; cartões translúcidos brancos com cantos de 18px e sombra leve.
 - Trilho vertical à esquerda: logotipo em pílula azul (letra A + linha de pulso) e navegação em ícones circulares dentro de uma faixa arredondada; item ativo em círculo azul com degradê; nome da área aparece ao passar o mouse.
 - Topo: saudação "Boa tarde, Victor" com data e entregas concluídas na semana; à direita, pesquisa em pílula e pílula de ações (captura rápida, nova tarefa, notificações, modo claro/escuro, avatar).
 - Visão Geral: 4 cartões de indicadores com ícone em círculo contornado; gráfico de barras "Pendências por projeto" (Abertas/Concluídas/Todas); gráfico de rosca "Distribuição por prioridade" com rótulos e legenda (Abertas/Com prazo/Com terceiros); tabela "Minhas pendências" com cabeçalho em faixa azul-clara e prioridade em etiquetas contornadas; "Precisa de atenção" e "Próximos 14 dias" lado a lado.
@@ -67,12 +71,12 @@ Regras de conduta:
 ## 4. Navegação (menu lateral, somente texto)
 
 **Operação**
-- Visão Geral
-- Foco de Hoje
+- Meu dia
+- Prioridades
 
 **Gestão**
-- Minhas Pendências
-- Projetos
+- Minhas tarefas
+- Frentes de trabalho
 - Aguardando Terceiros
 
 **Equipe**
@@ -80,7 +84,7 @@ Regras de conduta:
 
 **Registro**
 - Arquivos e Documentos
-- Relatórios
+- Acompanhamento (relatórios)
 
 **Rodapé do menu:** Notificações (com contador) e interruptor Modo escuro; abaixo, o estado do salvamento ("Salvo na nuvem · hora", "Salvando…" ou "Salvo só neste navegador").
 
@@ -149,11 +153,13 @@ Níveis: **Crítica ≥ 70**, **Alta ≥ 35**, **Normal ≥ 15**, **Baixa < 15**
 
 **Aguardando Terceiros:** agrupado por pessoa, com datas de solicitação, prazo esperado e próximo acompanhamento; aviso quando várias pendências aguardam a mesma pessoa. Nenhuma cobrança é enviada automaticamente.
 
-**Atividades da equipe:** quadro compartilhado no estilo Trello (A fazer, Em andamento, Concluída). Cada colaborador entra com a própria conta e registra as próprias atividades (título, situação, prazo, projeto ou setor, observações); todos com acesso veem o quadro; cada pessoa só altera os próprios cartões. Etiqueta e avatar com cor por pessoa, filtro por colaborador, prazo vencido em vermelho. As pendências pessoais do Victor continuam privadas e separadas.
+**Atividades da equipe (quadro Trello):** colunas A fazer, Em andamento e Concluída com **arrastar e soltar**; cartões compactos (só título, etiquetas de cor, prazo, ícones de descrição/anexos e avatar); "Adicionar um cartão" em cada coluna. Ao clicar, o cartão abre em **tela grande** com título editável, descrição, **anexos** (fotos com miniatura e ampliação, PDF, vídeo e texto; até 20 MB; Word/Excel devem ser salvos como PDF), e painel lateral com situação, **tipo de atividade** (Rotina, Projeto novo, Viagem, Reunião ou evento, Treinamento, Suporte, Outro), prazo e projeto/setor. Cartões **concluídos há mais de 15 dias** (ou excluídos) saem do quadro e vão para a área discreta **"Excluídos"**, de onde podem ser restaurados. O responsável pela página pode mover e editar os cartões de todos; cada colaborador altera os próprios.
+
+Base anterior: quadro compartilhado no estilo Trello (A fazer, Em andamento, Concluída). Cada colaborador entra com a própria conta e registra as próprias atividades (título, situação, prazo, projeto ou setor, observações); todos com acesso veem o quadro; cada pessoa só altera os próprios cartões. Etiqueta e avatar com cor por pessoa, filtro por colaborador, prazo vencido em vermelho. As pendências pessoais do Victor continuam privadas e separadas.
 
 **Arquivos e Documentos:** original preservado sem alteração (verificação SHA-256), texto extraído, vínculo com projeto e tarefa, envio do texto para a captura, download com confirmação; remover do AVANT não apaga o original.
 
-**Relatórios:** ritmo das últimas 8 semanas (criadas, concluídas, capturas), abertas por prioridade e status, projetos com progresso, qualidade da informação (certeza dos prazos), origem dos registros, por responsável, por categoria e por terceiro; exportação de cópia de segurança em JSON.
+**Relatórios:** ritmo das últimas 8 semanas (criadas, concluídas, capturas), abertas por prioridade e status, projetos com progresso, qualidade da informação (certeza dos prazos), origem dos registros, por responsável, por categoria e por terceiro; exportação de cópia de segurança em JSON. Seção **Indicadores por colaborador** (pensada para ~30 pessoas), com período (30/90/365 dias ou tudo): quem mais concluiu, quem mais viajou, quem mais fez projetos novos, maior carga atual; alerta de **possível sobrecarga** (≥ 1,5× a média de atividades em aberto e pelo menos 4) e de quem está **com folga** (≤ 50% da média); barras de carga por pessoa com linha da média; ranking ordenável com o "por quê" de cada pessoa. Os indicadores dependem do tipo de atividade informado nos cartões.
 
 **Agenda (acessível por links):** dia, semana e mês; criação por linguagem natural com escolha entre interpretações; conflitos de horário (término não informado considera 1 h e é sinalizado); prazos de tarefas no calendário; editar, reagendar e excluir com confirmação; histórico do evento.
 

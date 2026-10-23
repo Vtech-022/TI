@@ -95,7 +95,7 @@ async function boot() {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
     const a = (e.target as Element | null)?.closest?.('a[href]');
     const href = a?.getAttribute('href');
-    if (!href || !href.startsWith('/')) return;
+    if (!href || !href.startsWith('/') || href.startsWith('/_blob/')) return;
     e.preventDefault();
     if (href.startsWith('/api/')) void download(href);
     else void router.navigate(href);

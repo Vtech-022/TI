@@ -57,7 +57,7 @@ export default function Projects() {
       <div className="page-head">
         <div>
           <div className="eyebrow">Gestão</div>
-          <h1>Projetos</h1>
+          <h1>Frentes de trabalho</h1>
           <p>Progresso calculado pelas tarefas reais (subtarefas contam individualmente; canceladas não entram na conta).</p>
         </div>
         <button className="btn primary" onClick={() => setCreating({ ...emptyProject })}>

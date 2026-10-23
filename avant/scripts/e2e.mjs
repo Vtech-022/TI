@@ -37,14 +37,26 @@ const shot = (name) => page.screenshot({ path: path.join(SHOTS, `${name}.png`), 
 
 console.log(`AVANT e2e em ${BASE}`);
 
-await check('Visão Geral carrega com dados reais do banco', async () => {
+await check('Meu dia carrega com dados reais, adiciona item e guarda anotações', async () => {
   await page.goto(BASE + '/');
   await page.getByRole('heading', { level: 1 }).filter({ hasText: 'Victor' }).waitFor();
-  const kpi = await page.locator('.kpi-card').first().innerText();
-  assert(/Pendências abertas\s*\n?\s*\d+/.test(kpi), `Indicador inesperado: ${kpi}`);
-  assert((await page.locator('table.data.soft tbody tr').count()) > 3, 'Tabela de pendências vazia');
-  assert((await page.locator('.chart-wrap .bar').count()) > 0, 'Gráfico de barras vazio');
-  await shot('01-visao-geral');
+  assert((await page.locator('.dh-chip').count()) === 3, 'Indicadores do dia ausentes');
+  assert((await page.locator('.chart-wrap .bar-g').count()) === 7, 'Ritmo da semana deve ter 7 dias');
+  assert((await page.locator('.fronts li').count()) > 0, 'Frentes de trabalho vazias');
+  await page.getByLabel('Adicionar ao meu dia').fill('Ligar para o fornecedor de papel');
+  await page.getByLabel('Adicionar ao meu dia').press('Enter');
+  await page.locator('.day-item', { hasText: 'Ligar para o fornecedor de papel' }).waitFor();
+  await page.getByRole('textbox', { name: 'Anotações do dia' }).fill('Reunião com a coordenação às 15h');
+  await page.locator('.notes-state', { hasText: /^Salvo$/ }).waitFor({ timeout: 5000 });
+  await page.reload();
+  await page.getByRole('textbox', { name: 'Anotações do dia' }).waitFor();
+  assert((await page.getByRole('textbox', { name: 'Anotações do dia' }).inputValue()).includes('coordenação'), 'Anotação não persistiu');
+  // conclui pelo seletor de situação (sem precisar da bolinha)
+  await page.locator('.day-item', { hasText: 'Ligar para o fornecedor de papel' }).locator('.di-title').click();
+  await page.locator('#status-select').selectOption('concluida');
+  await page.locator('.day-item.is-done', { hasText: 'Ligar para o fornecedor de papel' }).waitFor();
+  await page.keyboard.press('Escape');
+  await shot('01-meu-dia');
 });
 
 await check('Painel lateral da tarefa mostra justificativa da prioridade e texto original', async () => {
@@ -168,8 +180,8 @@ await check('Celular: layout responsivo e menu recolhível', async () => {
   assert(!overflow, 'Rolagem horizontal na página inicial');
   await mp.screenshot({ path: path.join(SHOTS, '12-celular.png') });
   await mp.getByRole('button', { name: 'Abrir menu' }).click();
-  await mp.locator('.rail').getByRole('link', { name: /Projetos/ }).click();
-  await mp.getByRole('heading', { name: 'Projetos', level: 1 }).waitFor();
+  await mp.locator('.rail').getByRole('link', { name: /Frentes de trabalho/ }).click();
+  await mp.getByRole('heading', { name: 'Frentes de trabalho', level: 1 }).waitFor();
   await mp.screenshot({ path: path.join(SHOTS, '13-celular-projetos.png') });
   await m.close();
 });

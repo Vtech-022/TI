@@ -17,21 +17,20 @@ export function useOpenTask() {
   };
 }
 
-/** Botão de conclusão com as regras de negócio: verificação obrigatória e exceções justificadas. */
-export function CompleteButton({ task, onDone }: { task: Pick<TaskView, 'id' | 'title' | 'status' | 'requires_verification' | 'verification_note'>; onDone?: () => void }) {
+type CompletableTask = Pick<TaskView, 'id' | 'title' | 'status' | 'requires_verification' | 'verification_note'>;
+
+/** Fluxo de conclusão com as regras de negócio: verificação obrigatória e exceções justificadas. */
+export function useCompleteFlow(task: CompletableTask, onDone?: () => void) {
   const mutate = useMutation();
   const { fail } = useStore();
   const [dialog, setDialog] = useState<null | { kind: 'verify' } | { kind: 'pending'; blockers: { id: number; title: string }[]; children: { id: number; title: string }[] }>(null);
   const [verified, setVerified] = useState(false);
   const [reason, setReason] = useState('');
-  const [pop, setPop] = useState(false);
-  const done = task.status === 'concluida';
 
   const send = async (body: Record<string, unknown>) => {
     try {
       await api.post(`/api/tasks/${task.id}/status`, { status: 'concluida', ...body });
       setDialog(null);
-      setPop(true);
       onDone?.();
       await mutate(
         async () => null,
@@ -45,27 +44,13 @@ export function CompleteButton({ task, onDone }: { task: Pick<TaskView, 'id' | '
     }
   };
 
-  const click = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (done) {
-      mutate(() => api.post(`/api/tasks/${task.id}/status`, { status: 'pendente' }), 'Tarefa reaberta.');
-      return;
-    }
+  const start = () => {
     if (task.requires_verification) setDialog({ kind: 'verify' });
     else send({});
   };
 
-  return (
+  const dialogs = (
     <>
-      <button
-        className={`check${done ? ' done' : ''}${pop ? ' pop' : ''}`}
-        onClick={click}
-        onAnimationEnd={() => setPop(false)}
-        aria-label={done ? `Reabrir "${task.title}"` : `Concluir "${task.title}"`}
-        title={done ? 'Reabrir' : 'Concluir'}
-      >
-        <Check aria-hidden />
-      </button>
       <Modal
         open={dialog?.kind === 'verify'}
         title="Verificação necessária"
@@ -122,6 +107,39 @@ export function CompleteButton({ task, onDone }: { task: Pick<TaskView, 'id' | '
           </div>
         )}
       </Modal>
+    </>
+  );
+  return { start, dialogs };
+}
+
+/** Bolinha de conclusão rápida nas listas. */
+export function CompleteButton({ task, onDone }: { task: CompletableTask; onDone?: () => void }) {
+  const mutate = useMutation();
+  const [pop, setPop] = useState(false);
+  const flow = useCompleteFlow(task, () => {
+    setPop(true);
+    onDone?.();
+  });
+  const done = task.status === 'concluida';
+
+  const click = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (done) mutate(() => api.post(`/api/tasks/${task.id}/status`, { status: 'pendente' }), 'Tarefa reaberta.');
+    else flow.start();
+  };
+
+  return (
+    <>
+      <button
+        className={`check${done ? ' done' : ''}${pop ? ' pop' : ''}`}
+        onClick={click}
+        onAnimationEnd={() => setPop(false)}
+        aria-label={done ? `Reabrir "${task.title}"` : `Concluir "${task.title}"`}
+        title={done ? 'Reabrir' : 'Concluir'}
+      >
+        <Check aria-hidden />
+      </button>
+      {flow.dialogs}
     </>
   );
 }

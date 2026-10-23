@@ -88,7 +88,7 @@ export default function Tasks() {
       <div className="page-head">
         <div>
           <div className="eyebrow">Gestão</div>
-          <h1>Minhas Pendências</h1>
+          <h1>Minhas tarefas</h1>
         </div>
         <button className="btn primary" onClick={() => setNewTask(true)}>
           <Plus size={16} /> Nova tarefa

@@ -8,7 +8,7 @@ import { useApi, useMutation } from '../lib/store';
 import { CERTAINTY_LABEL, LEVEL_LABEL, ORIGIN_LABEL, PRIORITY_LABEL, STATUS_LABEL, TASK_STATUSES } from '../lib/types';
 import type { Priority, TaskDetail, TaskStatus, TaskView } from '../lib/types';
 import { draftFrom, draftToBody, TaskForm, useDirty } from './TaskForm';
-import { CompleteButton, TaskRow } from './TaskRow';
+import { CompleteButton, TaskRow, useCompleteFlow } from './TaskRow';
 import { BlockedBadge, Cert, ConfirmDialog, Drawer, DueBadge, ErrorBox, Modal, PriorityBadge, Skeleton, StatusBadge } from './ui';
 
 export function TaskDrawerHost() {
@@ -54,6 +54,7 @@ function TaskDrawer({ id, onClose }: { id: number; onClose: () => void }) {
   };
 
   const t = data?.task;
+  const completeFlow = useCompleteFlow(t ?? { id, title: '', status: 'pendente', requires_verification: false, verification_note: null });
 
   const save = async () => {
     if (!t) return;
@@ -132,14 +133,13 @@ function TaskDrawer({ id, onClose }: { id: number; onClose: () => void }) {
                 value={t.status}
                 onChange={(e) => {
                   const s = e.target.value as TaskStatus;
-                  if (s === 'concluida') return; // conclusão usa o botão com as regras de verificação
+                  if (s === 'concluida') return completeFlow.start(); // mesmas regras da bolinha de conclusão
                   mutate(() => api.post(`/api/tasks/${t.id}/status`, { status: s }), `Status: ${STATUS_LABEL[s]}`);
                 }}
               >
                 {TASK_STATUSES.map((s) => (
-                  <option key={s} value={s} disabled={s === 'concluida' && t.status !== 'concluida'}>
+                  <option key={s} value={s}>
                     {STATUS_LABEL[s]}
-                    {s === 'concluida' && t.status !== 'concluida' ? ' (use o botão de conclusão)' : ''}
                   </option>
                 ))}
               </select>
@@ -419,6 +419,7 @@ function TaskDrawer({ id, onClose }: { id: number; onClose: () => void }) {
           </>
         )}
       </Drawer>
+      {completeFlow.dialogs}
 
       <ConfirmDialog
         open={askDiscard}

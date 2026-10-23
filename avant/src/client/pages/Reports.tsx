@@ -1,5 +1,6 @@
 import { BarChart3, FolderKanban, Gauge, ShieldCheck, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { TeamReport } from '../components/TeamReport';
 import { ErrorBox, Panel, ProgressBar, Skeleton } from '../components/ui';
 import { dateBr } from '../lib/format';
 import { useApi } from '../lib/store';
@@ -60,7 +61,7 @@ export default function Reports() {
       <div className="page-head">
         <div>
           <div className="eyebrow">Indicadores calculados do banco de dados</div>
-          <h1>Relatórios</h1>
+          <h1>Acompanhamento</h1>
           <p>Todos os números vêm dos registros atuais — sem metas ou porcentagens estimadas.</p>
         </div>
         <a className="btn" href="/api/export">
@@ -177,6 +178,9 @@ export default function Reports() {
           </h3>
           <Bars data={data.waits_by_party} onClick={() => navigate('/terceiros')} />
         </Panel>
+      </div>
+      <div style={{ marginTop: 26 }}>
+        <TeamReport />
       </div>
     </>
   );

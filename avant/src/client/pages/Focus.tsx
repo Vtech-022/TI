@@ -14,7 +14,7 @@ export default function Focus() {
       <div className="page-head">
         <div>
           <div className="eyebrow">{today.data ? longDate(today.data.today) : 'Hoje'}</div>
-          <h1>Foco de Hoje</h1>
+          <h1>Prioridades</h1>
           <p>Ordem recomendada considerando prazo, impacto, dependências e esforço conhecido. Tarefas bloqueadas ficam fora da fila até a liberação.</p>
         </div>
       </div>
