@@ -1,0 +1,23 @@
+# AVANT — site próprio dentro do repositório (pasta "avant").
+# No Netlify, defina "Base directory" = avant (Site configuration > Build & deploy).
+# O site da raiz do repositório é outro e não é alterado por esta pasta.
+
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Páginas e cabeçalhos de segurança
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
