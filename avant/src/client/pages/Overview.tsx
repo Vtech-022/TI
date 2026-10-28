@@ -9,6 +9,7 @@ import { CompleteButton, useOpenTask } from '../components/TaskRow';
 import { Empty, ErrorBox, Panel, Skeleton } from '../components/ui';
 import { api } from '../lib/api';
 import { addDays, dateBr, localDate, localTime, longDate, weekdayName } from '../lib/format';
+import { userName } from '../lib/runtime';
 import { useApi, useMutation, useStore } from '../lib/store';
 import type { Dashboard, TaskView } from '../lib/types';
 
@@ -202,7 +203,7 @@ export default function Overview() {
             <Sun aria-hidden /> {longDate(today).replace(/^./, (ch) => ch.toUpperCase())}
           </span>
           <h1>
-            {meta ? greeting(meta.now, meta.tz) : 'Olá'}, Victor
+            {meta ? greeting(meta.now, meta.tz) : 'Olá'}, {userName().split(' ')[0]}
           </h1>
           <p>{message}</p>
           <div className="dh-chips">

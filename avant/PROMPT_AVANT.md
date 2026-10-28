@@ -182,6 +182,15 @@ Cadastrar como **pendentes**, com origem "carga inicial" e texto original preser
 
 ---
 
+## 8.1 Versão compartilhada na Netlify (ao vivo)
+
+- Publicada a partir do GitHub (pasta base `avant`), com a interface estática e uma função `/api/*` que roda as mesmas rotas do servidor Node.
+- Dados no Netlify Blobs: banco SQLite inteiro em um objeto, gravado com **controle de concorrência por ETag**. Se houver conflito, a operação é refeita sobre a versão mais recente, sem perda.
+- Todos veem e editam os mesmos dados. As telas se atualizam sozinhas a cada ~3 s (indicador "● Ao vivo" no rodapé do menu).
+- Entrada pede o nome da pessoa (saudação, avatar e cartões da equipe usam esse nome) e, opcionalmente, o código de acesso da equipe (`AVANT_ACCESS_CODE`).
+- Anexos e documentos de até 4 MB, guardados no armazenamento de arquivos da Netlify.
+- Guia de publicação: `avant/NETLIFY.md`.
+
 ## 9. Segurança e confiabilidade
 
 Validar entradas e arquivos (tamanho, formato, assinatura binária); nenhum segredo no código; nenhuma mensagem ou e-mail enviado automaticamente; confirmação para exclusões; histórico de alterações; mensagens de erro úteis; nunca sobrescrever dados salvos após falha de leitura; edição servidor escuta só localmente (sem autenticação); integrações com Outlook, Google Calendar, Microsoft 365, WhatsApp, e-mail e IA externa só podem ser declaradas ativas depois de configuradas, autorizadas e testadas.

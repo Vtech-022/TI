@@ -18,11 +18,14 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:e2e": "node scripts/e2e.mjs",
-    "build:artifact": "vite build -c vite.artifact.config.ts && node scripts/build-artifact.mjs"
+    "build:artifact": "vite build -c vite.artifact.config.ts && node scripts/build-artifact.mjs",
+    "build:netlify": "vite build -c vite.netlify.config.ts",
+    "netlify:local": "node scripts/netlify-local.mjs"
   },
   "dependencies": {
     "@fastify/multipart": "^10.1.6",
     "@fastify/static": "^10.1.7",
+    "@netlify/blobs": "^10.7.13",
     "exceljs": "^4.4.0",
     "fastify": "^5.12.7",
     "mammoth": "^1.13.0",

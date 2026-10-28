@@ -19,7 +19,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, ShortcutsHelp } from './components/Overlays';
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
-import { runtime } from './lib/runtime';
+import { runtime, userName } from './lib/runtime';
 import { useApi, useStore } from './lib/store';
 
 export const NAV = [
@@ -158,8 +158,8 @@ export default function App() {
             <button className="icon-btn" onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'} title={dark ? 'Modo claro' : 'Modo escuro'}>
               {dark ? <Sun /> : <Moon />}
             </button>
-            <span className="avatar me" aria-label="Victor" title="Victor">
-              V
+            <span className="avatar me" aria-label={userName()} title={userName()}>
+              {userName().trim().charAt(0).toUpperCase()}
             </span>
           </div>
         </header>

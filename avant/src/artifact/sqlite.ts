@@ -10,8 +10,10 @@ export interface BrowserDB extends DB {
 
 const norm = (args: unknown[]) => args.map((a) => (a === undefined ? null : typeof a === 'boolean' ? (a ? 1 : 0) : a));
 
+let sqlModule: ReturnType<typeof initSqlJs> | null = null;
+
 export async function openBrowserDatabase(bytes?: Uint8Array | null): Promise<BrowserDB> {
-  const SQL = await initSqlJs();
+  const SQL = await (sqlModule ??= initSqlJs());
   const raw = bytes ? new SQL.Database(bytes) : new SQL.Database();
   const db: BrowserDB = {
     exec(sql: string) {

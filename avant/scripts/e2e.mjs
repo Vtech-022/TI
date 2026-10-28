@@ -28,6 +28,8 @@ const assert = (cond, msg) => {
 
 const browser = await chromium.launch({ executablePath, headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+// Versão compartilhada (Netlify): entra já identificado como Victor.
+await ctx.addInitScript(() => localStorage.setItem('avant.identidade', JSON.stringify({ id: 'e2e-victor', name: 'Victor' })));
 const page = await ctx.newPage();
 const consoleErrors = [];
 // Respostas 409 são regras de negócio tratadas pela interface (ex.: conclusão bloqueada), não erros.
@@ -119,10 +121,16 @@ await check('Projeto: lista hierárquica, Kanban e cronograma', async () => {
 });
 
 await check('Agenda: evento por linguagem natural no fuso de São Paulo', async () => {
-  await page.goto(BASE + '/agenda?v=semana&d=2026-10-27');
+  // Próxima terça-feira a partir de hoje (fuso de São Paulo), como o sistema interpreta.
+  const todaySp = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  const t0 = new Date(todaySp + 'T12:00:00Z');
+  const add = ((2 - t0.getUTCDay() + 7) % 7) || 7;
+  const tue = new Date(t0.getTime() + add * 86400000).toISOString().slice(0, 10);
+  const tueBr = tue.split('-').reverse().join('/');
+  await page.goto(BASE + `/agenda?v=semana&d=${tue}`);
   await page.getByLabel('Descrição do evento').fill('Treinamento na terça-feira às 14h com a equipe.');
   await page.getByRole('button', { name: 'Interpretar' }).click();
-  await page.getByText('27/10/2026 (terça-feira)').waitFor();
+  await page.getByText(`${tueBr} (terça-feira)`).waitFor();
   await page.getByRole('button', { name: 'Revisar e salvar' }).click();
   const dlg = page.getByRole('dialog', { name: 'Novo evento' });
   assert((await dlg.getByLabel('Início').inputValue()) === '14:00', 'Horário incorreto');
@@ -172,6 +180,7 @@ await check('Relatórios calculados', async () => {
 
 await check('Celular: layout responsivo e menu recolhível', async () => {
   const m = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+  await m.addInitScript(() => localStorage.setItem('avant.identidade', JSON.stringify({ id: 'e2e-victor', name: 'Victor' })));
   const mp = await m.newPage();
   mp.on('pageerror', (e) => consoleErrors.push(e.message));
   await mp.goto(BASE + '/');

@@ -55,4 +55,12 @@ export interface TeamStore {
   download(att: TeamAttachment): Promise<void>;
 }
 
-export const runtime: { mode: 'servidor' | 'online'; Status?: ComponentType; team?: TeamStore } = { mode: 'servidor' };
+export const runtime: {
+  mode: 'servidor' | 'online' | 'compartilhado';
+  Status?: ComponentType;
+  team?: TeamStore;
+  /** Nome de quem está usando (versão compartilhada); nas demais, o sistema é do Victor. */
+  userName?: string;
+} = { mode: 'servidor' };
+
+export const userName = () => runtime.userName || 'Victor';
