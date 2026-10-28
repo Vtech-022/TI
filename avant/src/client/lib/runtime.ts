@@ -55,12 +55,25 @@ export interface TeamStore {
   download(att: TeamAttachment): Promise<void>;
 }
 
+/** Contas de usuário (versão compartilhada e arquivo HTML). */
+export interface AuthApi {
+  me: { id: string; name: string; role: 'admin' | 'membro' };
+  logout(): Promise<void>;
+  listUsers(): Promise<{ id: string; name: string; role: 'admin' | 'membro'; created_at: string }[]>;
+  updateUser(id: string, change: { role?: 'admin' | 'membro'; password?: string }): Promise<void>;
+  removeUser(id: string): Promise<void>;
+  changePassword(current: string, next: string): Promise<void>;
+}
+
 export const runtime: {
   mode: 'servidor' | 'online' | 'compartilhado';
   Status?: ComponentType;
   team?: TeamStore;
   /** Nome de quem está usando (versão compartilhada); nas demais, o sistema é do Victor. */
   userName?: string;
+  auth?: AuthApi;
 } = { mode: 'servidor' };
+
+export const isAdmin = () => runtime.auth?.me.role === 'admin';
 
 export const userName = () => runtime.userName || 'Victor';

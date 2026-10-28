@@ -2,6 +2,8 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { api, ApiError } from './api';
 import { setTimezone } from './format';
+import { runtime } from './runtime';
+import type { WallpaperKind } from '../components/Wallpaper';
 
 export interface Meta {
   today: string;
@@ -42,7 +44,31 @@ export interface Prefs {
   reduceMotion: boolean;
   sidebarCollapsed: boolean;
   theme: 'sistema' | 'claro' | 'escuro';
+  /** Personalização de cada pessoa. */
+  accent: string;
+  font: FontKey;
+  scale: number;
+  wallpaper: WallpaperKind;
+  wallpaperIntensity: number;
 }
+
+export const FONTS = [
+  { key: 'padrao', label: 'Padrão (Segoe UI)', css: "'Segoe UI', 'Segoe UI Web', Arial, Helvetica, sans-serif" },
+  { key: 'arial', label: 'Arial', css: 'Arial, Helvetica, sans-serif' },
+  { key: 'verdana', label: 'Verdana', css: 'Verdana, Geneva, sans-serif' },
+  { key: 'trebuchet', label: 'Trebuchet', css: "'Trebuchet MS', 'Segoe UI', sans-serif" },
+  { key: 'tahoma', label: 'Tahoma', css: 'Tahoma, Verdana, sans-serif' },
+  { key: 'georgia', label: 'Georgia (serifada)', css: "Georgia, 'Times New Roman', serif" },
+  { key: 'arredondada', label: 'Arredondada', css: "ui-rounded, 'SF Pro Rounded', 'Nunito', 'Varela Round', 'Segoe UI', sans-serif" }
+] as const;
+export type FontKey = (typeof FONTS)[number]['key'];
+export const SCALES = [
+  { value: 0.9, label: 'Pequeno' },
+  { value: 1, label: 'Normal' },
+  { value: 1.12, label: 'Grande' },
+  { value: 1.25, label: 'Muito grande' }
+];
+export const DEFAULT_LOOK = { accent: '#2f6bff', font: 'padrao' as FontKey, scale: 1, wallpaper: 'aurora' as WallpaperKind, wallpaperIntensity: 0.7 };
 
 const Ctx = createContext<Store | null>(null);
 
@@ -53,11 +79,15 @@ function systemPrefersDark(): boolean {
   return !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
 }
 
+/** Preferências por pessoa (quando há login) e por navegador. */
+const prefsKey = () => (runtime.auth ? `avant:prefs:${runtime.auth.me.id}` : 'avant:prefs');
+
 function loadPrefs(): Prefs {
+  const base: Prefs = { reduceMotion: false, sidebarCollapsed: false, theme: 'sistema', ...DEFAULT_LOOK };
   try {
-    return { reduceMotion: false, sidebarCollapsed: false, theme: 'sistema', ...JSON.parse(localStorage.getItem('avant:prefs') ?? '{}') };
+    return { ...base, ...JSON.parse(localStorage.getItem(prefsKey()) ?? '{}') };
   } catch {
-    return { reduceMotion: false, sidebarCollapsed: false, theme: 'sistema' };
+    return base;
   }
 }
 
@@ -91,7 +121,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setPrefsState((cur) => {
       const next = { ...cur, ...p };
       try {
-        localStorage.setItem('avant:prefs', JSON.stringify(next));
+        localStorage.setItem(prefsKey(), JSON.stringify(next));
       } catch {
         /* armazenamento indisponível: preferência vale só nesta sessão */
       }
@@ -144,8 +174,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const dark = prefs.theme === 'escuro' || (prefs.theme === 'sistema' && systemDark);
   useEffect(() => {
     document.documentElement.setAttribute('data-avant-theme', dark ? 'dark' : 'light');
+    // Personalização: cor principal, fonte e tamanho do texto.
+    const st = document.documentElement.style;
+    const a = /^#[0-9a-f]{6}$/i.test(prefs.accent) ? prefs.accent : DEFAULT_LOOK.accent;
+    const fg = dark ? `color-mix(in srgb, ${a} 72%, white)` : a;
+    st.setProperty('--accent', a);
+    st.setProperty('--accent-strong', `color-mix(in srgb, ${a} 78%, black)`);
+    for (const v of ['--accent-fg', '--navy-600', '--blue-500', '--blue-400', '--chart-bar']) st.setProperty(v, fg);
+    st.setProperty('--navy-700', `color-mix(in srgb, ${fg} 85%, ${dark ? 'white' : 'black'})`);
+    st.setProperty('--blue-100', `color-mix(in srgb, ${a} ${dark ? 18 : 14}%, transparent)`);
+    st.setProperty('--blue-50', `color-mix(in srgb, ${a} ${dark ? 9 : 7}%, transparent)`);
+    const font = FONTS.find((f) => f.key === prefs.font) ?? FONTS[0];
+    for (const v of ['--font', '--font-display', '--font-mono']) st.setProperty(v, font.css);
+    st.setProperty('--ui-scale', String(SCALES.some((x) => x.value === prefs.scale) ? prefs.scale : 1));
+    document.documentElement.classList.toggle('has-wallpaper', prefs.wallpaper !== 'nenhum');
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-  }, [dark]);
+  }, [dark, prefs.accent, prefs.font, prefs.scale, prefs.wallpaper]);
 
   const value = useMemo(
     () => ({ meta, version, refresh, toast, toasts, dismissToast, fail, busy, track, prefs, setPrefs, dark }),

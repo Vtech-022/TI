@@ -7,19 +7,25 @@ import {
   ListChecks,
   Menu,
   Moon,
+  Palette,
   Plus,
   Search,
   Sun,
+  ShieldCheck,
   Target,
   Users,
   Zap
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NewTaskModal, NotificationsButton, QuickCapture, SearchPalette, ShortcutsHelp } from './components/Overlays';
+import { AccountMenu } from './components/AccountMenu';
+import { Personalize } from './components/Personalize';
+import { Wallpaper } from './components/Wallpaper';
 import { TaskDrawerHost } from './components/TaskDrawer';
 import { Toasts } from './components/ui';
-import { runtime, userName } from './lib/runtime';
+import { isAdmin, runtime } from './lib/runtime';
 import { useApi, useStore } from './lib/store';
 
 export const NAV = [
@@ -32,6 +38,8 @@ export const NAV = [
   { to: '/arquivos', label: 'Arquivos e Documentos', icon: FileStack, section: 'Registro' },
   { to: '/relatorios', label: 'Acompanhamento', icon: BarChart3 }
 ];
+
+const ADMIN_NAV = { to: '/usuarios', label: 'Usuários', icon: ShieldCheck };
 
 /** Marca AVANT: o "A" tem a perna direita transformada em sinal de concluído que avança para fora da letra. */
 export function BrandMark({ size = 44 }: { size?: number }) {
@@ -52,7 +60,14 @@ export function BrandMark({ size = 44 }: { size?: number }) {
 }
 
 export default function App() {
-  const { setPrefs, busy, dark } = useStore();
+  const { setPrefs, busy, dark, prefs } = useStore();
+  const [personalize, setPersonalize] = useState(false);
+  const systemReduce = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    const open = () => setPersonalize(true);
+    window.addEventListener('avant:personalize', open);
+    return () => window.removeEventListener('avant:personalize', open);
+  }, []);
   const [palette, setPalette] = useState(false);
   const [capture, setCapture] = useState(false);
   const [newTask, setNewTask] = useState(false);
@@ -118,6 +133,8 @@ export default function App() {
 
   return (
     <div className={`shell shell-rail${mobileOpen ? ' mobile-open' : ''}`}>
+      {createPortal(<Wallpaper kind={prefs.wallpaper} accent={prefs.accent} dark={dark} intensity={prefs.wallpaperIntensity} still={prefs.reduceMotion || systemReduce} />, document.body)}
+      <Personalize open={personalize} onClose={() => setPersonalize(false)} />
       {busy > 0 && <div className="loading-bar" aria-hidden />}
       <div className="mobile-scrim" onClick={() => setMobileOpen(false)} />
       <aside className="rail" aria-label="Navegação principal">
@@ -126,7 +143,7 @@ export default function App() {
           <span className="rb-word">avant</span>
         </NavLink>
         <nav className="rail-nav">
-          {NAV.map((n) => (
+          {(isAdmin() ? [...NAV, ADMIN_NAV] : NAV).map((n) => (
             <NavLink key={n.to} to={n.to} end={n.to === '/'} className="rail-item" aria-label={n.label} data-tip={n.label}>
               <n.icon aria-hidden />
               <span className="rail-label">{n.label}</span>
@@ -154,13 +171,14 @@ export default function App() {
             <button className="icon-btn" onClick={() => setNewTask(true)} aria-label="Nova tarefa" title="Nova tarefa">
               <Plus />
             </button>
+            <button className="icon-btn" onClick={() => setPersonalize(true)} aria-label="Personalizar aparência" title="Personalizar">
+              <Palette />
+            </button>
             <NotificationsButton />
             <button className="icon-btn" onClick={() => setPrefs({ theme: dark ? 'claro' : 'escuro' })} aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'} title={dark ? 'Modo claro' : 'Modo escuro'}>
               {dark ? <Sun /> : <Moon />}
             </button>
-            <span className="avatar me" aria-label={userName()} title={userName()}>
-              {userName().trim().charAt(0).toUpperCase()}
-            </span>
+            <AccountMenu />
           </div>
         </header>
         <main className="content" id="conteudo">

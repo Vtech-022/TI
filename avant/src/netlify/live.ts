@@ -1,6 +1,6 @@
 // "Ao vivo": consulta a versão dos dados a cada poucos segundos e avisa as telas quando alguém salva.
 type What = 'db' | 'team';
-type State = { ok: boolean; at: Date | null };
+type State = { ok: boolean; at: Date | null; unauthorized?: boolean };
 
 const listeners = new Set<(what: What) => void>();
 const stateListeners = new Set<(s: State) => void>();
@@ -32,6 +32,7 @@ async function poll() {
   running = true;
   try {
     const res = await fetch('/api/live', { cache: 'no-store', credentials: 'same-origin' });
+    if (res.status === 401) return setState({ ok: false, at: state.at, unauthorized: true });
     if (!res.ok) throw new Error(String(res.status));
     const v = (await res.json()) as { db: string | null; team: string | null };
     if (last) {

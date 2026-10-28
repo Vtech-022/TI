@@ -13,6 +13,10 @@ import { createLocalApi } from './localApi';
 import { flush, hasPending, loadSnapshot, onSaveState, SaveState, scheduleSave, watchRemote } from './persist';
 import { openBrowserDatabase } from './sqlite';
 import { createTeamStore } from './team';
+import { createLocalTeamStore } from './teamLocal';
+import { Login } from '../client/components/Login';
+import { hasAccounts, localAuthApi, localLogin, localRegister, sessionUser } from './localAuth';
+import type { StoredUser } from '../shared/auth';
 
 const rootEl = document.getElementById('root')!;
 const toast = (text: string, kind: 'ok' | 'error' = 'ok') => window.dispatchEvent(new CustomEvent('avant:toast', { detail: { text, kind } }));
@@ -39,10 +43,19 @@ async function download(href: string) {
   const d = r.data as any;
   if (r.status >= 400) return toast(d?.message ?? 'Não foi possível baixar o arquivo.', 'error');
   const dl = await window.claude?.use('downloads').catch(() => null);
-  if (!dl) return toast('Downloads não estão disponíveis nesta visualização.', 'error');
   const file = href.startsWith('/api/export')
     ? { filename: `avant-copia-${new Date().toISOString().slice(0, 10)}.json`, data: JSON.stringify(d, null, 2) }
     : { filename: d.filename as string, data: d.bytes as Uint8Array };
+  if (!dl) {
+    // Arquivo HTML avulso: download comum do navegador.
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([file.data as BlobPart]));
+    a.download = file.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return;
+  }
   try {
     await dl.save(file);
   } catch (e: any) {
@@ -51,8 +64,30 @@ async function download(href: string) {
   }
 }
 
+const root = createRoot(rootEl);
+/** Arquivo HTML avulso: pede login (ou criação da conta) antes de abrir o sistema. */
+function askLogin(): Promise<StoredUser> {
+  const current = sessionUser();
+  if (current) return Promise.resolve(current);
+  return new Promise((resolve) =>
+    root.render(
+      <Login
+        firstAccount={!hasAccounts()}
+        subtitle="Seu sistema de rotina e acompanhamento do trabalho. Os dados ficam guardados neste navegador, neste computador."
+        login={async (name, password) => resolve(await localLogin(name, password))}
+        register={async (name, password) => resolve(await localRegister(name, password))}
+      />
+    )
+  );
+}
+
 async function boot() {
-  rootEl.innerHTML = '<div class="boot">Carregando o AVANT…</div>';
+  if (!window.claude) {
+    const user = await askLogin();
+    runtime.userName = user.name;
+    runtime.auth = localAuthApi(user);
+  }
+  root.render(<div className="boot">Carregando o AVANT…</div>);
   const loaded = await loadSnapshot();
   const db = await openBrowserDatabase(loaded.bytes);
   const ctx: Ctx = { db, tz: 'America/Sao_Paulo', dataDir: '', maxUploadBytes: 15 * 1024 * 1024, now: () => new Date() };
@@ -85,7 +120,7 @@ async function boot() {
 
   runtime.mode = 'online';
   runtime.Status = SaveStatus;
-  runtime.team = createTeamStore();
+  runtime.team = window.claude || !runtime.auth ? createTeamStore() : createLocalTeamStore(runtime.auth.me);
   const hash = location.hash.replace(/^#/, '');
   const known = ['equipe', 'foco', 'captura', 'pendencias', 'projetos', 'agenda', 'terceiros', 'arquivos', 'historico', 'relatorios', 'configuracoes'];
   const router = createMemoryRouter(routes, { initialEntries: [known.includes(hash) ? `/${hash}` : '/'] });
@@ -101,7 +136,7 @@ async function boot() {
     else void router.navigate(href);
   });
 
-  createRoot(rootEl).render(
+  root.render(
     <StrictMode>
       <StoreProvider>
         <RouterProvider router={router} />
@@ -112,6 +147,7 @@ async function boot() {
 
 boot().catch((err) => {
   console.error(err);
+  root.unmount();
   rootEl.innerHTML = '';
   const box = document.createElement('div');
   box.className = 'boot error';

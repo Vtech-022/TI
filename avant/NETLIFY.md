@@ -22,17 +22,15 @@ Nesta versão, todas as pessoas que abrem o link veem **os mesmos dados**. O que
    - Build command: `npm run build:netlify`
    - Publish directory: `dist/netlify`
    - Functions directory: `netlify/functions`
-6. Recomendado: em **Site configuration → Environment variables**, crie `AVANT_ACCESS_CODE` com um código da equipe (ex.: `cri-norte-2026`). Com ele, só entra quem souber o código. Sem ele, qualquer pessoa com o link pode ver e alterar tudo.
+6. Recomendado: em **Site configuration → Environment variables**, crie `AVANT_ACCESS_CODE` com um código da equipe (ex.: `cri-norte-2026`). Com ele, só cria conta quem souber o código. Sem ele, qualquer pessoa com o link pode criar uma conta.
 7. Clique em **Deploy**. A cada novo envio ao GitHub, a Netlify publica de novo sozinha, e os dados são mantidos.
 
-## Na primeira visita
+## Contas
 
-Cada pessoa informa **o nome** (e o código, se houver). O nome aparece:
-- na saudação;
-- no avatar;
-- nos cartões da equipe.
-
-Ele fica guardado no navegador daquela pessoa.
+- **A primeira conta criada é a do administrador:** crie a sua logo depois da primeira publicação.
+- As demais pessoas clicam em **Criar conta**, com nome e senha. Se `AVANT_ACCESS_CODE` estiver definido, também informam o código da equipe.
+- Regra da senha: de 4 a 7 caracteres, com letra, número e caractere especial (ex.: `Av@2026`).
+- O administrador gerencia as contas na tela **Usuários**.
 
 ## Limites desta versão
 

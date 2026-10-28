@@ -191,6 +191,20 @@ Cadastrar como **pendentes**, com origem "carga inicial" e texto original preser
 - Anexos e documentos de até 4 MB, guardados no armazenamento de arquivos da Netlify.
 - Guia de publicação: `avant/NETLIFY.md`.
 
+## 8.2 Login, administrador e personalização
+
+- **Login:** tela com "Entrar" e "Criar conta" (nome e senha). Senha de 4 a 7 caracteres, com pelo menos uma letra, um número e um caractere especial; guardada só como resumo PBKDF2 com sal. Nomes iguais com acento ou maiúscula diferentes são a mesma conta. Após 5 erros seguidos, o login é bloqueado por 1 minuto.
+- **Administrador:** a primeira conta criada (Victor). Tem a tela **Usuários** (tornar administrador/membro, definir nova senha, excluir conta; nunca a própria nem o último administrador) e pode alterar cartões de toda a equipe. Membros alteram só os próprios cartões; o servidor também bloqueia.
+- **Menu da conta (avatar):** Personalizar, Alterar minha senha, Sair.
+- **Personalizar (por pessoa):**
+  - papel de parede animado (Aurora, Constelação, Bolhas de luz, Ondas, Céu estrelado, Formas flutuantes ou Nenhum), com intensidade Suave/Média/Forte e opção de deixá-lo parado;
+  - cor principal (10 cores ou qualquer outra);
+  - fonte (7 opções);
+  - tamanho do texto (Pequeno, Normal, Grande, Muito grande);
+  - tema Claro/Escuro/Automático.
+  - O papel de parede usa as cores da cor principal, pausa com a aba em segundo plano e respeita a redução de movimento.
+- **Arquivo HTML avulso (`dist/AVANT.html`):** abre com dois cliques, sem internet. Contas e dados ficam no navegador daquele computador; o login dura 12 horas.
+
 ## 9. Segurança e confiabilidade
 
 Validar entradas e arquivos (tamanho, formato, assinatura binária); nenhum segredo no código; nenhuma mensagem ou e-mail enviado automaticamente; confirmação para exclusões; histórico de alterações; mensagens de erro úteis; nunca sobrescrever dados salvos após falha de leitura; edição servidor escuta só localmente (sem autenticação); integrações com Outlook, Google Calendar, Microsoft 365, WhatsApp, e-mail e IA externa só podem ser declaradas ativas depois de configuradas, autorizadas e testadas.

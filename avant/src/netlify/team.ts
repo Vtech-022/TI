@@ -30,7 +30,7 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export function createHttpTeamStore(identity: { id: string; name: string }): TeamStore {
+export function createHttpTeamStore(identity: { id: string; name: string; role: 'admin' | 'membro' }): TeamStore {
   const save = (memberId: string, items: TeamActivity[], name?: string) =>
     call('/api/team/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ memberId, items, name }) }).then(() => {
       window.dispatchEvent(new Event('avant:live-poll'));
@@ -38,7 +38,7 @@ export function createHttpTeamStore(identity: { id: string; name: string }): Tea
 
   return {
     async me() {
-      return { id: identity.id, canWrite: true, name: identity.name, isOwner: true, canUpload: true };
+      return { id: identity.id, canWrite: true, name: identity.name, isOwner: identity.role === 'admin', canUpload: true };
     },
 
     subscribe(onChange, onError) {

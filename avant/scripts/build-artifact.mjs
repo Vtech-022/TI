@@ -20,3 +20,16 @@ ${css}
 `;
 fs.writeFileSync('dist/artifact/avant.html', page);
 console.log(`dist/artifact/avant.html: ${(page.length / 1048576).toFixed(2)} MB`);
+
+// Arquivo HTML avulso: abre com dois cliques, sem servidor; dados ficam no navegador.
+const standalone = `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,${encodeURIComponent(fs.readFileSync('src/client/public/favicon.svg', 'utf8').trim())}">
+${page.replace('<div id="root"></div>', '</head>\n<body>\n<div id="root"></div>')}</body>
+</html>
+`;
+fs.writeFileSync('dist/AVANT.html', standalone);
+console.log(`dist/AVANT.html: ${(standalone.length / 1048576).toFixed(2)} MB`);

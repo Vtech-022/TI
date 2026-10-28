@@ -28,8 +28,13 @@ const assert = (cond, msg) => {
 
 const browser = await chromium.launch({ executablePath, headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
-// Versão compartilhada (Netlify): entra já identificado como Victor.
-await ctx.addInitScript(() => localStorage.setItem('avant.identidade', JSON.stringify({ id: 'e2e-victor', name: 'Victor' })));
+// Versão compartilhada (Netlify): entra com a conta do Victor (no servidor Node não há login).
+const signIn = async (c) => {
+  const data = { name: 'Victor', password: 'Av@2026' };
+  const r = await c.request.post(BASE + '/api/auth/register', { data });
+  if (r.status() === 409) await c.request.post(BASE + '/api/auth/login', { data });
+};
+await signIn(ctx);
 const page = await ctx.newPage();
 const consoleErrors = [];
 // Respostas 409 são regras de negócio tratadas pela interface (ex.: conclusão bloqueada), não erros.
@@ -180,7 +185,7 @@ await check('Relatórios calculados', async () => {
 
 await check('Celular: layout responsivo e menu recolhível', async () => {
   const m = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
-  await m.addInitScript(() => localStorage.setItem('avant.identidade', JSON.stringify({ id: 'e2e-victor', name: 'Victor' })));
+  await signIn(m);
   const mp = await m.newPage();
   mp.on('pageerror', (e) => consoleErrors.push(e.message));
   await mp.goto(BASE + '/');

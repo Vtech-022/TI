@@ -1,0 +1,18 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launchPersistentContext('/tmp/claude-0/-home-user-TI/87489235-4975-556e-9f45-e769ba079360/scratchpad/chrome-profile2', { executablePath: '/opt/pw-browsers/chromium', viewport: { width: 1360, height: 900 }, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+const p = b.pages()[0] ?? await b.newPage();
+const URL = 'file://' + process.cwd() + '/dist/AVANT.html';
+await p.goto(URL);
+await p.getByLabel('Nome').fill('Victor');
+await p.getByLabel('Senha', { exact: true }).fill('Av@2026');
+await p.getByRole('button', { name: 'Entrar' }).click();
+await p.locator('.day-item', { hasText: 'Tarefa no HTML' }).waitFor({ timeout: 30000 });
+console.log('✓ dados do teste anterior continuam lá após fechar e reabrir o navegador');
+await b.close();
+const b2 = await chromium.launchPersistentContext('/tmp/claude-0/-home-user-TI/87489235-4975-556e-9f45-e769ba079360/scratchpad/chrome-profile2', { executablePath: '/opt/pw-browsers/chromium', viewport: { width: 1360, height: 900 }, locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+const p2 = b2.pages()[0] ?? await b2.newPage();
+await p2.goto(URL);
+await p2.locator('.day-item', { hasText: 'Tarefa no HTML' }).waitFor({ timeout: 30000 });
+console.log('✓ reabrindo o arquivo, continua conectado (sem pedir senha de novo)');
+await p2.screenshot({ path: '/tmp/claude-0/-home-user-TI/87489235-4975-556e-9f45-e769ba079360/scratchpad/shots/html-home.png' });
+await b2.close();
