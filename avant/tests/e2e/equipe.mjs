@@ -133,6 +133,11 @@ try {
   await v.locator('.rail a[aria-label="Usuários"]').scrollIntoViewIfNeeded();
   const vis = await v.locator('.rail a[aria-label="Usuários"]').evaluate((e) => { const r = e.getBoundingClientRect(); return r.bottom <= window.innerHeight + 1; });
   check("menu lateral rola em tela baixa e o último item fica alcançável", vis && (!rail.rola || rail.auto === "auto"), JSON.stringify(rail));
+  await v.locator('.rail a[aria-label="Calendário da equipe"]').hover();
+  await v.waitForTimeout(300);
+  const dica = await v.locator(".avtip").evaluate((e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(); return { txt: e.textContent, cor: c.color, fundo: c.backgroundColor, dentro: r.left >= 0 && r.right <= window.innerWidth && r.width > 40 }; }).catch(() => null);
+  check("dica do menu lateral legível ao passar o mouse (texto claro em fundo escuro)", !!dica && dica.txt === "Calendário da equipe" && dica.cor === "rgb(255, 255, 255)" && dica.dentro, JSON.stringify(dica));
+  await shot(v, "11-dica-menu");
   await v.setViewportSize({ width: 1280, height: 860 });
 
   // ---- tarefa individual não vaza

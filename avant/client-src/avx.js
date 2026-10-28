@@ -414,3 +414,22 @@ function AvCodeModal(){
     children:code?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("p",{className:"small",children:"Guarde este código em local seguro. Ele aparece só desta vez e substitui o código anterior."}),(0,q.jsx)("div",{className:"avt-code mono",children:code})]}):
       (0,q.jsxs)("form",{onSubmit:go,children:[(0,q.jsx)("p",{className:"small muted",children:"Com este código você cria uma nova senha se esquecer a atual, sem precisar de ninguém. Confirme sua senha para gerar um."}),(0,q.jsxs)("label",{className:"field",children:[(0,q.jsx)("span",{children:"Senha atual"}),(0,q.jsx)("input",{className:"input",type:"password",value:pw,onChange:e=>setPw(e.target.value),autoComplete:"current-password","data-autofocus":!0,maxLength:64})]}),err&&(0,q.jsx)("p",{className:"gate-error",role:"alert",children:err})]})});
 }
+
+/* ---- Dica do menu lateral (fixa, sempre legível, não é cortada pela rolagem do menu) ---- */
+(function(){
+  if(typeof document==="undefined")return;
+  let tip=null;
+  const hide=()=>{if(tip){tip.remove();tip=null}};
+  document.addEventListener("mouseover",e=>{
+    const el=e.target&&e.target.closest?e.target.closest(".rail-item[data-tip]"):null;
+    if(!el){hide();return}
+    hide();
+    const r=el.getBoundingClientRect();
+    tip=document.createElement("div");tip.className="avtip";tip.textContent=el.getAttribute("data-tip");
+    tip.style.left=(r.right+12)+"px";tip.style.top=(r.top+r.height/2)+"px";
+    document.body.appendChild(tip);
+  });
+  document.addEventListener("mouseleave",hide,!0);
+  document.addEventListener("click",hide,!0);
+  document.addEventListener("scroll",hide,!0);
+})();

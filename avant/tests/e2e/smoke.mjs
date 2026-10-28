@@ -89,7 +89,7 @@ try {
   await v.waitForSelector(".rail", { timeout: 20000 });
   await v.waitForTimeout(1500);
 
-  check("Victor entrou no PRUMO", /Meu dia/.test(await texto(v)));
+  check("Victor entrou no Zênite", /Meu dia/.test(await texto(v)));
   check("administrador vê o item Usuários no menu", (await v.locator('.rail a[aria-label="Usuários"]').count()) === 1);
   check("rodapé do menu mostra ● Ao vivo", /Ao vivo/.test(await v.locator(".rail").innerText()));
   await ir(v, "Frentes de trabalho");

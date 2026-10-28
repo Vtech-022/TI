@@ -1,6 +1,6 @@
-# PRUMO — Central de Acompanhamento do Trabalho (versão online)
+# Zênite — Central de Acompanhamento do Trabalho (versão online)
 
-(O sistema chamava AVANT; o nome novo é PRUMO, com logotipo próprio azul/branco/amarelo.)
+(O sistema chamava AVANT; o nome novo é Zênite, com logotipo próprio: estrela amarela em órbita sobre azul.)
 
 ## Como publicar no Netlify (uma vez)
 1. Netlify → **Add new site → Import an existing project** → GitHub → repositório `Vtech-022/ti`.

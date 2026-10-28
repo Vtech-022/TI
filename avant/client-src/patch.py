@@ -436,25 +436,32 @@ sub("_.map((e,t)=>(0,q.jsx)(`li`,{children:e},t))", "_.map((e,t)=>(0,q.jsx)(`li`
 sub("</style>", AVX_CSS + "\n</style>") if s.count("</style>") == 1 else None
 
 
-# ---- Novo nome (PRUMO) e novo logotipo (azul, branco e amarelo) ----
+# ---- Novo nome (Zênite) e novo logotipo (azul, branco e amarelo) ----
 import re as _re, urllib.parse as _up
-LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
-            '<stop offset="0" stop-color="#2f6bff"/><stop offset="1" stop-color="#123a9c"/></linearGradient></defs>'
-            '<rect x="2" y="2" width="60" height="60" rx="16" fill="url(#g)"/>'
-            '<path d="M23 50V14h13a11 11 0 0 1 0 22H23" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>'
-            '<circle cx="23" cy="51" r="5" fill="#ffc83d"/></svg>')
-NEW_FU = ("function fu({size:e=44}){return(0,q.jsxs)(`svg`,{viewBox:`0 0 64 64`,width:e,height:e,\"aria-hidden\":!0,className:`brand-mark`,children:[(0,q.jsx)(`defs`,{children:(0,q.jsxs)(`linearGradient`,{id:`avant-g`,x1:`0`,y1:`0`,x2:`1`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#2f6bff`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#123a9c`})]})}),"
-          "(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`16`,fill:`url(#avant-g)`}),"
-          "(0,q.jsx)(`path`,{d:`M23 50V14h13a11 11 0 0 1 0 22H23`,fill:`none`,stroke:`#fff`,strokeWidth:`6.5`,strokeLinecap:`round`,strokeLinejoin:`round`}),"
-          "(0,q.jsx)(`circle`,{cx:`23`,cy:`51`,r:`5`,fill:`#ffc83d`})]})}")
+LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>'
+            '<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f86ff"/><stop offset="0.55" stop-color="#2447d6"/><stop offset="1" stop-color="#14267f"/></linearGradient>'
+            '<linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffd34d"/></linearGradient>'
+            '<radialGradient id="h" cx="0.3" cy="0.2" r="0.8"><stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs>'
+            '<rect x="2" y="2" width="60" height="60" rx="18" fill="url(#g)"/><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#h)"/>'
+            '<ellipse cx="32" cy="33" rx="25" ry="9.5" transform="rotate(-28 32 33)" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2"/>'
+            '<path d="M32 9C33.6 23.5 40.5 30.4 55 32C40.5 33.6 33.6 40.5 32 55C30.4 40.5 23.5 33.6 9 32C23.5 30.4 30.4 23.5 32 9Z" fill="url(#s)"/>'
+            '<circle cx="50.5" cy="20.5" r="3.2" fill="#ffd34d"/></svg>')
+NEW_FU = ("function fu({size:e=44}){return(0,q.jsxs)(`svg`,{viewBox:`0 0 64 64`,width:e,height:e,\"aria-hidden\":!0,className:`brand-mark`,children:[(0,q.jsxs)(`defs`,{children:["
+          "(0,q.jsxs)(`linearGradient`,{id:`avant-g`,x1:`0`,y1:`0`,x2:`1`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#4f86ff`}),(0,q.jsx)(`stop`,{offset:`.55`,stopColor:`#2447d6`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#14267f`})]}),"
+          "(0,q.jsxs)(`linearGradient`,{id:`avant-s`,x1:`0`,y1:`0`,x2:`0`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#fff`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#ffd34d`})]}),"
+          "(0,q.jsxs)(`radialGradient`,{id:`avant-h`,cx:`.3`,cy:`.2`,r:`.8`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#fff`,stopOpacity:`.35`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#fff`,stopOpacity:`0`})]})]}),"
+          "(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`18`,fill:`url(#avant-g)`}),(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`18`,fill:`url(#avant-h)`}),"
+          "(0,q.jsx)(`ellipse`,{cx:`32`,cy:`33`,rx:`25`,ry:`9.5`,transform:`rotate(-28 32 33)`,fill:`none`,stroke:`#fff`,strokeOpacity:`.5`,strokeWidth:`2`}),"
+          "(0,q.jsx)(`path`,{d:`M32 9C33.6 23.5 40.5 30.4 55 32C40.5 33.6 33.6 40.5 32 55C30.4 40.5 23.5 33.6 9 32C23.5 30.4 30.4 23.5 32 9Z`,fill:`url(#avant-s)`}),"
+          "(0,q.jsx)(`circle`,{cx:`50.5`,cy:`20.5`,r:`3.2`,fill:`#ffd34d`})]})}")
 _i = s.index("function fu({size:e=44}){"); _j = s.index("function ", _i + 10)
 s = s[:_i] + NEW_FU + s[_j:]
 _m = _re.search(r'<link rel="icon" type="image/svg\+xml" href="data:image/svg\+xml,[^"]*">', s)
 s = s[:_m.start()] + '<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + _up.quote(LOGO_SVG, safe="") + '">' + s[_m.end():]
-s = s.replace("AVANT", "PRUMO")
-s = s.replace("className:`rb-word`,children:`avant`", "className:`rb-word`,children:`prumo`")
+s = s.replace("AVANT", "Zênite")
+s = s.replace("className:`rb-word`,children:`avant`", "className:`rb-word`,children:`zênite`")
 s = s.replace("Central Inteligente de Gestão", "Central de Acompanhamento do Trabalho")
-s = s.replace("<title>PRUMO</title>", "<title>PRUMO · Central de Trabalho</title>")
+s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</title>")
 
 # título da aba
 OUT.parent.mkdir(parents=True, exist_ok=True)

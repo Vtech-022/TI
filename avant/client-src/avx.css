@@ -91,3 +91,6 @@ input::placeholder,textarea::placeholder{color:var(--text-3);opacity:1}
 /* Menu lateral: em telas baixas fica compacto e, se ainda não couber, rola */
 @media (max-height:860px){.rail{gap:14px;padding:12px 0 10px}.rail-brand{height:84px}.rail-nav{gap:6px;padding:6px}}
 @media (max-height:700px){.rail{overflow-y:auto;overflow-x:hidden;justify-content:flex-start;scrollbar-width:none}.rail::-webkit-scrollbar{display:none}.rail>*{flex:none}}
+
+.rail-item:after,.rail-item:hover:after,.rail-item:focus-visible:after{display:none!important}
+.avtip{position:fixed;z-index:99999;transform:translateY(-50%);background:#0b1d38;color:#fff;border:1px solid #ffffff2e;border-radius:8px;padding:7px 11px;font:600 12.5px/1.2 var(--font,system-ui);white-space:nowrap;pointer-events:none;box-shadow:0 6px 20px #0006}
