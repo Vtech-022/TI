@@ -308,12 +308,7 @@ GATE = r'''async function Xz(){
     if(e.code==="offline")throw Error("Sem conexão com o servidor. Verifique a internet e recarregue a página.");
   }
   const st=await __avJson("/auth/status").catch(()=>({firstAccount:!1,needCode:!1}));
-  return new Promise(done=>Yz.render((0,q.jsx)(Nz,{
-    firstAccount:st.firstAccount,needCode:st.needCode,
-    subtitle:"Seu sistema de rotina e acompanhamento do trabalho. Entre com seu nome e senha ou crie sua conta.",
-    login:async(name,pw)=>{const j=await __avJson("/auth/login",{method:"POST",body:{name,password:pw}});done(j.user)},
-    register:async(name,pw,code)=>{const j=await __avJson("/auth/register",{method:"POST",body:{name,password:pw,code}});done(j.user)}
-  })));
+  return new Promise(done=>Yz.render((0,q.jsx)(AvGate,{st,Gate:Nz,done})));
 }
 '''
 cut("function Xz(){let e=Bz();", "async function Zz(){", GATE)
@@ -349,6 +344,117 @@ sub("r=vp(t)", "r=Wi.auth.me.is_first_admin?vp(t):!1")
 sub("e.cloudReady&&e.bytes||n()", "e.cloudReady&&e.bytes&&!e.localNewer||n()")
 sub("Wi.team=window.claude||!Wi.auth?kz():Mz(Wi.auth.me)", "Wi.team=Mz(Wi.auth.me)")
 sub("!t.startsWith(`/_blob/`)&&", "!t.startsWith(`/_blob/`)&&!t.startsWith(`/api/files/`)&&")
+
+# ---------------------------------------------------------------------------------------
+# 6. Melhorias de uso: equipe, calendário, recuperar senha, busca, upload sem criar tarefas
+# ---------------------------------------------------------------------------------------
+AVX_JS = (HERE / "avx.js").read_text(encoding="utf8")
+AVX_CSS = (HERE / "avx.css").read_text(encoding="utf8")
+
+# componentes novos entram logo antes da tela de entrada (mesmo escopo do app)
+sub("function Nz({firstAccount:e,needCode:t=!1,subtitle:n,login:r,register:i}){",
+    AVX_JS + "\nfunction Nz({firstAccount:e,needCode:t=!1,subtitle:n,login:r,register:i,onForgot:avf}){")
+sub("children:y?`Aguarde…`:a===`entrar`?`Entrar`:`Criar conta e entrar`})]})})}",
+    "children:y?`Aguarde…`:a===`entrar`?`Entrar`:`Criar conta e entrar`}),a===`entrar`&&!e&&avf&&(0,q.jsx)(`button`,{className:`btn ghost`,type:`button`,onClick:avf,children:`Esqueci minha senha`})]})})}")
+
+# ---- Nova tarefa: sem "Esforço", Impacto explicado, campos extras recolhidos, atribuição ----
+sub("function El({draft:e,onChange:t,parentOptions:n}){", "function El({draft:e,onChange:t,parentOptions:n,share:avs}){")
+sub("(0,q.jsx)(gl,{label:`Impacto`,children:", "(0,q.jsx)(gl,{label:`Impacto`,hint:__avImpactHelp,children:")
+cut("(0,q.jsx)(gl,{label:`Esforço`,children:", "(0,q.jsx)(gl,{label:`Categoria`,children:", "")
+# Responsável + Envolvidos + Categoria vão para "Mais detalhes"
+RESP_START = "(0,q.jsx)(gl,{label:`Responsável`,children:(0,q.jsx)(`input`,{className:`input`,value:e.responsible,"
+RESP_END = "(0,q.jsx)(gl,{label:`Impacto`,hint:__avImpactHelp,children:"
+i0 = s.index(RESP_START); j0 = s.index(RESP_END, i0)
+resp_block = s[i0:j0]
+s = s[:i0] + s[j0:]
+CAT_START = "(0,q.jsx)(gl,{label:`Categoria`,children:"
+CAT_END = "(0,q.jsx)(gl,{label:`Próxima ação`,full:!0,children:"
+i1 = s.index(CAT_START); j1 = s.index(CAT_END, i1)
+cat_block = s[i1:j1]
+s = s[:i1] + s[j1:]
+sub("(0,q.jsx)(`datalist`,{id:`avant-people`,children:r?.people.map(e=>(0,q.jsx)(`option`,{value:e},e))}),(0,q.jsx)(`datalist`,{id:`avant-categories`",
+    "avs&&(0,q.jsx)(AvShareFields,{draft:e,onChange:t}),(0,q.jsxs)(`details`,{className:`av-more`,children:[(0,q.jsx)(`summary`,{children:`Mais detalhes (responsável, envolvidos, categoria)`}),(0,q.jsxs)(`div`,{className:`form-grid`,children:[" + resp_block + cat_block + "]})]}),(0,q.jsx)(`datalist`,{id:`avant-people`,children:r?.people.map(e=>(0,q.jsx)(`option`,{value:e},e))}),(0,q.jsx)(`datalist`,{id:`avant-categories`")
+sub("effort:e?.effort??``,", "effort:e?.effort??``,__assignee:``,__scope:`individual`,")
+sub("let n=Dl(wl()),r=Oa(),i=_l(),[a,o]=(0,x.useState)(!1),s=()=>n.dirty?o(!0):t();",
+    "let n=Dl(wl()),r=Oa(),i=_l(),avn=ir(),[a,o]=(0,x.useState)(!1),s=()=>n.dirty?o(!0):t();")
+sub("onClick:async()=>{let e=await r(()=>Yi.post(`/api/tasks`,Tl(n.value)),`Tarefa criada.`);e&&(n.reset(wl()),t(),i(e.id))}",
+    "onClick:async()=>{if(__avIsShared(n.value)){let e=await r(()=>__avCreateShared(n.value),n.value.__assignee?`Tarefa enviada.`:`Tarefa criada para a equipe.`);e&&(n.reset(wl()),t(),avn(`/tarefas-equipe`));return}let e=await r(()=>Yi.post(`/api/tasks`,Tl(n.value)),`Tarefa criada.`);e&&(n.reset(wl()),t(),i(e.id))}")
+sub("children:(0,q.jsx)(El,{draft:n.value,onChange:n.setValue})}),(0,q.jsx)(pl,{open:a,title:`Descartar nova tarefa?`",
+    "children:(0,q.jsx)(El,{draft:n.value,onChange:n.setValue,share:!0})}),(0,q.jsx)(pl,{open:a,title:`Descartar nova tarefa?`")
+
+# ---- Detalhe da tarefa: menos informação de uma vez ----
+sub("(0,q.jsx)(`dt`,{children:`Esforço`}),(0,q.jsx)(`dd`,{children:D.effort?Zc[D.effort]:(0,q.jsx)(rl,{c:`desconhecida`})}),", "")
+sub("(0,q.jsxs)(`div`,{className:`section`,children:[(0,q.jsx)(`h3`,{children:`Por que esta prioridade`}),", "(0,q.jsxs)(AvSec,{title:`Por que esta prioridade`,children:[")
+sub("(0,q.jsxs)(`div`,{className:`section`,children:[(0,q.jsxs)(`h3`,{children:[(0,q.jsx)(ps,{size:12}),` Dependências`]}),", "(0,q.jsxs)(AvSec,{title:`Dependências`,children:[")
+sub("D.original_text&&(0,q.jsxs)(`div`,{className:`section`,children:[(0,q.jsx)(`h3`,{children:`Texto original`}),", "D.original_text&&(0,q.jsxs)(AvSec,{title:`Texto original`,children:[")
+
+# ---- Lista: subtarefas junto da tarefa principal ----
+sub("function bl({task:e,rank:t,why:n,showProject:r=!0,compact:i}){", "function bl({task:e,rank:t,why:n,showProject:r=!0,compact:i,child:avc}){")
+sub("className:`task-row prio-${o?`none`:e.effective_priority}${o?` is-done`:``}${e.is_blocked?` is-blocked`:``}`", "className:`task-row prio-${o?`none`:e.effective_priority}${o?` is-done`:``}${e.is_blocked?` is-blocked`:``}${avc?` task-child`:``}`")
+sub("m.map(e=>(0,q.jsx)(bl,{task:e,why:c.sort?void 0:", "__avNest(m).map(e=>(0,q.jsx)(bl,{task:e,child:e.__child,why:c.sort?void 0:")
+# excluir várias
+sub("function fd(){let[e,t]=Fi(),{meta:n}=Ea(),", "function fd(){let[e,t]=Fi(),{meta:n}=Ea(),[avB,setAvB]=(0,x.useState)(!1),")
+sub("(0,q.jsxs)(`button`,{className:`btn primary`,onClick:()=>i(!0),children:[(0,q.jsx)(Gs,{size:16}),` Nova tarefa`]})]}),(0,q.jsxs)(`div`,{className:`filterbar`",
+    "(0,q.jsxs)(`div`,{className:`btn-row`,children:[(0,q.jsx)(`button`,{className:`btn`,onClick:()=>setAvB(!0),children:`Selecionar e excluir`}),(0,q.jsxs)(`button`,{className:`btn primary`,onClick:()=>i(!0),children:[(0,q.jsx)(Gs,{size:16}),` Nova tarefa`]})]})]}),(0,q.jsxs)(`div`,{className:`filterbar`")
+sub("(0,q.jsx)(Nl,{open:r,onClose:()=>i(!1)})]})}var pd=", "(0,q.jsx)(Nl,{open:r,onClose:()=>i(!1)}),(0,q.jsx)(AvBulk,{open:avB,onClose:()=>setAvB(!1)})]})}var pd=")
+
+# ---- Aguardando terceiros: pedir para uma pessoa do sistema ----
+sub("expected_at:``,follow_up_at:``,note:``};function Cd(){", "expected_at:``,follow_up_at:``,note:``,__assignee:``,__kind:`fazer`};function Cd(){")
+sub("(0,q.jsx)(gl,{label:`Tarefa relacionada`,children:(0,q.jsxs)(`select`,{className:`select`,value:c.task_id,", "!c.id&&(0,q.jsx)(AvWaitAssign,{value:c,onChange:l}),(0,q.jsx)(gl,{label:`Tarefa relacionada`,children:(0,q.jsxs)(`select`,{className:`select`,value:c.task_id,")
+sub("await i(()=>c.id?Yi.patch(`/api/waits/${c.id}`,e):Yi.post(`/api/waits`,e),c.id?`Pendência atualizada.`:`Pendência registrada.`)&&l(null)",
+    "await i(async()=>{let r0=c.id?await Yi.patch(`/api/waits/${c.id}`,e):await Yi.post(`/api/waits`,e);if(!c.id&&c.__assignee)await __avWaitShared(c);return r0},c.id?`Pendência atualizada.`:c.__assignee?`Pendência registrada e enviada para a pessoa.`:`Pendência registrada.`)&&l(null)")
+
+# ---- Menu da conta: gerar código de recuperação ----
+sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>void e.logout().then(()=>location.reload()),children:[(0,q.jsx)(xs,{\"aria-hidden\":!0}),` Sair`]})",
+    "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`))),children:[(0,q.jsx)(ss,{\"aria-hidden\":!0}),` Código de recuperação`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>void e.logout().then(()=>location.reload()),children:[(0,q.jsx)(xs,{\"aria-hidden\":!0}),` Sair`]})")
+sub("(0,q.jsx)(`button`,{className:`fab`,onClick:()=>f(!0),\"aria-label\":`Nova tarefa`", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(`button`,{className:`fab`,onClick:()=>f(!0),\"aria-label\":`Nova tarefa`")
+
+# ---- Menu, rotas e painel ----
+sub("{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},", "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},")
+sub("{path:`equipe`,element:(0,q.jsx)(yd,{})},", "{path:`equipe`,element:(0,q.jsx)(yd,{})},{path:`tarefas-equipe`,element:(0,q.jsx)(AvTeamTasks,{})},{path:`calendario-equipe`,element:(0,q.jsx)(AvCalendar,{})},")
+sub("return(0,q.jsxs)(`div`,{className:`myday`,children:[(0,q.jsxs)(`section`,{className:`day-hero`", "return(0,q.jsxs)(`div`,{className:`myday`,children:[(0,q.jsx)(AvMine,{}),(0,q.jsxs)(`section`,{className:`day-hero`")
+
+# ---- Arquivos e Documentos: busca, ver, vincular; upload nunca cria tarefa ----
+sub("function Eu(){let{data:e,error:t}=Da(`/api/documents`),{data:n}=Da(`/api/tasks?include_closed=1`),",
+    "function Eu(){let{data:avAll,error:t}=Da(`/api/documents`),[avq,setAvq]=(0,x.useState)(``),e=avAll&&avAll.filter(d=>!avq.trim()||__avNorm(d.filename).includes(__avNorm(avq))),{data:n}=Da(`/api/tasks?include_closed=1`),")
+sub("`${t.name}: importado e texto extraído.`", "`${t.name}: importado. Clique em “Ver” para abrir e ligar ao projeto ou tarefa.`")
+sub("(0,q.jsx)(ll,{error:t}),(0,q.jsx)(sl,{title:`Arquivos`,", "(0,q.jsx)(ll,{error:t}),(0,q.jsx)(`input`,{className:`input`,style:{maxWidth:420,marginBottom:12},placeholder:`Pesquisar arquivo pelo nome…`,\"aria-label\":`Pesquisar arquivo`,value:avq,onChange:e=>setAvq(e.target.value)}),(0,q.jsx)(sl,{title:`Arquivos`,")
+cut("e.parse_status===`ok`&&(0,q.jsxs)(`button`,{className:`btn sm`,title:`Enviar o texto para a Captura Inteligente`",
+    "(0,q.jsx)(`a`,{className:`btn sm ghost`,href:`/api/documents/${e.id}/file`",
+    "(0,q.jsx)(`button`,{className:`btn sm`,onClick:()=>d({doc:String(e.id)}),children:`Ver`}),")
+cut("(0,q.jsx)(`td`,{children:(0,q.jsxs)(`select`,{className:`select`,style:{height:30,minWidth:150,maxWidth:220},value:e.task_id??``,",
+    "(0,q.jsx)(`td`,{className:`small`,children:pa(e.created_at)})",
+    "(0,q.jsx)(`td`,{children:(0,q.jsx)(AvPick,{items:(n??[]).map(t=>({id:t.id,label:t.title})),value:e.task_id,placeholder:`Buscar tarefa…`,ariaLabel:`Tarefa do documento`,onPick:id=>c(()=>Yi.patch(`/api/documents/${e.id}`,{task_id:id?Number(id):null}),`Vínculo atualizado.`),onCreate:title=>c(async()=>{let t=await Yi.post(`/api/tasks`,{title,project_id:e.project_id||null});await Yi.patch(`/api/documents/${e.id}`,{task_id:t.id});return t},`Tarefa criada e vinculada.`)})}),")
+sub("v.data&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)(`p`,{className:`small muted`,style:{marginBottom:10},children:[v.data.document.mime,",
+    "v.data&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(AvDocLink,{doc:v.data.document,projects:r?.projects??[],tasks:n??[],onSaved:()=>{v.reload();o()}}),(0,q.jsxs)(`p`,{className:`small muted`,style:{marginBottom:10},children:[v.data.document.mime,")
+# Captura Inteligente: enviar arquivo só importa; mostra "Ver documento"
+sub("i.parse_status===`ok`?(a.push(`${i.filename}: texto extraído e original preservado.`),await w(s,i.id,i.filename)):a.push(`${i.filename}: ${i.parse_error}`)",
+    "i.parse_status===`ok`?a.push({text:`${i.filename}: importado e original preservado. Nenhuma tarefa foi criada.`,id:i.id}):a.push(`${i.filename}: ${i.parse_error}`)")
+sub("_.map((e,t)=>(0,q.jsx)(`li`,{children:e},t))", "_.map((e,t)=>(0,q.jsx)(`li`,{children:typeof e==`string`?e:[e.text,` `,(0,q.jsx)(`a`,{href:`/arquivos?doc=${e.id}`,children:`Ver documento e ligar ao projeto ou tarefa`})]},t))")
+
+# estilos novos
+sub("</style>", AVX_CSS + "\n</style>") if s.count("</style>") == 1 else None
+
+
+# ---- Novo nome (PRUMO) e novo logotipo (azul, branco e amarelo) ----
+import re as _re, urllib.parse as _up
+LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+            '<stop offset="0" stop-color="#2f6bff"/><stop offset="1" stop-color="#123a9c"/></linearGradient></defs>'
+            '<rect x="2" y="2" width="60" height="60" rx="16" fill="url(#g)"/>'
+            '<path d="M23 50V14h13a11 11 0 0 1 0 22H23" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            '<circle cx="23" cy="51" r="5" fill="#ffc83d"/></svg>')
+NEW_FU = ("function fu({size:e=44}){return(0,q.jsxs)(`svg`,{viewBox:`0 0 64 64`,width:e,height:e,\"aria-hidden\":!0,className:`brand-mark`,children:[(0,q.jsx)(`defs`,{children:(0,q.jsxs)(`linearGradient`,{id:`avant-g`,x1:`0`,y1:`0`,x2:`1`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#2f6bff`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#123a9c`})]})}),"
+          "(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`16`,fill:`url(#avant-g)`}),"
+          "(0,q.jsx)(`path`,{d:`M23 50V14h13a11 11 0 0 1 0 22H23`,fill:`none`,stroke:`#fff`,strokeWidth:`6.5`,strokeLinecap:`round`,strokeLinejoin:`round`}),"
+          "(0,q.jsx)(`circle`,{cx:`23`,cy:`51`,r:`5`,fill:`#ffc83d`})]})}")
+_i = s.index("function fu({size:e=44}){"); _j = s.index("function ", _i + 10)
+s = s[:_i] + NEW_FU + s[_j:]
+_m = _re.search(r'<link rel="icon" type="image/svg\+xml" href="data:image/svg\+xml,[^"]*">', s)
+s = s[:_m.start()] + '<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,' + _up.quote(LOGO_SVG, safe="") + '">' + s[_m.end():]
+s = s.replace("AVANT", "PRUMO")
+s = s.replace("className:`rb-word`,children:`avant`", "className:`rb-word`,children:`prumo`")
+s = s.replace("Central Inteligente de Gestão", "Central de Acompanhamento do Trabalho")
+s = s.replace("<title>PRUMO</title>", "<title>PRUMO · Central de Trabalho</title>")
 
 # título da aba
 OUT.parent.mkdir(parents=True, exist_ok=True)

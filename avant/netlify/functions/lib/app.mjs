@@ -4,6 +4,7 @@
 import {
   getJSON, putJSON, updateJSON,
 } from "./store.mjs";
+import { randomBytes } from "node:crypto";
 import {
   passwordError, nameError, nameKey, normalizeName,
   hashPassword, verifyPassword, sha256, newToken, newId,
@@ -11,6 +12,9 @@ import {
   SESSION_DAYS, MAX_ATTEMPTS, LOCK_SECONDS,
 } from "./security.mjs";
 import { mergeCards } from "./team-merge.mjs";
+import {
+  cleanTaskInput, canSee, canManage, assigneeCanApply, TASK_LIMITS,
+} from "./shared-tasks.mjs";
 
 export const LIMITS = {
   json: 2 * 1024 * 1024, // corpo JSON
@@ -20,6 +24,7 @@ export const LIMITS = {
 };
 
 const BOARD_KEY = "team/board";
+const TASKS_KEY = "team/tasks";
 const FIRST_ADMIN_KEY = "meta/first-admin";
 
 const FILE_TYPES = {
@@ -155,6 +160,25 @@ async function handleStatus(ctx) {
   return json(200, { firstAccount: !flag, needCode: !!ctx.env.AVANT_ACCESS_CODE });
 }
 
+// ---------------------------------------------------------------- código de recuperação de senha
+
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem I, O, 0 e 1 (evita confusão)
+
+function newRecoveryCode() {
+  const bytes = randomBytes(12);
+  let raw = "";
+  for (const b of bytes) raw += CODE_ALPHABET[b % CODE_ALPHABET.length];
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
+}
+
+const normalizeCode = (c) => String(c ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+async function makeRecovery() {
+  const code = newRecoveryCode();
+  const rec = await hashPassword(normalizeCode(code));
+  return { code, rec: { salt: rec.salt, hash: rec.hash, iter: rec.iter } };
+}
+
 async function handleRegister(request, ctx) {
   const body = await readJson(request);
   const nErr = nameError(body.name);
@@ -177,8 +201,10 @@ async function handleRegister(request, ctx) {
   }
   try {
     const role = await claimAdmin(ctx, id);
+    const recovery = await makeRecovery();
     const user = {
       id, name, key, role, ...pw, pwv: 1, created_at: new Date(ctx.now()).toISOString(),
+      recovery: recovery.rec,
     };
     await putJSON(ctx.store, `users/${id}`, user, { ifNew: true });
     await updateJSON(ctx.store, BOARD_KEY, (board) => {
@@ -188,7 +214,7 @@ async function handleRegister(request, ctx) {
       return board;
     });
     const token = await createSession(ctx, user);
-    return json(201, { user: await withFirst(ctx, user), firstAccount: role === "admin" }, {
+    return json(201, { user: await withFirst(ctx, user), firstAccount: role === "admin", recoveryCode: recovery.code }, {
       "set-cookie": cookieFor(request, token),
     });
   } catch (e) {
@@ -274,6 +300,214 @@ async function handleChangePassword(request, ctx) {
   return json(200, { ok: true }, { "set-cookie": cookieFor(request, token) });
 }
 
+
+// ---------------------------------------------------------------- recuperar senha
+
+/** Controle de tentativas (bloqueio de 1 minuto após 5 erros), compartilhado por entrar e recuperar. */
+async function checkLock(ctx, attemptsKey) {
+  const now = ctx.now();
+  const att = await getJSON(ctx.store, attemptsKey);
+  if (att && att.value.until && att.value.until > now) {
+    const s = Math.ceil((att.value.until - now) / 1000);
+    throw new ApiError(429, "bloqueado", `Muitas tentativas erradas. Tente de novo em ${s} segundo${s === 1 ? "" : "s"}.`, { retry_after: s });
+  }
+  return att;
+}
+
+async function registerFailure(ctx, attemptsKey) {
+  const now = ctx.now();
+  let locked = 0;
+  await updateJSON(ctx.store, attemptsKey, (cur) => {
+    const fresh = cur && now - (cur.last ?? 0) < 15 * 60_000 ? cur : { count: 0 };
+    const count = (fresh.count ?? 0) + 1;
+    const next = { count, last: now };
+    if (count >= MAX_ATTEMPTS) {
+      next.until = now + LOCK_SECONDS * 1000;
+      next.count = 0;
+      locked = LOCK_SECONDS;
+    }
+    return next;
+  });
+  if (locked) {
+    throw new ApiError(429, "bloqueado", `Muitas tentativas erradas. Tente de novo em ${locked} segundos.`, { retry_after: locked });
+  }
+}
+
+/** Nome + código de recuperação -> define nova senha. O código usado deixa de valer e um novo é entregue. */
+async function handleRecover(request, ctx) {
+  const body = await readJson(request);
+  const nErr = nameError(body.name);
+  if (nErr) throw new ApiError(400, "nome", nErr);
+  const code = normalizeCode(body.code);
+  if (code.length !== 12) throw new ApiError(400, "codigo", "Informe o código de recuperação (12 letras e números).");
+  const pErr = passwordError(body.next);
+  if (pErr) throw new ApiError(400, "senha", pErr);
+
+  const key = nameKey(body.name);
+  const attemptsKey = `attempts/rec-${sha256(key)}`;
+  const att = await checkLock(ctx, attemptsKey);
+
+  const idRec = await getJSON(ctx.store, `names/${key}`);
+  const user = idRec ? await loadUser(ctx, idRec.value.id) : null;
+  let ok = false;
+  if (user?.recovery) ok = await verifyPassword(code, user.recovery);
+  else await hashPassword(code); // custo igual, para não revelar se a conta existe
+
+  if (!ok) {
+    await registerFailure(ctx, attemptsKey);
+    throw new ApiError(401, "recuperacao", "Nome ou código de recuperação incorretos. Se você perdeu o código, peça ao administrador para definir uma nova senha.");
+  }
+  if (att) await ctx.store.del(attemptsKey).catch(() => {});
+
+  const pw = await hashPassword(body.next);
+  const fresh = await makeRecovery();
+  let updated;
+  await updateJSON(ctx.store, `users/${user.id}`, (cur) => {
+    if (!cur) throw new ApiError(404, "conta", "Conta não encontrada.");
+    updated = { ...cur, ...pw, pwv: (cur.pwv ?? 1) + 1, recovery: fresh.rec };
+    return updated;
+  });
+  const token = await createSession(ctx, updated);
+  return json(200, { user: await withFirst(ctx, updated), recoveryCode: fresh.code }, { "set-cookie": cookieFor(request, token) });
+}
+
+/** Gera (ou troca) o código de recuperação de quem já tem conta; exige a senha atual. */
+async function handleNewRecoveryCode(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  if (!(await verifyPassword(String(body.current ?? ""), user))) {
+    throw new ApiError(400, "senha_atual", "A senha atual está incorreta.");
+  }
+  const fresh = await makeRecovery();
+  await updateJSON(ctx.store, `users/${user.id}`, (cur) => {
+    if (!cur) throw new ApiError(404, "conta", "Conta não encontrada.");
+    return { ...cur, recovery: fresh.rec };
+  });
+  return json(200, { recoveryCode: fresh.code });
+}
+
+// ---------------------------------------------------------------- pessoas (para atribuir tarefas)
+
+/** Lista simples (id e nome) das contas, para escolher a quem atribuir. Qualquer pessoa logada vê. */
+async function handleDirectory(request, ctx) {
+  await requireUser(request, ctx);
+  const users = (await allUsers(ctx)).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  return json(200, users.map((u) => ({ id: u.id, name: u.name })));
+}
+
+// ---------------------------------------------------------------- tarefas da equipe
+
+const emptyTasks = () => ({ version: 0, tasks: {} });
+
+function visibleTasks(doc, user) {
+  return Object.values(doc.tasks)
+    .filter((t) => canSee(t, user))
+    .sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") || a.created_at.localeCompare(b.created_at));
+}
+
+async function handleListTasks(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const cur = await getJSON(ctx.store, TASKS_KEY);
+  const base = cur?.etag ?? "0";
+  // a etiqueta inclui o usuário: duas pessoas veem listas diferentes e não podem trocar o "304"
+  const tag = `"${sha256(`${base}|${user.id}|${user.role}`).slice(0, 24)}"`;
+  if (request.headers.get("if-none-match") === tag) {
+    return new Response(null, { status: 304, headers: { etag: tag, ...noStore } });
+  }
+  const tasks = cur ? visibleTasks(cur.value, user) : [];
+  return json(200, { tag, me: user.id, tasks }, { etag: tag });
+}
+
+async function resolveAssignee(ctx, id) {
+  if (!id) return { assignee: null, assignee_name: null };
+  const u = await loadUser(ctx, id);
+  if (!u) throw new ApiError(400, "responsavel", "A pessoa escolhida não tem conta no sistema.");
+  return { assignee: u.id, assignee_name: u.name };
+}
+
+async function handleCreateTask(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  let input;
+  try { input = cleanTaskInput(body); } catch (e) { throw new ApiError(e.status ?? 400, e.code ?? "tarefa", e.message); }
+  const who = await resolveAssignee(ctx, input.assignee);
+  const nowIso = new Date(ctx.now()).toISOString();
+  const task = {
+    id: newId(),
+    title: input.title,
+    description: input.description ?? "",
+    visibility: input.visibility ?? "individual",
+    kind: input.kind ?? "fazer",
+    status: input.status ?? "pendente",
+    impact: input.impact ?? null,
+    due_date: input.due_date ?? null,
+    due_time: input.due_time ?? null,
+    note: input.note ?? "",
+    origin: input.origin ?? "tarefa",
+    subtasks: input.subtasks ?? [],
+    ...who,
+    owner: user.id,
+    owner_name: user.name,
+    created_at: nowIso,
+    updated_at: nowIso,
+    done_at: null,
+    done_by: null,
+  };
+  if (task.status === "concluida") { task.done_at = nowIso; task.done_by = user.name; }
+  await updateJSON(ctx.store, TASKS_KEY, (doc) => {
+    doc ??= emptyTasks();
+    if (Object.keys(doc.tasks).length >= TASK_LIMITS.tasks) {
+      throw new ApiError(413, "tarefas_demais", "O limite de tarefas da equipe foi atingido.");
+    }
+    doc.tasks[task.id] = task;
+    doc.version++;
+    return doc;
+  });
+  return json(201, task);
+}
+
+async function handleUpdateTask(request, ctx, id) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  let patch;
+  try { patch = cleanTaskInput(body, { partial: true }); } catch (e) { throw new ApiError(e.status ?? 400, e.code ?? "tarefa", e.message); }
+  const who = patch.assignee !== undefined ? await resolveAssignee(ctx, patch.assignee) : null;
+  const nowIso = new Date(ctx.now()).toISOString();
+  let result;
+  await updateJSON(ctx.store, TASKS_KEY, (doc) => {
+    const task = doc?.tasks[id];
+    if (!task || !canSee(task, user)) throw new ApiError(404, "tarefa", "Tarefa não encontrada.");
+    if (!canManage(task, user)) {
+      if (task.assignee !== user.id || !assigneeCanApply(task, patch)) {
+        throw new ApiError(403, "sem_permissao", "Você só pode alterar as tarefas que criou. Quem recebe a tarefa pode mudar a situação e marcar as subtarefas.");
+      }
+    }
+    const next = { ...task, ...patch, ...(who ?? {}), updated_at: nowIso };
+    if (patch.status && patch.status !== task.status) {
+      next.done_at = patch.status === "concluida" ? nowIso : null;
+      next.done_by = patch.status === "concluida" ? user.name : null;
+    }
+    doc.tasks[id] = next;
+    doc.version++;
+    result = next;
+    return doc;
+  });
+  return json(200, result);
+}
+
+async function handleDeleteTask(request, ctx, id) {
+  const user = await requireUser(request, ctx);
+  await updateJSON(ctx.store, TASKS_KEY, (doc) => {
+    const task = doc?.tasks[id];
+    if (!task || !canSee(task, user)) throw new ApiError(404, "tarefa", "Tarefa não encontrada.");
+    if (!canManage(task, user)) throw new ApiError(403, "sem_permissao", "Só quem criou a tarefa (ou o administrador) pode excluí-la.");
+    delete doc.tasks[id];
+    doc.version++;
+    return doc;
+  });
+  return json(200, { ok: true });
+}
+
 // ---------------------------------------------------------------- administração
 
 async function handleListUsers(request, ctx) {
@@ -324,6 +558,17 @@ async function handleDeleteUser(request, ctx, id) {
   await ctx.store.del(`data/${id}`).catch(() => {});
   await ctx.store.del(`prefs/${id}`).catch(() => {});
   for (const k of await ctx.store.list(`docfiles/${id}/`)) await ctx.store.del(k).catch(() => {});
+  // tarefas que estavam com ela voltam a ficar sem responsável
+  await updateJSON(ctx.store, TASKS_KEY, (doc) => {
+    if (!doc) return undefined;
+    let changed = false;
+    for (const t of Object.values(doc.tasks)) {
+      if (t.assignee === id) { t.assignee = null; t.assignee_name = null; changed = true; }
+    }
+    if (!changed) return undefined;
+    doc.version++;
+    return doc;
+  });
   // os cartões dela continuam no quadro, marcados como de conta removida
   await updateJSON(ctx.store, BOARD_KEY, (board) => {
     if (!board?.docs[id]) return undefined;
@@ -448,12 +693,14 @@ async function handlePutData(request, ctx) {
 
 async function handlePing(request, ctx) {
   const user = await requireUser(request, ctx);
-  const [board, data] = await Promise.all([
+  const [board, data, tasks] = await Promise.all([
     ctx.store.getMeta(BOARD_KEY),
     ctx.store.getMeta(dataKey(user.id)),
+    ctx.store.getMeta(TASKS_KEY),
   ]);
   return json(200, {
     t: board?.etag ?? "0",
+    k: tasks?.etag ?? "0",
     d: data?.metadata?.gen ?? null,
     role: user.role,
     now: new Date(ctx.now()).toISOString(),
@@ -588,6 +835,16 @@ export async function handle(request, ctx) {
     if (method === "POST" && path === "/auth/logout") return await handleLogout(request, ctx);
     if (method === "GET" && path === "/auth/me") return await handleMe(request, ctx);
     if (method === "POST" && path === "/auth/password") return await handleChangePassword(request, ctx);
+    if (method === "POST" && path === "/auth/recover") return await handleRecover(request, ctx);
+    if (method === "POST" && path === "/auth/recovery-code") return await handleNewRecoveryCode(request, ctx);
+    if (method === "GET" && path === "/directory") return await handleDirectory(request, ctx);
+
+    if (method === "GET" && path === "/shared-tasks") return await handleListTasks(request, ctx);
+    if (method === "POST" && path === "/shared-tasks") return await handleCreateTask(request, ctx);
+    if ((m = path.match(/^\/shared-tasks\/([0-9a-f]{24})$/))) {
+      if (method === "PATCH") return await handleUpdateTask(request, ctx, m[1]);
+      if (method === "DELETE") return await handleDeleteTask(request, ctx, m[1]);
+    }
 
     if (method === "GET" && path === "/users") return await handleListUsers(request, ctx);
     if ((m = path.match(/^\/users\/([0-9a-f]{24})$/))) {

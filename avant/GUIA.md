@@ -1,4 +1,6 @@
-# AVANT — Central de Acompanhamento do Trabalho (versão online)
+# PRUMO — Central de Acompanhamento do Trabalho (versão online)
+
+(O sistema chamava AVANT; o nome novo é PRUMO, com logotipo próprio azul/branco/amarelo.)
 
 ## Como publicar no Netlify (uma vez)
 1. Netlify → **Add new site → Import an existing project** → GitHub → repositório `Vtech-022/ti`.
@@ -14,13 +16,21 @@
 - Administrador tem a tela **Usuários**: mudar função, definir nova senha, excluir conta (com confirmação; não a própria nem o último admin).
 - Personalização (papel de parede, cores, fontes, tema) fica salva por conta.
 - Anexos até 4 MB.
+- **Tarefas da equipe**: em *Nova tarefa* escolha *Atribuir a* (qualquer pessoa com login) e *Quem pode ver* (só eu / toda a equipe). Quem recebe vê em *Meu dia* e em *Tarefas da equipe → Para mim* e marca como feita. Sem atribuir nem compartilhar, a tarefa continua individual (só sua).
+- **Calendário da equipe**: mês com a tarefa de cada pessoa por dia (tarefas individuais só aparecem para quem pode vê-las).
+- **Aguardando Terceiros**: ao registrar a espera dá para pedir a uma pessoa do sistema *fazer* ou *validar*; aparece na lista dela.
+- **Subtarefas** aparecem recuadas logo abaixo da tarefa principal. O detalhe da tarefa tem seções recolhidas. “Esforço” foi removido; “Impacto” tem explicação no campo.
+- **Selecionar e excluir** várias tarefas de uma vez (Minhas tarefas). Dá para desfazer pelo Histórico.
+- **Arquivos e Documentos**: enviar um arquivo **nunca cria tarefa**. Há pesquisa por nome, botão *Ver* e o campo Tarefa é uma busca (só mostra resultados ao digitar; dá para criar a tarefa ali mesmo).
+- **Recuperar senha**: ao criar a conta aparece um código de recuperação (12 caracteres, uso único). Na tela de entrada: *Esqueci minha senha* → nome + código + nova senha. Quem já tinha conta gera o código em menu da conta → *Código de recuperação*. Sem o código, o administrador define nova senha em *Usuários*.
+- **Onde ficam os dados**: no servidor (Netlify Blobs), não em HTML. Tarefas da equipe em um documento único com gravação protegida contra edições simultâneas. Um banco SQL (ex.: Netlify DB/Postgres) é um passo futuro opcional se o uso crescer muito.
 
 ## Testado
-- 35 testes de API (regras, permissões direto na API, bloqueio, 30 gravações simultâneas sem perda) — com armazenamento em memória e com o cliente oficial do Netlify Blobs contra emulador local.
-- 30 verificações no navegador (admin + membro, isolamento, quadro ao vivo entre dois navegadores, personalização, offline/“Sem conexão”, celular sem rolagem lateral, sem erros no console).
+- 48 testes de API (inclui tarefas da equipe, permissões, recuperação de senha e 30 pessoas criando tarefas ao mesmo tempo) (regras, permissões direto na API, bloqueio, 30 gravações simultâneas sem perda) — com armazenamento em memória e com o cliente oficial do Netlify Blobs contra emulador local.
+- 32 + 34 verificações no navegador (tarefas da equipe, calendário, recuperar senha, busca em Arquivos, upload sem tarefas, excluir em massa; admin + membro, isolamento, quadro ao vivo entre dois navegadores, personalização, offline/“Sem conexão”, celular sem rolagem lateral, sem erros no console).
 
 ## Não testado / limitações (honesto)
-- **Não foi feito deploy real no Netlify** nem usado o Blobs de produção; o emulador local foi ajustado para devolver ETag como o serviço real. Faça um teste rápido após publicar (criar conta, criar cartão, abrir em outro aparelho).
+- Os testes rodam contra emulador local; o Netlify de produção é conferido à parte após cada publicação.
 - “Ao vivo” = consulta a cada ~3 s (10 s se a aba ficar parada; pausa em aba oculta). Com ~30 pessoas isso consome chamadas de função do plano do Netlify; acompanhe o uso.
 - Dados pessoais de cada conta (base interna) têm limite de ~5,5 MB por conta.
 - Se a mesma conta for editada em dois aparelhos ao mesmo tempo, vale a última gravação (há aviso).

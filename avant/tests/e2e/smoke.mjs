@@ -39,6 +39,9 @@ async function criarConta(page, nome, senha) {
   await pw.nth(0).fill(senha);
   await pw.nth(1).fill(senha);
   await page.locator('.gate-card button[type="submit"]').click();
+  await page.waitForSelector(".avt-code", { timeout: 20000 });
+  await page.locator('.gate-card input[type="checkbox"]').check();
+  await page.locator('.gate-card button:has-text("Continuar")').click();
   await page.waitForSelector(".rail", { timeout: 20000 });
   await page.waitForTimeout(1500);
 }
@@ -78,10 +81,15 @@ try {
   await pw.nth(0).fill("Av@2026");
   await pw.nth(1).fill("Av@2026");
   await v.locator('.gate-card button[type="submit"]').click();
+  await v.waitForSelector(".avt-code", { timeout: 20000 });
+  check("depois de criar a conta aparece o código de recuperação", /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test((await v.locator(".avt-code").innerText()).trim()));
+  check("'Continuar' só libera depois de confirmar que guardou o código", await v.locator('.gate-card button:has-text("Continuar")').isDisabled());
+  await v.locator('.gate-card input[type="checkbox"]').check();
+  await v.locator('.gate-card button:has-text("Continuar")').click();
   await v.waitForSelector(".rail", { timeout: 20000 });
   await v.waitForTimeout(1500);
 
-  check("Victor entrou no AVANT", /Meu dia/.test(await texto(v)));
+  check("Victor entrou no PRUMO", /Meu dia/.test(await texto(v)));
   check("administrador vê o item Usuários no menu", (await v.locator('.rail a[aria-label="Usuários"]').count()) === 1);
   check("rodapé do menu mostra ● Ao vivo", /Ao vivo/.test(await v.locator(".rail").innerText()));
   await ir(v, "Frentes de trabalho");
