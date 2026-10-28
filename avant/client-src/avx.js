@@ -173,11 +173,11 @@ function AvTaskCard({t,me,isAdmin,dir,onChanged,onEdit}){
 }
 
 /* ---- Criar / editar tarefa da equipe ---- */
-function AvTaskModal({open,task,onClose,onSaved}){
+function AvTaskModal({open,task,onClose,onSaved,defaults}){
   const dir=useAvDir(),{toast,fail}=Ea();
   const blank={title:"",description:"",assignee:"",visibility:"equipe",kind:"fazer",due_date:"",due_time:"",impact:"",subtasks:[]};
   const[d,setD]=x.useState(blank),[sub,setSub]=x.useState(""),[busy,setBusy]=x.useState(!1);
-  x.useEffect(()=>{if(open){setD(task?{title:task.title,description:task.description||"",assignee:task.assignee||"",visibility:task.visibility,kind:task.kind,due_date:task.due_date||"",due_time:task.due_time||"",impact:task.impact||"",subtasks:(task.subtasks||[]).map(s=>({...s}))}:blank);setSub("")}},[open,task]);
+  x.useEffect(()=>{if(open){setD(task?{title:task.title,description:task.description||"",assignee:task.assignee||"",visibility:task.visibility,kind:task.kind,due_date:task.due_date||"",due_time:task.due_time||"",impact:task.impact||"",subtasks:(task.subtasks||[]).map(s=>({...s}))}:{...blank,...(defaults||{})});setSub("")}},[open,task,defaults]);
   const set=k=>e=>setD({...d,[k]:e.target.value});
   const addSub=()=>{const t=sub.trim();if(!t)return;setD({...d,subtasks:[...d.subtasks,{id:"s"+Date.now().toString(36)+d.subtasks.length,title:t,done:!1}]});setSub("")};
   const save=async()=>{
@@ -249,10 +249,10 @@ function AvMine(){
 
 /* ---- Página: Calendário da equipe ---- */
 function AvCalendar(){
-  const{tasks,me,error}=useAvTasks();
+  const{tasks,me,error,reload}=useAvTasks();
   const dir=useAvDir();
   const todayS=__avToday();
-  const[ym,setYm]=x.useState(()=>todayS.slice(0,7)),[sel,setSel]=x.useState(todayS),[who,setWho]=x.useState("");
+  const[ym,setYm]=x.useState(()=>todayS.slice(0,7)),[sel,setSel]=x.useState(todayS),[who,setWho]=x.useState(""),[addOpen,setAddOpen]=x.useState(!1);
   const[y,m]=ym.split("-").map(Number);
   const first=new Date(Date.UTC(y,m-1,1)),startDow=first.getUTCDay();
   const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
@@ -272,7 +272,7 @@ function AvCalendar(){
     (0,q.jsx)(ll,{error}),
     (0,q.jsxs)("div",{className:"toolbar",children:[
       (0,q.jsxs)("div",{className:"btn-row",role:"group","aria-label":"Mês",style:{flexWrap:"nowrap"},children:[(0,q.jsx)("button",{className:"btn sm",onClick:()=>move(-1),"aria-label":"Mês anterior",children:"‹"}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{setYm(todayS.slice(0,7));setSel(todayS)},children:"Hoje"}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>move(1),"aria-label":"Próximo mês",children:"›"})]}),
-      (0,q.jsx)("strong",{className:"avc-title",children:months[m-1]+" de "+y}),(0,q.jsx)("span",{style:{flex:1}}),
+      (0,q.jsx)("strong",{className:"avc-title",children:months[m-1]+" de "+y}),(0,q.jsx)("span",{style:{flex:1}}),(0,q.jsx)("button",{className:"btn primary",onClick:()=>setAddOpen(!0),children:"+ Nova tarefa em "+na(sel)}),
       (0,q.jsxs)("select",{className:"select",value:who,onChange:e=>setWho(e.target.value),"aria-label":"Pessoa",children:[(0,q.jsx)("option",{value:"",children:"Todas as pessoas"}),dir.map(p=>(0,q.jsx)("option",{value:p.id,children:p.name+(p.id===me?" (você)":"")},p.id))]})]}),
     (0,q.jsxs)("div",{className:"avc",children:[
       (0,q.jsx)("div",{className:"avc-grid",role:"grid","aria-label":"Calendário",children:[
@@ -286,12 +286,13 @@ function AvCalendar(){
           ]},k);
         })]}),
       (0,q.jsxs)("section",{className:"avc-day panel","aria-live":"polite",children:[
-        (0,q.jsx)("div",{className:"panel-head",children:(0,q.jsx)("h2",{children:na(sel)+(sel===todayS?" · hoje":"")})}),
+        (0,q.jsxs)("div",{className:"panel-head",children:[(0,q.jsx)("h2",{children:na(sel)+(sel===todayS?" · hoje":"")}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>setAddOpen(!0),children:"+ Adicionar"})]}),
         (0,q.jsx)("div",{className:"panel-body",children:!tasks?(0,q.jsx)(cl,{rows:3}):day.length===0?(0,q.jsx)("p",{className:"small muted",children:"Nada marcado para este dia."}):[...groups.entries()].map(([name,list])=>(0,q.jsxs)("div",{className:"avc-grp",children:[
           (0,q.jsxs)("div",{className:"avc-who",children:[(0,q.jsx)("span",{className:"avt-av sm",style:{background:__avColor(list[0].assignee||list[0].owner)},"aria-hidden":!0,children:__avInit(name)}),(0,q.jsx)("strong",{children:name})]}),
           (0,q.jsx)("ul",{children:list.map(t=>(0,q.jsxs)("li",{className:t.status==="concluida"?"is-done":"",onClick:()=>nav("/tarefas-equipe"),children:[t.due_time&&(0,q.jsx)("span",{className:"mono small",children:t.due_time+" "}),t.title,(0,q.jsx)("span",{className:"small muted",children:" · "+__avStatus[t.status]+(t.kind==="validar"?" · validar":"")})]},t.id))})]},name))})
       ]})
-    ]})
+    ]}),
+    (0,q.jsx)(AvTaskModal,{open:addOpen,task:null,defaults:{due_date:sel,assignee:who||""},onClose:()=>setAddOpen(!1),onSaved:reload})
   ]});
 }
 

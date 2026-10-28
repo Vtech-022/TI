@@ -69,7 +69,8 @@ input::placeholder,textarea::placeholder{color:var(--text-3);opacity:1}
 .avc-cell{min-height:64px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:6px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px}
 .avc-cell.empty{border:0;background:transparent;cursor:default}
 .avc-cell.today{border-color:#1f55e0;box-shadow:inset 0 0 0 1px #1f55e0}
-.avc-cell.sel{background:var(--blue-100,#e3ecfb);color:#0b1d38}
+.avc-cell.sel{background:#1f55e0;border-color:#1f55e0;color:#fff}
+.avc-cell.sel .avc-dots em{color:#fff}
 .avc-n{font-weight:600;font-size:13px}
 .avc-dots{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
 .avc-dots i{width:9px;height:9px;border-radius:50%;display:inline-block}
@@ -86,3 +87,7 @@ input::placeholder,textarea::placeholder{color:var(--text-3);opacity:1}
 .avb-list label{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;cursor:pointer}
 .avb-list label:hover{background:var(--surface-2)}
 .avb-t{min-width:0;word-break:break-word}
+
+/* Menu lateral: em telas baixas fica compacto e, se ainda não couber, rola */
+@media (max-height:860px){.rail{gap:14px;padding:12px 0 10px}.rail-brand{height:84px}.rail-nav{gap:6px;padding:6px}}
+@media (max-height:700px){.rail{overflow-y:auto;overflow-x:hidden;justify-content:flex-start;scrollbar-width:none}.rail::-webkit-scrollbar{display:none}.rail>*{flex:none}}

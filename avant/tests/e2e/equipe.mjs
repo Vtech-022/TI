@@ -118,6 +118,23 @@ try {
   await shot(v, "05-calendario");
   check("calendário mostra a tarefa no dia e a pessoa responsável", /Revisar planilha de custos/.test(await texto(v)) && /Ana Souza/.test(await texto(v)));
 
+  // criar tarefa direto do calendário
+  await v.locator('button:has-text("+ Nova tarefa em")').click();
+  await v.waitForSelector(".modal");
+  check("calendário: nova tarefa já vem com a data do dia selecionado", (await v.locator('.modal input[type="date"]').inputValue()) === hoje);
+  await v.locator('.modal input[data-autofocus]').fill("Reunião de alinhamento");
+  await v.locator('.modal button:has-text("Criar tarefa")').click();
+  await v.waitForTimeout(1500);
+  check("tarefa criada pelo calendário aparece no dia", /Reunião de alinhamento/.test(await v.locator(".avc-day").innerText()));
+  // menu lateral em tela baixa: dá para chegar no último item
+  await v.setViewportSize({ width: 1280, height: 520 });
+  await v.waitForTimeout(400);
+  const rail = await v.locator(".rail").evaluate((e) => ({ rola: e.scrollHeight > e.clientHeight, auto: getComputedStyle(e).overflowY }));
+  await v.locator('.rail a[aria-label="Usuários"]').scrollIntoViewIfNeeded();
+  const vis = await v.locator('.rail a[aria-label="Usuários"]').evaluate((e) => { const r = e.getBoundingClientRect(); return r.bottom <= window.innerHeight + 1; });
+  check("menu lateral rola em tela baixa e o último item fica alcançável", vis && (!rail.rola || rail.auto === "auto"), JSON.stringify(rail));
+  await v.setViewportSize({ width: 1280, height: 860 });
+
   // ---- tarefa individual não vaza
   await ir(v, "Minhas tarefas");
   await v.locator('button:has-text("Nova tarefa")').first().click();
