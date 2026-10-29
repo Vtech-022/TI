@@ -689,6 +689,7 @@ function AvThread({peer,onBack}){
       if(s!==sig.current){sig.current=s;setMsgs(r.msgs);reload()}
     }catch{}
   },[peer]);
+  x.useEffect(()=>{window.__avChatPeer=peer;return()=>{if(window.__avChatPeer===peer)window.__avChatPeer=null}},[peer]);
   x.useEffect(()=>{sig.current="";setMsgs([]);setEdit(null);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
   x.useEffect(()=>{const b=box.current;if(b&&stick.current)b.scrollTop=b.scrollHeight},[msgs,up]);
   const send=async(t,fid)=>{
@@ -775,7 +776,9 @@ function AvPalettes({n,r}){
       (0,q.jsx)("strong",{children:p.name})]},p.key))})]});
 }
 
-/* ===== Animação ao trocar entre modo claro e escuro (onda a partir do botão) ===== */
+/* ===== Animação ao trocar entre modo claro e escuro =====
+   Leve: um único círculo animado só com transform/opacity (roda na GPU, sem recalcular o layout
+   nem tirar "foto" da página), que cobre a troca de cores e some em seguida. */
 (function(){
   if(typeof document==="undefined")return;
   document.addEventListener("click",e=>{
@@ -783,26 +786,104 @@ function AvPalettes({n,r}){
     if(!b)return;
     if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
     const toDark=/escuro/.test(b.getAttribute("aria-label")||"");
-    const r=b.getBoundingClientRect(),root=document.documentElement;
-    if(document.startViewTransition){
-      /* revela a tela já no novo tema, crescendo a partir do botão (como no vídeo de referência) */
-      const cx=r.left+r.width/2,cy=r.top+r.height/2,rad=Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy));
-      let vt;try{vt=document.startViewTransition(()=>new Promise(res=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(res,40)))))}catch{vt=null}
-      if(vt){
-        root.classList.add("av-vt");
-        vt.ready.then(()=>{root.animate({clipPath:["circle(0px at "+cx+"px "+cy+"px)","circle("+rad+"px at "+cx+"px "+cy+"px)"]},{duration:900,easing:"cubic-bezier(.65,0,.35,1)",pseudoElement:"::view-transition-new(root)"})}).catch(()=>{});
-        vt.finished.finally(()=>root.classList.remove("av-vt"));
-        return;
-      }
-    }
+    const r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const rad=Math.ceil(Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy)));
+    const old=document.querySelector(".av-wave");old&&old.remove();
     const ov=document.createElement("div");
     ov.className="av-wave";
-    ov.style.setProperty("--x",(r.left+r.width/2)+"px");ov.style.setProperty("--y",(r.top+r.height/2)+"px");
-    ov.style.background=toDark?"radial-gradient(circle at var(--x) var(--y),#1b1f26,#0d0f12 70%)":"radial-gradient(circle at var(--x) var(--y),#ffffff,#eef1f8 70%)";
-    root.classList.add("av-theming");
+    ov.style.cssText="width:"+rad*2+"px;height:"+rad*2+"px;left:"+(cx-rad)+"px;top:"+(cy-rad)+"px;background:"+(toDark?"#0b0c18":"#f4f6fb");
+    document.documentElement.classList.add("av-switching");
     document.body.appendChild(ov);
-    setTimeout(()=>root.classList.remove("av-theming"),900);
-    ov.addEventListener("animationend",()=>ov.remove());
-    setTimeout(()=>ov.remove(),1500);
+    const kill=()=>{ov.remove();document.documentElement.classList.remove("av-switching")};
+    ov.addEventListener("animationend",kill);
+    setTimeout(kill,1200);
   },!0);
 })();
+
+/* ===== Notificações: novas tarefas da equipe e novas mensagens ===== */
+function __avDing(){
+  try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;const c=__avDing.c||(__avDing.c=new A());
+    const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(880,c.currentTime);o.frequency.exponentialRampToValueAtTime(1320,c.currentTime+.12);
+    g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.08,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.35);
+    o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.36)}catch{}
+}
+function __avNotify(title,body,onClick,tag){
+  try{
+    if(window.Notification&&Notification.permission==="granted"&&(document.visibilityState!=="visible"||!document.hasFocus())){
+      const n=new Notification(title,{body,tag,icon:"/favicon.ico",silent:!1});
+      n.onclick=()=>{window.focus();onClick&&onClick();n.close()};
+    }
+  }catch{}
+  window.dispatchEvent(new CustomEvent("prumo:notify",{detail:{title,body,onClick}}));
+  __avDing();
+}
+function AvNotifier(){
+  const{peers}=useChatSummary();
+  const{people}=usePresence();
+  const prev=x.useRef(null);
+  const[toasts,setToasts]=x.useState([]);
+  const nav=ir();
+  /* mensagens */
+  x.useEffect(()=>{
+    const me=window.__avUid;if(!me||!__avCS.data)return;
+    const cur={};for(const[k,v]of Object.entries(peers))cur[k]=v.unread;
+    if(prev.current){
+      for(const[k,n]of Object.entries(cur)){
+        const before=prev.current[k]||0;
+        if(n>before){
+          const open=window.__avChatPeer===k&&document.visibilityState==="visible";
+          if(open)continue;
+          const who=(people||[]).find(p=>p.id===k);const l=peers[k].last;
+          __avNotify("Nova mensagem de "+(who?who.name:"um colega"),l.file?"Arquivo: "+l.file:l.text,()=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:k}})),"chat-"+k);
+        }
+      }
+    }
+    prev.current=cur;
+    const total=Object.values(cur).reduce((s,v)=>s+v,0);
+    const base=document.title.replace(/^\(\d+\)\s*/,"");document.title=total?"("+total+") "+base:base;
+  },[peers]);
+  /* tarefas da equipe */
+  x.useEffect(()=>{
+    let tag="",stop=!1;const me=window.__avUid;if(!me)return;
+    const key="av:seenTasks:"+me;
+    let seen=null;try{seen=new Set(JSON.parse(localStorage.getItem(key)||"null")||[])}catch{seen=null}
+    const save=()=>{try{localStorage.setItem(key,JSON.stringify([...seen].slice(-3000)))}catch{}};
+    const tick=async()=>{
+      if(stop||document.visibilityState==="hidden"&&Math.random()<.5)return;
+      try{
+        const res=await __avFetch("/shared-tasks",{headers:tag?{"if-none-match":tag}:{}});
+        if(res.status===304||!res.ok)return;
+        const j=await res.json();tag=j.tag;
+        if(!seen){seen=new Set(j.tasks.map(t=>t.id));save();return}
+        const fresh=j.tasks.filter(t=>!seen.has(t.id));
+        fresh.forEach(t=>seen.add(t.id));if(fresh.length)save();
+        for(const t of fresh.filter(t=>t.owner!==me).slice(0,5)){
+          const mine=t.assignee===me;
+          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/tarefas-equipe"),"task-"+t.id);
+        }
+      }catch{}
+    };
+    tick();const iv=setInterval(tick,20000);
+    return()=>{stop=!0;clearInterval(iv)};
+  },[]);
+  /* avisos dentro do site (canto inferior) */
+  x.useEffect(()=>{
+    const f=e=>{const id=Math.random().toString(36).slice(2);setToasts(a=>[...a.slice(-2),{id,...e.detail}]);setTimeout(()=>setToasts(a=>a.filter(z=>z.id!==id)),7000)};
+    window.addEventListener("prumo:notify",f);return()=>window.removeEventListener("prumo:notify",f);
+  },[]);
+  return(0,q.jsx)("div",{className:"avn-stack","aria-live":"polite",children:toasts.map(t=>(0,q.jsxs)("button",{className:"avn-toast",onClick:()=>{t.onClick&&t.onClick();setToasts(a=>a.filter(z=>z.id!==t.id))},children:[
+    (0,q.jsx)("span",{className:"avn-ico",children:(0,q.jsx)(AvIcon,{n:/mensagem/i.test(t.title)?"chat":"file",s:18})}),
+    (0,q.jsxs)("span",{className:"avn-txt",children:[(0,q.jsx)("strong",{children:t.title}),(0,q.jsx)("small",{children:t.body})]})]},t.id))});
+}
+/* convite para ativar as notificações do navegador */
+function AvNotifyAsk(){
+  const has=typeof window!=="undefined"&&"Notification"in window;
+  const[st,setSt]=x.useState(has?Notification.permission:"unsupported");
+  const[hide,setHide]=x.useState(()=>{try{return localStorage.getItem("av:notifyAsk")==="no"}catch{return!1}});
+  x.useEffect(()=>{const f=()=>{if(has)Notification.requestPermission().then(setSt)};window.addEventListener("prumo:notifyask",f);return()=>window.removeEventListener("prumo:notifyask",f)},[]);
+  if(!has||st!=="default"||hide)return null;
+  return(0,q.jsxs)("div",{className:"avn-ask",children:[(0,q.jsx)("span",{className:"avn-ico",children:(0,q.jsx)(AvIcon,{n:"chat",s:18})}),
+    (0,q.jsx)("span",{children:"Receba aviso de novas tarefas da equipe e de mensagens, mesmo com o Zênite em outra aba."}),
+    (0,q.jsx)("button",{className:"btn sm primary",onClick:()=>Notification.requestPermission().then(setSt),children:"Ativar notificações"}),
+    (0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>{try{localStorage.setItem("av:notifyAsk","no")}catch{}setHide(!0)},children:"Agora não"})]});
+}

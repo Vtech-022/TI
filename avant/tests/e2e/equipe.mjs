@@ -307,8 +307,8 @@ try {
   await v.locator(".account-btn, .rail .avatar.me").first().click().catch(() => {});
   await v.locator('[role=menuitem]:has-text("Foto de perfil")').click();
   await v.locator('.modal input[type=file]').setInputFiles({ name: "f.png", mimeType: "image/png", buffer: png });
-  await v.waitForTimeout(1500);
-  check("foto de perfil enviada e exibida", await v.locator("img.av-img").count() > 0);
+  await v.waitForSelector("img.av-img", { timeout: 10000 }).catch(() => {});
+  check("foto de perfil enviada e exibida", await v.locator("img.av-img").count() > 0, (await v.locator(".modal").innerText().catch(()=>"")).slice(0,200));
   await shot(v, "09-inicio");
 
   // ---- conversa estilo Teams
@@ -347,6 +347,17 @@ try {
   check("mensagem com arquivo apagada para os dois", true);
   await a.locator(".avc-close").click();
   await v.locator(".avc-close").click();
+
+  // ---- notificações: mensagem e tarefa nova
+  const vid = await v.evaluate(() => window.__avUid);
+  await a.evaluate(async (vid) => { await fetch("/api/chat/" + vid, { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ text: "Chegou?" }) }); }, vid);
+  await v.waitForSelector('.avn-toast:has-text("Nova mensagem de Ana Souza")', { timeout: 15000 }).catch(() => {});
+  check("aviso de nova mensagem aparece", (await v.locator('.avn-toast:has-text("Nova mensagem de Ana Souza")').count()) > 0);
+  check("título da aba mostra mensagens não lidas", /^\(\d+\)/.test(await v.title()), await v.title());
+  await a.evaluate(async (vid) => { await fetch("/api/shared-tasks", { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ title: "Revisar planilha do evento", assignee: vid, visibility: "equipe" }) }); }, vid);
+  await v.waitForSelector('.avn-toast:has-text("Revisar planilha do evento")', { timeout: 30000 }).catch(() => {});
+  check("aviso de nova tarefa atribuída aparece", (await v.locator('.avn-toast:has-text("atribuiu uma tarefa a você")').count()) > 0);
+  await shot(v, "16-notificacao");
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();

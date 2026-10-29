@@ -50,3 +50,9 @@
 - **Conversas (estilo Teams):** clique num colega da faixa lateral da tela inicial (ou menu da conta → Conversas). Mensagens em tempo quase real (atualiza a cada poucos segundos), aviso de não lidas e envio de arquivos de qualquer tipo (botão 📎 ou arrastando). Arquivos são enviados em pedaços de 4 MB, então não há limite prático de tamanho (o tempo depende da sua internet). Só os dois da conversa veem as mensagens e baixam os arquivos. São guardadas as últimas 800 mensagens por conversa.
 - **Paletas prontas:** botão de paleta no topo → "Paletas prontas" (Azul Zênite, Floresta, Noite urbana, Neon rosa, Elétrico, Rubi e ouro, Céu aberto, Ouro). Vale só para quem escolheu; a tela inicial, a faixa de colegas e o chat usam as cores escolhidas.
 - **Abrir documento no programa de origem:** na janela do documento (Arquivos), botão "Abrir no Word/Excel/PowerPoint" ou "Abrir em tela cheia" (PDF/imagem).
+
+## Notificações
+- Avisos de **mensagem nova** e de **tarefa nova da equipe** (ou atribuída a você) aparecem no canto inferior do Zênite, com um som curto, e o título da aba mostra quantas mensagens não lidas há, por exemplo "(2) Zênite".
+- Para receber o aviso do **Windows/navegador** mesmo com o Zênite em outra aba: clique em "Ativar notificações" (faixa na tela inicial ou menu da conta) e permita no navegador.
+- Limite: os avisos chegam enquanto o Zênite estiver aberto em alguma aba (pode estar minimizado). Com o navegador fechado, não chegam.
+- Desempenho: a troca claro/escuro usa uma animação leve, os cartões não usam mais desfoque de fundo e o papel de parede animado roda mais leve.
