@@ -533,30 +533,52 @@ function AvWorkTimer(){
     (0,q.jsx)("span",{className:"avw-hint",children:working?"Contando… pausa sozinho se você sair do sistema.":"Ligue ao começar o expediente."})]});
 }
 
-/* ---- Painel de números do dia (limpo: anel + números simples) ---- */
+/* ---- Painel de números do dia (animado) ---- */
+function __avCount(v){
+  const[n,setN]=x.useState(0);
+  x.useEffect(()=>{
+    if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches){setN(v);return}
+    let raf,t0=performance.now(),from=0;const D=900;
+    const f=t=>{const k=Math.min(1,(t-t0)/D);setN(Math.round(from+(v-from)*(1-Math.pow(1-k,3))));if(k<1)raf=requestAnimationFrame(f)};
+    raf=requestAnimationFrame(f);return()=>cancelAnimationFrame(raf);
+  },[v]);
+  return n;
+}
 function AvHomeDash({done,total,late,doing,waiting}){
   const pct=total?Math.round(100*done/total):0;
+  const[go,setGo]=x.useState(!1);
+  x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
   const R=52,C=2*Math.PI*R;
-  const rows=[["Atrasadas",late],["Em andamento",doing],["Aguardando",waiting]];
+  const nDone=__avCount(done),nLate=__avCount(late),nDoing=__avCount(doing),nWait=__avCount(waiting),nPct=__avCount(pct);
+  const rows=[["Atrasadas",nLate,"late"],["Em andamento",nDoing,"doing"],["Aguardando",nWait,"wait"]];
   return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
-    (0,q.jsx)("div",{className:"panel-head",children:(0,q.jsx)("h2",{children:"Seu dia em números"})}),
+    (0,q.jsx)("i",{className:"avh-orb o1","aria-hidden":!0}),(0,q.jsx)("i",{className:"avh-orb o2","aria-hidden":!0}),
+    (0,q.jsx)("div",{className:"avh-top",children:(0,q.jsx)("h2",{children:"Seu dia em números"})}),
     (0,q.jsxs)("div",{className:"avh-body",children:[
       (0,q.jsxs)("div",{className:"avh-ring",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"112",height:"112",children:[(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"var(--line)",strokeWidth:"10"}),(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"#2f64c4",strokeWidth:"10",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:C*(1-pct/100),transform:"rotate(-90 64 64)",style:{transition:"stroke-dashoffset .6s"}})]}),
-        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:done+"/"+total}),(0,q.jsx)("small",{children:"feitas hoje"})]})]}),
-      (0,q.jsx)("ul",{className:"avh-rows",children:rows.map(([l,v])=>(0,q.jsxs)("li",{children:[(0,q.jsx)("span",{children:l}),(0,q.jsx)("strong",{style:l==="Atrasadas"&&v>0?{color:"#b42318"}:void 0,children:v})]},l))})]})]});
+        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"132",height:"132",children:[
+          (0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g2",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffe27a)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffffff"})]})}),
+          (0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"#ffffff30",strokeWidth:"11"}),
+          (0,q.jsx)("circle",{className:"avh-arc",cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g2)",strokeWidth:"11",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:go?C*(1-pct/100):C,transform:"rotate(-90 64 64)"})]}),
+        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:nDone+"/"+total}),(0,q.jsx)("small",{children:nPct+"% feito hoje"})]})]}),
+      (0,q.jsx)("ul",{className:"avh-rows",children:rows.map(([l,v,k])=>(0,q.jsxs)("li",{className:k,children:[(0,q.jsx)("span",{children:l}),(0,q.jsx)("strong",{children:v})]},l))})]})]});
 }
 
-/* ---- Quem está online: faixa vertical na lateral, só avatares ---- */
+/* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
 function AvOnline(){
   const{people}=usePresence();
+  const{peers}=useChatSummary();
   if(!people)return null;
+  const me=window.__avUid;
   const list=[...people].sort((a,b)=>(b.online?1:0)-(a.online?1:0));
   const shown=list.slice(0,9),extra=list.length-shown.length;
+  const total=Object.values(peers).reduce((s,v)=>s+v.unread,0);
+  const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
   return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
     (0,q.jsx)("span",{className:"avo-cnt",title:"Pessoas online agora",children:people.filter(p=>p.online).length}),
-    shown.map(p=>(0,q.jsxs)("span",{className:"avo-face"+(p.online?"":" off"),title:p.name+(p.id===window.__avUid?" (você)":"")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")})]},p.id)),
-    extra>0&&(0,q.jsx)("span",{className:"avo-cnt",title:extra+" pessoas a mais",children:"+"+extra})]});
+    shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
+    extra>0&&(0,q.jsx)("span",{className:"avo-cnt",title:extra+" pessoas a mais",children:"+"+extra}),
+    (0,q.jsxs)("button",{className:"avo-chat",onClick:()=>open(null),title:"Abrir conversas","aria-label":"Abrir conversas",children:["💬",total>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:total})]})]});
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
@@ -593,4 +615,125 @@ function AvAvatarModal(){
       (0,q.jsxs)("label",{className:"btn primary",style:{cursor:"pointer"},children:[busy?"Enviando…":"Escolher foto",(0,q.jsx)("input",{type:"file",accept:"image/jpeg,image/png,image/webp",hidden:!0,disabled:busy,onChange:e=>{pick(e.target.files&&e.target.files[0]);e.target.value=""}})]}),
       p&&p.av>0&&(0,q.jsx)("button",{className:"btn ghost",disabled:busy,onClick:remove,children:"Remover foto"}),
       err&&(0,q.jsx)("p",{className:"gate-error",role:"alert",children:err})]})});
+}
+
+/* ===== Conversas (estilo Teams) ===== */
+const __avCS={data:null,subs:new Set(),timer:null};
+async function __avCSLoad(){try{const d=await __avJson("/chat");__avCS.data=d;__avCS.subs.forEach(f=>f())}catch{}}
+function useChatSummary(){
+  const[,tick]=x.useState(0);
+  x.useEffect(()=>{
+    const f=()=>tick(n=>n+1);__avCS.subs.add(f);
+    if(!__avCS.timer){__avCSLoad();__avCS.timer=setInterval(()=>{if(document.visibilityState==="visible")__avCSLoad()},6000)}else if(__avCS.data)f();
+    return()=>{__avCS.subs.delete(f);if(!__avCS.subs.size&&__avCS.timer){clearInterval(__avCS.timer);__avCS.timer=null}};
+  },[]);
+  return{peers:(__avCS.data&&__avCS.data.peers)||{},reload:__avCSLoad};
+}
+const __avSize=b=>b<1024?b+" B":b<1048576?(b/1024).toFixed(0)+" KB":b<1073741824?(b/1048576).toFixed(1)+" MB":(b/1073741824).toFixed(2)+" GB";
+const __avClock=ms=>{const d=new Date(ms),h=new Date().toDateString()===d.toDateString();return h?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+async function __avSendFile(peer,file,onProg){
+  const CH=4*1024*1024,n=Math.max(1,Math.ceil(file.size/CH));
+  const{id}=await __avJson("/chat/upload",{method:"POST",body:{peer,name:file.name,type:file.type||"application/octet-stream",size:file.size,chunks:n}});
+  for(let i=0;i<n;i++){
+    const buf=new Uint8Array(await file.slice(i*CH,(i+1)*CH).arrayBuffer());
+    let tries=0;
+    for(;;){try{await __avJson("/chat/upload/"+id+"/"+i,{method:"PUT",body:buf});break}catch(e){if(++tries>3||(e&&e.status&&e.status<500&&e.status!==0))throw e;await new Promise(r=>setTimeout(r,800*tries))}}
+    onProg&&onProg((i+1)/n);
+  }
+  return id;
+}
+
+function AvMsgFile({f,mine}){
+  const url="/api/chat/file/"+f.id;
+  if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("a",{href:url,target:"_blank",rel:"noopener",children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
+  return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:"📎"}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
+}
+
+function AvThread({peer,onBack}){
+  const me=window.__avUid;
+  const{people}=usePresence();
+  const{reload}=useChatSummary();
+  const who=people&&people.find(p=>p.id===peer);
+  const[msgs,setMsgs]=x.useState([]),[text,setText]=x.useState(""),[up,setUp]=x.useState(null),[err,setErr]=x.useState("");
+  const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const pull=x.useCallback(async()=>{
+    try{
+      const r=await __avJson("/chat/"+peer+"?read=1&after="+last.current);
+      if(r.msgs.length){last.current=r.msgs[r.msgs.length-1].at;setMsgs(m=>{const ids=new Set(m.map(z=>z.id));return[...m,...r.msgs.filter(z=>!ids.has(z.id))]});reload()}
+    }catch{}
+  },[peer]);
+  x.useEffect(()=>{last.current=0;setMsgs([]);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
+  x.useEffect(()=>{const b=box.current;if(b&&stick.current)b.scrollTop=b.scrollHeight},[msgs,up]);
+  const send=async(t,fid)=>{
+    const r=await __avJson("/chat/"+peer,{method:"POST",body:{text:t,...(fid?{file:{id:fid}}:{})}});
+    last.current=Math.max(last.current,r.msg.at);stick.current=!0;
+    setMsgs(m=>m.some(z=>z.id===r.msg.id)?m:[...m,r.msg]);reload();
+  };
+  const sendText=async e=>{e&&e.preventDefault();const t=text.trim();if(!t)return;setErr("");setText("");try{await send(t)}catch(x2){setText(t);setErr(x2?.message||"Não foi possível enviar.")}};
+  const sendFiles=async files=>{
+    setErr("");
+    for(const f of files){
+      if(!f.size){setErr("“"+f.name+"” está vazio.");continue}
+      try{setUp({name:f.name,p:0});const fid=await __avSendFile(peer,f,p=>setUp({name:f.name,p}));await send("",fid)}
+      catch(x2){setErr("Falha ao enviar “"+f.name+"”: "+(x2?.message||"tente de novo."))}
+    }
+    setUp(null);
+  };
+  return(0,q.jsxs)("div",{className:"avc-thread",onDragOver:e=>e.preventDefault(),onDrop:e=>{e.preventDefault();e.dataTransfer.files.length&&sendFiles([...e.dataTransfer.files])},children:[
+    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("button",{className:"avc-x",onClick:onBack,"aria-label":"Voltar às conversas",children:"‹"}),
+      (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:peer,name:who?who.name:"?",size:34}),(0,q.jsx)("i",{className:"avo-dot"+(who&&who.online?" on":"")})]}),
+      (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:who?who.name:"Conversa"}),(0,q.jsx)("small",{children:who&&who.online?"Online agora":"Offline"})]})]}),
+    (0,q.jsxs)("div",{className:"avc-msgs",ref:box,onScroll:e=>{const b=e.target;stick.current=b.scrollHeight-b.scrollTop-b.clientHeight<60},children:[
+      msgs.length===0&&(0,q.jsx)("p",{className:"avc-empty",children:"Diga olá! Você também pode arrastar arquivos para cá."}),
+      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:__avClock(m.at)})]})]},m.id)),
+      up&&(0,q.jsxs)("div",{className:"avc-row mine",children:[(0,q.jsxs)("div",{className:"avc-bub avc-up",children:["Enviando "+up.name+"… "+Math.round(up.p*100)+"%",(0,q.jsx)("i",{style:{width:Math.round(up.p*100)+"%"}})]})]})]}),
+    err&&(0,q.jsx)("p",{className:"avc-err",role:"alert",children:err}),
+    (0,q.jsxs)("form",{className:"avc-form",onSubmit:sendText,children:[
+      (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),children:"📎"}),
+      (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),
+      (0,q.jsx)("textarea",{value:text,rows:1,placeholder:"Escreva uma mensagem",maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
+      (0,q.jsx)("button",{type:"submit",className:"avc-send",disabled:!text.trim(),"aria-label":"Enviar",children:"➤"})]})]});
+}
+
+function AvChat(){
+  const[open,setOpen]=x.useState(!1),[peer,setPeer]=x.useState(null);
+  const{people}=usePresence();
+  const{peers}=useChatSummary();
+  const[qs,setQs]=x.useState("");
+  x.useEffect(()=>{const f=e=>{setPeer((e.detail&&e.detail.peer)||null);setOpen(!0)};window.addEventListener("prumo:chat",f);return()=>window.removeEventListener("prumo:chat",f)},[]);
+  if(!open)return null;
+  const me=window.__avUid;
+  const list=(people||[]).filter(p=>p.id!==me&&p.name.toLowerCase().includes(qs.toLowerCase())).sort((a,b)=>{
+    const la=peers[a.id]?peers[a.id].last.at:0,lb=peers[b.id]?peers[b.id].last.at:0;
+    return lb-la||(b.online-a.online)||a.name.localeCompare(b.name,"pt-BR")});
+  return(0,q.jsxs)("section",{className:"avc-panel",role:"dialog","aria-label":"Conversas",children:[
+    peer?(0,q.jsx)(AvThread,{peer,onBack:()=>setPeer(null)}):
+    (0,q.jsxs)("div",{className:"avc-list",children:[
+      (0,q.jsx)("header",{className:"avc-head",children:(0,q.jsx)("strong",{style:{flex:1},children:"Conversas"})}),
+      (0,q.jsx)("input",{className:"input avc-search",placeholder:"Buscar pessoa…","aria-label":"Buscar pessoa",value:qs,onChange:e=>setQs(e.target.value)}),
+      (0,q.jsxs)("ul",{children:[list.map(p=>{const s=peers[p.id];return(0,q.jsx)("li",{children:(0,q.jsxs)("button",{className:"avc-item",onClick:()=>setPeer(p.id),children:[
+        (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")})]}),
+        (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:s?((s.last.from===me?"Você: ":"")+(s.last.file?"📎 "+s.last.file:s.last.text)):(p.online?"Online":"Offline")})]}),
+        s&&s.unread>0&&(0,q.jsx)("b",{className:"avc-badge",children:s.unread})]})},p.id)}),list.length===0&&(0,q.jsx)("li",{className:"small muted",style:{padding:12},children:"Ninguém encontrado."})]})]}),
+    (0,q.jsx)("button",{className:"avc-close",onClick:()=>setOpen(!1),"aria-label":"Fechar conversas",children:"×"})]});
+}
+
+/* ===== Paletas de cores prontas (cada pessoa escolhe a sua) ===== */
+const __avPalettes=[
+  {key:"azul",name:"Azul Zênite",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",light:"#f4f7ff"},
+  {key:"floresta",name:"Floresta",accent:"#518e45",accent2:"#f1ca30",deep:"#20372f",light:"#f9f6eb"},
+  {key:"urbana",name:"Noite urbana",accent:"#1fa383",accent2:"#ebae29",deep:"#132228",light:"#f5eed2"},
+  {key:"neon",name:"Neon rosa",accent:"#da0090",accent2:"#f2cb30",deep:"#2c0e63",light:"#12002e"},
+  {key:"eletrico",name:"Elétrico",accent:"#ff2801",accent2:"#c8e600",deep:"#111e26",light:"#edf2f6"},
+  {key:"rubi",name:"Rubi e ouro",accent:"#ac0f2c",accent2:"#f5dc06",deep:"#570511",light:"#1e1518"},
+  {key:"ceu",name:"Céu aberto",accent:"#02a3fe",accent2:"#fdfc0c",deep:"#122835",light:"#ffffff"},
+  {key:"ouro",name:"Ouro",accent:"#c98a12",accent2:"#f6df75",deep:"#5c3f08",light:"#faf398"}
+];
+function AvPalettes({n,r}){
+  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Paletas prontas"}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação: ela muda a cor de destaque e o brilho do seu painel, só para você."}),
+    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep}),children:[
+      (0,q.jsx)("span",{className:"avp-dots",children:[p.accent2,p.accent,p.deep,p.light].map((c,i)=>(0,q.jsx)("i",{style:{background:c}},i))}),
+      (0,q.jsx)("span",{className:"avp-bar",style:{background:"linear-gradient(90deg,"+p.accent2+","+p.accent+" 60%,"+p.deep+")"}}),
+      (0,q.jsx)("strong",{children:p.name})]},p.key))})]});
 }

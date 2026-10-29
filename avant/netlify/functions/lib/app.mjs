@@ -696,6 +696,148 @@ async function handleGetAvatar(request, ctx, id) {
   });
 }
 
+
+// ---------------------------------------------------------------- conversas (estilo Teams) e arquivos
+
+const CHAT_TEXT_MAX = 4000;
+const CHAT_KEEP = 800;            // mensagens guardadas por conversa
+const CHUNK_MAX = 4 * 1024 * 1024; // cada pedaço de arquivo (limite de 6 MB das funções)
+const CHUNKS_MAX = 2048;          // 2048 x 4 MB = 8 GB por arquivo, na prática sem limite
+const pairKey = (a, b) => [a, b].sort().join(".");
+const ID24 = /^[0-9a-f]{24}$/;
+
+async function chatPeer(ctx, me, peerId) {
+  if (!ID24.test(peerId) || peerId === me.id) throw new ApiError(400, "pessoa", "Escolha outra pessoa da equipe.");
+  const peer = await loadUser(ctx, peerId);
+  if (!peer) throw new ApiError(404, "pessoa", "Essa pessoa não está mais na equipe.");
+  return peer;
+}
+
+async function handleChatSummary(request, ctx) {
+  const me = await requireUser(request, ctx);
+  const reads = (await getJSON(ctx.store, `chatread/${me.id}`))?.value ?? {};
+  const keys = (await ctx.store.list("chat/")).filter((k) => k.slice(5).split(".").includes(me.id));
+  const peers = {};
+  for (const k of keys) {
+    const r = await getJSON(ctx.store, k);
+    if (!r) continue;
+    const peerId = k.slice(5).split(".").find((x) => x !== me.id);
+    const msgs = r.value.msgs ?? [];
+    const last = msgs[msgs.length - 1];
+    if (!last) continue;
+    const since = reads[peerId] ?? 0;
+    peers[peerId] = {
+      last: { from: last.from, at: last.at, text: last.text.slice(0, 80), file: last.file ? last.file.name : null },
+      unread: msgs.filter((m) => m.from !== me.id && m.at > since).length,
+    };
+  }
+  return json(200, { peers });
+}
+
+async function handleChatThread(request, ctx, peerId) {
+  const me = await requireUser(request, ctx);
+  await chatPeer(ctx, me, peerId);
+  const url = new URL(request.url);
+  const after = Number(url.searchParams.get("after") ?? 0) || 0;
+  const r = await getJSON(ctx.store, `chat/${pairKey(me.id, peerId)}`);
+  const all = r?.value.msgs ?? [];
+  const msgs = all.filter((m) => m.at > after);
+  if (url.searchParams.get("read") === "1" && all.length) {
+    const lastAt = all[all.length - 1].at;
+    await updateJSON(ctx.store, `chatread/${me.id}`, (cur) => {
+      const d = cur ?? {};
+      if ((d[peerId] ?? 0) >= lastAt) return undefined;
+      d[peerId] = lastAt;
+      return d;
+    });
+  }
+  return json(200, { msgs, now: ctx.now() });
+}
+
+async function handleChatSend(request, ctx, peerId) {
+  const me = await requireUser(request, ctx);
+  await chatPeer(ctx, me, peerId);
+  const body = await readJson(request);
+  const text = String(body.text ?? "").trim().slice(0, CHAT_TEXT_MAX);
+  let file = null;
+  if (body.file) {
+    const fid = String(body.file.id ?? "");
+    if (!ID24.test(fid)) throw new ApiError(400, "arquivo", "Arquivo inválido.");
+    const meta = (await getJSON(ctx.store, `chatmeta/${fid}`))?.value;
+    if (!meta || meta.uid !== me.id || meta.peer !== peerId) throw new ApiError(400, "arquivo", "Arquivo não encontrado.");
+    const have = (await ctx.store.list(`chatfile/${fid}/`)).length;
+    if (have !== meta.chunks) throw new ApiError(400, "arquivo_incompleto", "O envio do arquivo não terminou. Tente de novo.");
+    file = { id: fid, name: meta.name, size: meta.size, type: meta.type };
+  }
+  if (!text && !file) throw new ApiError(400, "vazio", "Escreva uma mensagem ou anexe um arquivo.");
+  const at = ctx.now();
+  const msg = { id: newId(), from: me.id, at, text, ...(file ? { file } : {}) };
+  await updateJSON(ctx.store, `chat/${pairKey(me.id, peerId)}`, (cur) => {
+    const d = cur ?? { msgs: [] };
+    const last = d.msgs[d.msgs.length - 1];
+    msg.at = Math.max(at, last ? last.at + 1 : 0); // ordem estável
+    d.msgs.push(msg);
+    if (d.msgs.length > CHAT_KEEP) d.msgs = d.msgs.slice(-CHAT_KEEP);
+    return d;
+  });
+  return json(201, { msg });
+}
+
+async function handleChatUploadStart(request, ctx) {
+  const me = await requireUser(request, ctx);
+  const body = await readJson(request);
+  await chatPeer(ctx, me, String(body.peer ?? ""));
+  const chunks = Number(body.chunks);
+  const size = Number(body.size);
+  if (!Number.isInteger(chunks) || chunks < 1 || chunks > CHUNKS_MAX || !(size >= 0)) throw new ApiError(400, "arquivo", "Arquivo inválido.");
+  const fid = newId();
+  await putJSON(ctx.store, `chatmeta/${fid}`, {
+    uid: me.id, peer: body.peer, chunks, size,
+    name: safeName(String(body.name ?? "arquivo")),
+    type: String(body.type ?? "application/octet-stream").slice(0, 100) || "application/octet-stream",
+  });
+  return json(201, { id: fid });
+}
+
+async function handleChatUploadChunk(request, ctx, fid, n) {
+  const me = await requireUser(request, ctx);
+  const meta = (await getJSON(ctx.store, `chatmeta/${fid}`))?.value;
+  if (!meta || meta.uid !== me.id) throw new ApiError(404, "arquivo", "Arquivo não encontrado.");
+  const idx = Number(n);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= meta.chunks) throw new ApiError(400, "parte", "Parte inválida.");
+  const bytes = await readBytes(request, CHUNK_MAX);
+  await ctx.store.put(`chatfile/${fid}/${String(idx).padStart(5, "0")}`, bytes);
+  return json(200, { ok: true });
+}
+
+async function handleChatFile(request, ctx, fid) {
+  const me = await requireUser(request, ctx);
+  const meta = (await getJSON(ctx.store, `chatmeta/${fid}`))?.value;
+  if (!meta || (meta.uid !== me.id && meta.peer !== me.id)) throw new ApiError(404, "arquivo", "Arquivo não encontrado.");
+  const dl = new URL(request.url).searchParams.get("download") === "1";
+  const keys = (await ctx.store.list(`chatfile/${fid}/`)).sort();
+  let i = 0;
+  const stream = new ReadableStream({
+    async pull(controller) {
+      if (i >= keys.length) { controller.close(); return; }
+      const r = await ctx.store.get(keys[i++]);
+      controller.enqueue(r ? r.bytes : new Uint8Array(0));
+    },
+  });
+  const inline = /^(image\/(png|jpeg|gif|webp)|application\/pdf|video\/(mp4|webm)|audio\/)/.test(meta.type);
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      "content-type": inline ? meta.type : "application/octet-stream",
+      "content-length": String(meta.size),
+      "content-disposition": contentDisposition(meta.name, inline && !dl),
+      "x-content-type-options": "nosniff",
+      "content-security-policy": "default-src 'none'; sandbox",
+      "cache-control": "private, max-age=3600",
+    },
+  });
+}
+
 // ---------------------------------------------------------------- quadro da equipe
 
 function validateCards(list, label) {
@@ -997,6 +1139,12 @@ export async function handle(request, ctx) {
     if (method === "PUT" && path === "/avatar") return await handlePutAvatar(request, ctx);
     if (method === "DELETE" && path === "/avatar") return await handleDeleteAvatar(request, ctx);
     if (method === "GET" && (m = path.match(/^\/avatar\/([0-9a-f]{24})$/))) return await handleGetAvatar(request, ctx, m[1]);
+    if (method === "GET" && path === "/chat") return await handleChatSummary(request, ctx);
+    if (method === "POST" && path === "/chat/upload") return await handleChatUploadStart(request, ctx);
+    if (method === "PUT" && (m = path.match(/^\/chat\/upload\/([0-9a-f]{24})\/(\d{1,5})$/))) return await handleChatUploadChunk(request, ctx, m[1], m[2]);
+    if (method === "GET" && (m = path.match(/^\/chat\/file\/([0-9a-f]{24})$/))) return await handleChatFile(request, ctx, m[1]);
+    if (method === "GET" && (m = path.match(/^\/chat\/([0-9a-f]{24})$/))) return await handleChatThread(request, ctx, m[1]);
+    if (method === "POST" && (m = path.match(/^\/chat\/([0-9a-f]{24})$/))) return await handleChatSend(request, ctx, m[1]);
     if (method === "GET" && path === "/prefs") return await handleGetPrefs(request, ctx);
     if (method === "PUT" && path === "/prefs") return await handlePutPrefs(request, ctx);
 

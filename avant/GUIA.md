@@ -45,3 +45,8 @@
 - **Tela inicial (Meu dia)** enxuta: só as atividades do dia, painel "Seu dia em números" (feitas/total, atrasadas, em andamento, aguardando, horas), **Equipe agora** (quem está online, com bolinha verde) e anotações recolhidas.
 - **Horas trabalhadas**: botão Iniciar/Pausar no topo da tela inicial. O cronômetro pausa sozinho ~2,5 min após você sair do sistema e zera à meia-noite (Brasília).
 - **Foto de perfil**: menu da conta → "Foto de perfil" (JPG/PNG/WEBP; recortada e reduzida automaticamente).
+
+## Conversas, paletas e painel animado
+- **Conversas (estilo Teams):** clique num colega da faixa lateral da tela inicial (ou menu da conta → Conversas). Mensagens em tempo quase real (atualiza a cada poucos segundos), aviso de não lidas e envio de arquivos de qualquer tipo (botão 📎 ou arrastando). Arquivos são enviados em pedaços de 4 MB, então não há limite prático de tamanho (o tempo depende da sua internet). Só os dois da conversa veem as mensagens e baixam os arquivos. São guardadas as últimas 800 mensagens por conversa.
+- **Paletas prontas:** botão de paleta no topo → "Paletas prontas" (Azul Zênite, Floresta, Noite urbana, Neon rosa, Elétrico, Rubi e ouro, Céu aberto, Ouro). Vale só para quem escolheu; a tela inicial, a faixa de colegas e o chat usam as cores escolhidas.
+- **Abrir documento no programa de origem:** na janela do documento (Arquivos), botão "Abrir no Word/Excel/PowerPoint" ou "Abrir em tela cheia" (PDF/imagem).

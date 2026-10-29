@@ -431,8 +431,15 @@ sub("(0,q.jsx)(cl,{rows:5})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[
 cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
 # foto de perfil: botão da conta, menu e janela
 sub("children:l.trim().charAt(0).toUpperCase()});return e?", "children:(0,q.jsx)(AvPhoto,{id:window.__avUid,name:l,fallback:l.trim().charAt(0).toUpperCase()})});return e?")
-sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Foto de perfil`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
-sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),")
+sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new CustomEvent(`prumo:chat`,{detail:{}}))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Conversas`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Foto de perfil`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
+sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),(0,q.jsx)(AvChat,{}),")
+
+# ---- Paletas prontas + cores secundárias vivas ----
+sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
+sub("(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "(0,q.jsx)(AvPalettes,{n,r}),(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
+sub("ba={accent:`#2f6bff`,", "ba={accent:`#2f6bff`,accent2:`#ffc83d`,deep:`#1b1250`,palette:`azul`,")
+sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
+sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.font,l.scale,l.wallpaper]")
 
 # ---- Menu, rotas e painel ----
 sub("{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},", "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},")

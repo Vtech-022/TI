@@ -303,6 +303,38 @@ try {
   check("foto de perfil enviada e exibida", await v.locator("img.av-img").count() > 0);
   await shot(v, "09-inicio");
 
+  // ---- conversa estilo Teams
+  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.waitForSelector(".avc-panel .avc-form textarea");
+  check("clicar no colega abre a conversa com ele", /Ana Souza/.test(await v.locator(".avc-head").innerText()));
+  await v.locator(".avc-form textarea").fill("Oi Ana, tudo bem?");
+  await v.locator(".avc-form textarea").press("Enter");
+  await v.waitForSelector(".avc-row.mine .avc-txt");
+  await v.locator('.avc-form input[type=file]').setInputFiles({ name: "contrato final.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: Buffer.alloc(5 * 1024 * 1024 + 123, 7) });
+  await v.waitForSelector('.avc-file strong:has-text("contrato final.docx")', { timeout: 30000 });
+  check("arquivo de 5 MB (mais de um pedaço) enviado na conversa", true);
+  await shot(v, "13-chat");
+  await a.waitForSelector('.avo-strip .avo-face[title^="Victor"] .avc-badge', { timeout: 15000 });
+  check("Ana vê o aviso de mensagem não lida", true);
+  await a.locator('.avo-strip .avo-face[title^="Victor"]').click();
+  await a.waitForSelector('.avc-file strong:has-text("contrato final.docx")', { timeout: 15000 });
+  check("Ana recebe texto e arquivo", /Oi Ana, tudo bem\?/.test(await a.locator(".avc-msgs").innerText()));
+  const tam = await a.evaluate(async () => { const h = await fetch(document.querySelector(".avc-file").getAttribute("href")); return (await h.arrayBuffer()).byteLength; });
+  check("download do arquivo volta inteiro", tam === 5 * 1024 * 1024 + 123, String(tam));
+  await a.locator(".avc-close").click();
+  await v.locator(".avc-close").click();
+
+  // ---- paletas prontas
+  await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
+  await v.waitForSelector(".avp-card");
+  await v.locator('.avp-card:has-text("Neon rosa")').click();
+  await v.waitForTimeout(400);
+  const ac = await v.evaluate(() => [getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(), getComputedStyle(document.documentElement).getPropertyValue("--accent2").trim()]);
+  check("paleta pronta troca as cores de destaque", ac[0].toLowerCase() === "#da0090" && ac[1].toLowerCase() === "#f2cb30", ac.join(" "));
+  await shot(v, "14-paletas");
+  await v.locator('.modal button:has-text("Pronto")').click();
+  await shot(v, "15-inicio-neon");
+
   // ---- celular
   const m = await novo(390, 800);
   await m.goto(base); await m.waitForSelector(".gate-card");
