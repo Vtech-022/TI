@@ -89,7 +89,7 @@ try {
   const hoje = new Date().toISOString().slice(0, 10);
   await v.locator('.modal input[type="date"]').fill(hoje);
   await v.locator('.modal button:has-text("Criar tarefa")').click();
-  await v.waitForSelector("h1:has-text('Tarefas da equipe')");
+  await v.waitForSelector(".avt-embed-head");
   await v.waitForTimeout(800);
   check("tarefa atribuída aparece em Tarefas da equipe (Victor)", /Revisar planilha de custos/.test(await texto(v)) === false ? true : true);
   await v.locator('.seg button:has-text("Criei")').click();
@@ -105,7 +105,7 @@ try {
   await a.waitForTimeout(800);
   check("Ana vê a tarefa no Meu dia ('Atribuídas a você')", /Atribuídas a você pela equipe/.test(await texto(a)) && /Revisar planilha de custos/.test(await texto(a)));
   await shot(a, "04-meu-dia-ana");
-  await ir(a, "Tarefas da equipe");
+  await ir(a, "Atividades da equipe");
   check("Ana vê em 'Para mim'", /Revisar planilha de custos/.test(await texto(a)) && /Para você/.test(await texto(a)));
   await a.locator(".avt-card select.avt-st").first().selectOption("concluida");
   await a.waitForTimeout(900);
@@ -166,7 +166,7 @@ try {
   await v.waitForTimeout(1500);
   await v.keyboard.press("Escape");
   await a.waitForTimeout(4500);
-  await ir(a, "Tarefas da equipe");
+  await ir(a, "Atividades da equipe");
   await a.locator('.seg button:has-text("Todas abertas")').click();
   check("tarefa individual do Victor não aparece para a Ana", !/Anotação só minha/.test(await texto(a)));
 
@@ -221,7 +221,7 @@ try {
   await v.locator('.modal button:has-text("Salvar")').click();
   await v.waitForTimeout(1500);
   await a.waitForTimeout(4500);
-  await ir(a, "Tarefas da equipe");
+  await ir(a, "Atividades da equipe");
   await a.locator('.seg button:has-text("Para mim")').click();
   check("espera atribuída a Ana aparece para ela como 'Validar'", /Validar: Validar o relatório mensal/.test(await texto(a)));
 
@@ -288,6 +288,11 @@ try {
   // ---- tela inicial: presença, horas, painel, foto
   await v.locator(".rail-brand").click(); await v.waitForTimeout(1500);
   check("Arquivos e Documentos não aparece mais no menu lateral", !(await v.locator('.rail a[aria-label="Arquivos e Documentos"]').isVisible()));
+  check("'Tarefas da equipe' saiu do menu e está dentro de Atividades da equipe", !(await v.locator('.rail a[aria-label="Tarefas da equipe"]').isVisible()));
+  await ir(v, "Atividades da equipe"); await v.waitForSelector(".avt-embed-head");
+  check("Atividades da equipe tem o botão '+ Nova tarefa da equipe' e os filtros", (await v.locator('.avt-embed button:has-text("Nova tarefa da equipe")').count()) === 1 && (await v.locator('.avt-embed .seg button').count()) === 4);
+  await shot(v, "17-atividades");
+  await v.locator(".rail-brand").click(); await v.waitForTimeout(1200);
   await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
   const home = await texto(v);
   check("faixa lateral mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);

@@ -207,7 +207,7 @@ function AvTaskModal({open,task,onClose,onSaved,defaults}){
 }
 
 /* ---- Página: Tarefas da equipe ---- */
-function AvTeamTasks(){
+function AvTeamTasks({embedded}){
   const{tasks,me,error,reload}=useAvTasks();
   const dir=useAvDir();
   const[tab,setTab]=x.useState("paramim"),[search,setSearch]=x.useState(""),[modal,setModal]=x.useState(null);
@@ -224,6 +224,7 @@ function AvTeamTasks(){
   const count=k=>(tasks||[]).filter(t=>{const o=t.status!=="concluida";return k==="paramim"?o&&t.assignee===me:k==="minhas"?o&&t.owner===me:k==="equipe"?o:!o}).length;
   const tabs=[["paramim","Para mim"],["minhas","Criei"],["equipe","Todas abertas"],["feitas","Concluídas"]];
   return(0,q.jsxs)(q.Fragment,{children:[
+    embedded?(0,q.jsxs)("div",{className:"avt-embed-head",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("h2",{children:"Tarefas da equipe"}),(0,q.jsx)("p",{className:"small muted",children:"Passe tarefas para alguém com login ou para a equipe toda. Quem recebe vê na própria lista e marca como feita."})]}),(0,q.jsx)("button",{className:"btn primary",onClick:()=>setModal({}),children:"+ Nova tarefa da equipe"})]}):
     (0,q.jsxs)("div",{className:"page-head",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("div",{className:"eyebrow",children:"Equipe"}),(0,q.jsx)("h1",{children:"Tarefas da equipe"}),(0,q.jsx)("p",{children:"Tarefas que você passa para alguém com login, ou que a equipe toda enxerga. Quem recebe vê na própria lista e marca como feita."})]}),
       (0,q.jsx)("button",{className:"btn primary",onClick:()=>setModal({}),children:"+ Nova tarefa da equipe"})]}),
     (0,q.jsx)(ll,{error}),
@@ -243,8 +244,8 @@ function AvMine(){
   const mine=(tasks||[]).filter(t=>t.assignee===me&&t.status!=="concluida");
   if(!tasks||mine.length===0)return null;
   const today=__avToday();
-  return(0,q.jsx)(sl,{title:"Atribuídas a você pela equipe",count:mine.length,accent:!0,actions:(0,q.jsx)("button",{className:"btn sm",onClick:()=>nav("/tarefas-equipe"),children:"Abrir"}),children:
-    (0,q.jsx)("ul",{className:"avt-mini",children:mine.slice(0,5).map(t=>(0,q.jsxs)("li",{onClick:()=>nav("/tarefas-equipe"),children:[(0,q.jsx)("strong",{children:t.title}),(0,q.jsxs)("span",{className:"small muted",children:[" · de "+t.owner_name,t.due_date?" · prazo "+na(t.due_date):""," ",t.due_date&&t.due_date<today?"(atrasada)":""]})]},t.id))})});
+  return(0,q.jsx)(sl,{title:"Atribuídas a você pela equipe",count:mine.length,accent:!0,actions:(0,q.jsx)("button",{className:"btn sm",onClick:()=>nav("/equipe"),children:"Abrir"}),children:
+    (0,q.jsx)("ul",{className:"avt-mini",children:mine.slice(0,5).map(t=>(0,q.jsxs)("li",{onClick:()=>nav("/equipe"),children:[(0,q.jsx)("strong",{children:t.title}),(0,q.jsxs)("span",{className:"small muted",children:[" · de "+t.owner_name,t.due_date?" · prazo "+na(t.due_date):""," ",t.due_date&&t.due_date<today?"(atrasada)":""]})]},t.id))})});
 }
 
 /* ---- Página: Calendário da equipe ---- */
@@ -281,7 +282,7 @@ function AvCalendar(){
   const cells=[];for(let i=0;i<startDow;i++)cells.push(null);for(let d=1;d<=dim;d++)cells.push(d);
   const day=byDay.get(sel)||[];
   const openCount=day.filter(i=>!i.done).length;
-  const goItem=it=>{if(it.kind==="local")open(it.localId);else nav("/tarefas-equipe")};
+  const goItem=it=>{if(it.kind==="local")open(it.localId);else nav("/equipe")};
   const nav=ir();
   const stLabel=it=>it.done?"Concluída":it.status==="em_andamento"?"Em andamento":"Pendente";
   return(0,q.jsxs)(q.Fragment,{children:[
@@ -315,7 +316,7 @@ function AvCalendar(){
           (0,q.jsxs)("div",{className:"avc2-card-top",children:[(0,q.jsx)("strong",{children:it.title}),(0,q.jsx)("span",{className:"avc2-st",children:stLabel(it)})]}),
           (0,q.jsxs)("div",{className:"avc2-card-meta",children:[(0,q.jsx)("i",{style:{background:it.color},children:__avInit(it.whoName)}),(0,q.jsx)("span",{children:it.whoName}),it.time&&(0,q.jsx)("span",{className:"mono",children:it.time}),it.project&&(0,q.jsx)("span",{className:"avc2-proj",style:{color:it.color},children:it.project}),it.validar&&(0,q.jsx)("span",{className:"avc2-proj",children:"validar"})]}),
           it.subs.length>0&&(0,q.jsx)("div",{className:"avc2-bar",title:it.subs.filter(s=>s.done).length+"/"+it.subs.length+" subtarefas",children:(0,q.jsx)("span",{style:{width:Math.round(100*it.subs.filter(s=>s.done).length/it.subs.length)+"%",background:it.color}})})]},it.key))}),
-        (0,q.jsx)("button",{className:"btn ghost sm",style:{marginTop:10},onClick:()=>nav("/tarefas-equipe"),children:"Abrir Tarefas da equipe"})
+        (0,q.jsx)("button",{className:"btn ghost sm",style:{marginTop:10},onClick:()=>nav("/equipe"),children:"Abrir Atividades da equipe"})
       ]})]}),
     (0,q.jsx)(AvTaskModal,{open:addOpen,task:null,defaults:{due_date:sel,assignee:who&&who!==me?who:""},onClose:()=>setAddOpen(!1),onSaved:reload}),
     (0,q.jsx)(AvColorsModal,{open:colorsOpen,onClose:()=>setColorsOpen(!1)})
@@ -886,7 +887,7 @@ function AvNotifier(){
         fresh.forEach(t=>seen.add(t.id));if(fresh.length)save();
         for(const t of fresh.filter(t=>t.owner!==me).slice(0,5)){
           const mine=t.assignee===me;
-          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/tarefas-equipe"),"task-"+t.id);
+          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/equipe"),"task-"+t.id);
         }
       }catch{}
     };
@@ -942,7 +943,7 @@ function AvAgendaToday({events,mine,today,go}){
   const items=[];
   (events||[]).forEach(e=>items.push({k:"e"+e.id,time:e.all_day?"":fa(e.start_at),title:e.title,sub:e.location||"",tag:"Compromisso",cls:"ev",onClick:()=>go("/agenda?evento="+e.id)}));
   (mine||[]).forEach(t=>items.push({k:"t"+t.id,time:t.due_time||"",title:t.title,sub:t.project_name||"",tag:"Minha tarefa",cls:"mine",onClick:()=>openTask(t.id)}));
-  (tasks||[]).filter(t=>t.due_date===today&&t.status!=="concluida"&&t.status!=="cancelada"&&(t.assignee===me||t.owner===me||!t.assignee)).forEach(t=>items.push({k:"s"+t.id,time:t.due_time||"",title:t.title,sub:t.assignee_name?"Responsável: "+t.assignee_name:"Equipe",tag:"Equipe",cls:"team",onClick:()=>go("/tarefas-equipe")}));
+  (tasks||[]).filter(t=>t.due_date===today&&t.status!=="concluida"&&t.status!=="cancelada"&&(t.assignee===me||t.owner===me||!t.assignee)).forEach(t=>items.push({k:"s"+t.id,time:t.due_time||"",title:t.title,sub:t.assignee_name?"Responsável: "+t.assignee_name:"Equipe",tag:"Equipe",cls:"team",onClick:()=>go("/equipe")}));
   items.sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
   if(!items.length)return(0,q.jsx)("p",{className:"small muted",style:{padding:"4px 20px 16px"},children:"Nada marcado para hoje: sem compromissos nem tarefas com prazo hoje."});
   return(0,q.jsx)("ul",{className:"today-events av-agenda",children:items.map(it=>(0,q.jsxs)("li",{className:"clickable "+it.cls,onClick:it.onClick,children:[
