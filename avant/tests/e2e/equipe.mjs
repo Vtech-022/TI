@@ -321,6 +321,20 @@ try {
   check("Ana recebe texto e arquivo", /Oi Ana, tudo bem\?/.test(await a.locator(".avc-msgs").innerText()));
   const tam = await a.evaluate(async () => { const h = await fetch(document.querySelector(".avc-file").getAttribute("href")); return (await h.arrayBuffer()).byteLength; });
   check("download do arquivo volta inteiro", tam === 5 * 1024 * 1024 + 123, String(tam));
+  await v.locator('.avc-row.mine:has-text("Oi Ana") .avc-bub').hover();
+  await v.locator('.avc-row.mine:has-text("Oi Ana") button[aria-label="Editar mensagem"]').click();
+  await v.locator(".avc-form textarea").fill("Oi Ana, bom dia!");
+  await v.locator(".avc-form textarea").press("Enter");
+  await v.waitForSelector('.avc-txt:has-text("bom dia")');
+  check("mensagem editada aparece como 'editada'", /editada/.test(await v.locator(".avc-msgs").innerText()));
+  await a.waitForSelector('.avc-txt:has-text("bom dia")', { timeout: 15000 });
+  check("edição chega para a Ana", true);
+  v.once("dialog", (d) => d.accept());
+  await v.locator('.avc-row.mine:has(.avc-file) .avc-bub').hover();
+  await v.locator('.avc-row.mine:has(.avc-file) button[aria-label="Apagar mensagem"]').click();
+  await v.waitForFunction(() => !document.querySelector(".avc-file"));
+  await a.waitForFunction(() => !document.querySelector(".avc-file"), null, { timeout: 15000 });
+  check("mensagem com arquivo apagada para os dois", true);
   await a.locator(".avc-close").click();
   await v.locator(".avc-close").click();
 

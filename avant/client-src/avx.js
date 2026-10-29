@@ -655,21 +655,26 @@ function AvThread({peer,onBack}){
   const{reload}=useChatSummary();
   const who=people&&people.find(p=>p.id===peer);
   const[msgs,setMsgs]=x.useState([]),[text,setText]=x.useState(""),[up,setUp]=x.useState(null),[err,setErr]=x.useState("");
-  const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const[edit,setEdit]=x.useState(null);const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const sig=x.useRef("");
   const pull=x.useCallback(async()=>{
     try{
-      const r=await __avJson("/chat/"+peer+"?read=1&after="+last.current);
-      if(r.msgs.length){last.current=r.msgs[r.msgs.length-1].at;setMsgs(m=>{const ids=new Set(m.map(z=>z.id));return[...m,...r.msgs.filter(z=>!ids.has(z.id))]});reload()}
+      const r=await __avJson("/chat/"+peer+"?read=1");
+      const s=r.msgs.map(z=>z.id+":"+(z.edited||0)).join(",");
+      if(s!==sig.current){sig.current=s;setMsgs(r.msgs);reload()}
     }catch{}
   },[peer]);
-  x.useEffect(()=>{last.current=0;setMsgs([]);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
+  x.useEffect(()=>{sig.current="";setMsgs([]);setEdit(null);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
   x.useEffect(()=>{const b=box.current;if(b&&stick.current)b.scrollTop=b.scrollHeight},[msgs,up]);
   const send=async(t,fid)=>{
     const r=await __avJson("/chat/"+peer,{method:"POST",body:{text:t,...(fid?{file:{id:fid}}:{})}});
     last.current=Math.max(last.current,r.msg.at);stick.current=!0;
     setMsgs(m=>m.some(z=>z.id===r.msg.id)?m:[...m,r.msg]);reload();
   };
-  const sendText=async e=>{e&&e.preventDefault();const t=text.trim();if(!t)return;setErr("");setText("");try{await send(t)}catch(x2){setText(t);setErr(x2?.message||"Não foi possível enviar.")}};
+  const sendText=async e=>{e&&e.preventDefault();const t=text.trim();if(!t&&!edit)return;setErr("");
+    if(edit){try{await __avJson("/chat/"+peer+"/"+edit.id,{method:"PATCH",body:{text:t}});setEdit(null);setText("");sig.current="";await pull()}catch(x2){setErr(x2?.message||"Não foi possível editar.")}return}
+    setText("");try{await send(t)}catch(x2){setText(t);setErr(x2?.message||"Não foi possível enviar.")}};
+  const del=async m=>{if(!confirm("Apagar esta mensagem para os dois? Não dá para desfazer."))return;try{await __avJson("/chat/"+peer+"/"+m.id,{method:"DELETE"});sig.current="";if(edit&&edit.id===m.id){setEdit(null);setText("")}await pull()}catch(x2){setErr(x2?.message||"Não foi possível apagar.")}};
   const sendFiles=async files=>{
     setErr("");
     for(const f of files){
@@ -685,9 +690,11 @@ function AvThread({peer,onBack}){
       (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:who?who.name:"Conversa"}),(0,q.jsx)("small",{children:who&&who.online?"Online agora":"Offline"})]})]}),
     (0,q.jsxs)("div",{className:"avc-msgs",ref:box,onScroll:e=>{const b=e.target;stick.current=b.scrollHeight-b.scrollTop-b.clientHeight<60},children:[
       msgs.length===0&&(0,q.jsx)("p",{className:"avc-empty",children:"Diga olá! Você também pode arrastar arquivos para cá."}),
-      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:__avClock(m.at)})]})]},m.id)),
+      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:(m.edited?"editada · ":"")+__avClock(m.at)}),
+        m.from===me&&(0,q.jsxs)("span",{className:"avc-act",children:[(m.text||!m.file)&&(0,q.jsx)("button",{type:"button",title:"Editar mensagem","aria-label":"Editar mensagem",onClick:()=>{setEdit(m);setText(m.text||"")},children:"✎"}),(0,q.jsx)("button",{type:"button",title:"Apagar mensagem","aria-label":"Apagar mensagem",onClick:()=>del(m),children:"🗑"})]})]})]},m.id)),
       up&&(0,q.jsxs)("div",{className:"avc-row mine",children:[(0,q.jsxs)("div",{className:"avc-bub avc-up",children:["Enviando "+up.name+"… "+Math.round(up.p*100)+"%",(0,q.jsx)("i",{style:{width:Math.round(up.p*100)+"%"}})]})]})]}),
     err&&(0,q.jsx)("p",{className:"avc-err",role:"alert",children:err}),
+    edit&&(0,q.jsxs)("p",{className:"avc-editing",children:["Editando mensagem ",(0,q.jsx)("button",{type:"button",onClick:()=>{setEdit(null);setText("")},children:"cancelar"})]}),
     (0,q.jsxs)("form",{className:"avc-form",onSubmit:sendText,children:[
       (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),children:"📎"}),
       (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),

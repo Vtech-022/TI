@@ -249,7 +249,7 @@ td .pill{padding-top:3px;padding-bottom:3px}
 @media (prefers-reduced-motion:reduce){.avh-orb,.avh-ring{animation:none}.avh-arc{transition:none}}
 
 /* faixa de colegas: centralizada, na cor de destaque */
-.avo-strip{top:50%!important;transform:translateY(-50%);background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--deep,#1b1250)) 60%,color-mix(in srgb,var(--accent) 50%,var(--accent2,#ffc83d)))!important;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 45%,transparent)!important;border:1px solid #ffffff40}
+.avo-strip{top:84px!important;transform:none;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--deep,#1b1250)) 60%,color-mix(in srgb,var(--accent) 50%,var(--accent2,#ffc83d)))!important;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 45%,transparent)!important;border:1px solid #ffffff40}
 .avo-strip .avo-face{border:0;background:none;padding:0;cursor:pointer;border-radius:50%;transition:transform .15s}
 .avo-strip .avo-face:not(:disabled):hover{transform:scale(1.12)}
 .avo-strip .avo-face:disabled{cursor:default}
@@ -307,3 +307,21 @@ td .pill{padding-top:3px;padding-bottom:3px}
 .avp-dots i:first-child{margin-left:0}
 .avp-bar{height:10px;border-radius:999px}
 .avp-card strong{font-size:12.5px;color:#fff}
+
+.avc-act{position:absolute;top:2px;right:4px;display:none;gap:2px;background:#0000008c;border-radius:10px;padding:1px 3px}
+.avc-bub:hover .avc-act,.avc-bub:focus-within .avc-act{display:flex}
+.avc-act button{border:0;background:none;color:#fff;cursor:pointer;font-size:12px;padding:2px 4px}
+.avc-editing{margin:0;padding:5px 12px;font-size:12px;background:color-mix(in srgb,var(--accent2,#ffc83d) 30%,transparent)}
+.avc-editing button{border:0;background:none;color:var(--accent-fg);cursor:pointer;text-decoration:underline;font-size:12px}
+
+/* ===== Cores suaves (menos agressivas para a vista) — sobrescreve os gradientes anteriores ===== */
+:root{--avs:color-mix(in srgb,var(--accent) 58%,var(--deep,#1b1250));--avs2:color-mix(in srgb,var(--accent) 34%,var(--deep,#1b1250))}
+.day-hero{background:radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--accent2,#ffc83d) 22%,transparent),#0000 42%),linear-gradient(120deg,var(--avs),var(--avs2))!important;box-shadow:0 10px 26px color-mix(in srgb,var(--avs) 30%,transparent)!important}
+.avh{background:linear-gradient(145deg,var(--avs),var(--avs2) 75%,color-mix(in srgb,var(--accent2,#ffc83d) 12%,var(--avs2)))!important;box-shadow:0 10px 26px color-mix(in srgb,var(--avs) 30%,transparent)!important}
+.avh-orb{opacity:.22}
+.avh-ring{filter:drop-shadow(0 0 8px #ffffff22)}
+.avo-strip{background:linear-gradient(180deg,var(--avs),var(--avs2))!important;box-shadow:0 8px 22px color-mix(in srgb,var(--avs) 35%,transparent)!important}
+.avo-cnt{background:color-mix(in srgb,var(--accent2,#ffc83d) 82%,#fff0)}
+.avc-head,.avc-row.mine .avc-bub{background:linear-gradient(135deg,var(--avs),var(--avs2))}
+.avc-send{background:var(--avs)}
+.avh-rows li{background:#ffffff17}

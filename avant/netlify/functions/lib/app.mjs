@@ -783,6 +783,41 @@ async function handleChatSend(request, ctx, peerId) {
   return json(201, { msg });
 }
 
+async function handleChatEdit(request, ctx, peerId, msgId) {
+  const me = await requireUser(request, ctx);
+  await chatPeer(ctx, me, peerId);
+  const body = await readJson(request);
+  const text = String(body.text ?? "").trim().slice(0, CHAT_TEXT_MAX);
+  let found = null;
+  await updateJSON(ctx.store, `chat/${pairKey(me.id, peerId)}`, (cur) => {
+    const m = cur?.msgs.find((z) => z.id === msgId);
+    if (!m || m.from !== me.id) return undefined;
+    if (!text && !m.file) return undefined;
+    m.text = text; m.edited = ctx.now(); found = m;
+    return cur;
+  });
+  if (!found) throw new ApiError(404, "mensagem", "Mensagem não encontrada, ou não é sua, ou ficou vazia.");
+  return json(200, { msg: found });
+}
+
+async function handleChatDelete(request, ctx, peerId, msgId) {
+  const me = await requireUser(request, ctx);
+  await chatPeer(ctx, me, peerId);
+  let gone = null;
+  await updateJSON(ctx.store, `chat/${pairKey(me.id, peerId)}`, (cur) => {
+    const i = cur ? cur.msgs.findIndex((z) => z.id === msgId && z.from === me.id) : -1;
+    if (i < 0) return undefined;
+    gone = cur.msgs.splice(i, 1)[0];
+    return cur;
+  });
+  if (!gone) throw new ApiError(404, "mensagem", "Mensagem não encontrada ou não é sua.");
+  if (gone.file) {
+    for (const k of await ctx.store.list(`chatfile/${gone.file.id}/`)) await ctx.store.del(k).catch(() => {});
+    await ctx.store.del(`chatmeta/${gone.file.id}`).catch(() => {});
+  }
+  return json(200, { ok: true });
+}
+
 async function handleChatUploadStart(request, ctx) {
   const me = await requireUser(request, ctx);
   const body = await readJson(request);
@@ -1139,6 +1174,8 @@ export async function handle(request, ctx) {
     if (method === "PUT" && path === "/avatar") return await handlePutAvatar(request, ctx);
     if (method === "DELETE" && path === "/avatar") return await handleDeleteAvatar(request, ctx);
     if (method === "GET" && (m = path.match(/^\/avatar\/([0-9a-f]{24})$/))) return await handleGetAvatar(request, ctx, m[1]);
+    if (method === "PATCH" && (m = path.match(/^\/chat\/([0-9a-f]{24})\/([0-9a-f]{24})$/))) return await handleChatEdit(request, ctx, m[1], m[2]);
+    if (method === "DELETE" && (m = path.match(/^\/chat\/([0-9a-f]{24})\/([0-9a-f]{24})$/))) return await handleChatDelete(request, ctx, m[1], m[2]);
     if (method === "GET" && path === "/chat") return await handleChatSummary(request, ctx);
     if (method === "POST" && path === "/chat/upload") return await handleChatUploadStart(request, ctx);
     if (method === "PUT" && (m = path.match(/^\/chat\/upload\/([0-9a-f]{24})\/(\d{1,5})$/))) return await handleChatUploadChunk(request, ctx, m[1], m[2]);

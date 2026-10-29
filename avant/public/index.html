@@ -263,7 +263,7 @@ td .pill{padding-top:3px;padding-bottom:3px}
 @media (prefers-reduced-motion:reduce){.avh-orb,.avh-ring{animation:none}.avh-arc{transition:none}}
 
 /* faixa de colegas: centralizada, na cor de destaque */
-.avo-strip{top:50%!important;transform:translateY(-50%);background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--deep,#1b1250)) 60%,color-mix(in srgb,var(--accent) 50%,var(--accent2,#ffc83d)))!important;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 45%,transparent)!important;border:1px solid #ffffff40}
+.avo-strip{top:84px!important;transform:none;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--deep,#1b1250)) 60%,color-mix(in srgb,var(--accent) 50%,var(--accent2,#ffc83d)))!important;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 45%,transparent)!important;border:1px solid #ffffff40}
 .avo-strip .avo-face{border:0;background:none;padding:0;cursor:pointer;border-radius:50%;transition:transform .15s}
 .avo-strip .avo-face:not(:disabled):hover{transform:scale(1.12)}
 .avo-strip .avo-face:disabled{cursor:default}
@@ -321,6 +321,24 @@ td .pill{padding-top:3px;padding-bottom:3px}
 .avp-dots i:first-child{margin-left:0}
 .avp-bar{height:10px;border-radius:999px}
 .avp-card strong{font-size:12.5px;color:#fff}
+
+.avc-act{position:absolute;top:2px;right:4px;display:none;gap:2px;background:#0000008c;border-radius:10px;padding:1px 3px}
+.avc-bub:hover .avc-act,.avc-bub:focus-within .avc-act{display:flex}
+.avc-act button{border:0;background:none;color:#fff;cursor:pointer;font-size:12px;padding:2px 4px}
+.avc-editing{margin:0;padding:5px 12px;font-size:12px;background:color-mix(in srgb,var(--accent2,#ffc83d) 30%,transparent)}
+.avc-editing button{border:0;background:none;color:var(--accent-fg);cursor:pointer;text-decoration:underline;font-size:12px}
+
+/* ===== Cores suaves (menos agressivas para a vista) — sobrescreve os gradientes anteriores ===== */
+:root{--avs:color-mix(in srgb,var(--accent) 58%,var(--deep,#1b1250));--avs2:color-mix(in srgb,var(--accent) 34%,var(--deep,#1b1250))}
+.day-hero{background:radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--accent2,#ffc83d) 22%,transparent),#0000 42%),linear-gradient(120deg,var(--avs),var(--avs2))!important;box-shadow:0 10px 26px color-mix(in srgb,var(--avs) 30%,transparent)!important}
+.avh{background:linear-gradient(145deg,var(--avs),var(--avs2) 75%,color-mix(in srgb,var(--accent2,#ffc83d) 12%,var(--avs2)))!important;box-shadow:0 10px 26px color-mix(in srgb,var(--avs) 30%,transparent)!important}
+.avh-orb{opacity:.22}
+.avh-ring{filter:drop-shadow(0 0 8px #ffffff22)}
+.avo-strip{background:linear-gradient(180deg,var(--avs),var(--avs2))!important;box-shadow:0 8px 22px color-mix(in srgb,var(--avs) 35%,transparent)!important}
+.avo-cnt{background:color-mix(in srgb,var(--accent2,#ffc83d) 82%,#fff0)}
+.avc-head,.avc-row.mine .avc-bub{background:linear-gradient(135deg,var(--avs),var(--avs2))}
+.avc-send{background:var(--avs)}
+.avh-rows li{background:#ffffff17}
 
 </style>
 </head>
@@ -1601,21 +1619,26 @@ function AvThread({peer,onBack}){
   const{reload}=useChatSummary();
   const who=people&&people.find(p=>p.id===peer);
   const[msgs,setMsgs]=x.useState([]),[text,setText]=x.useState(""),[up,setUp]=x.useState(null),[err,setErr]=x.useState("");
-  const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const[edit,setEdit]=x.useState(null);const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const sig=x.useRef("");
   const pull=x.useCallback(async()=>{
     try{
-      const r=await __avJson("/chat/"+peer+"?read=1&after="+last.current);
-      if(r.msgs.length){last.current=r.msgs[r.msgs.length-1].at;setMsgs(m=>{const ids=new Set(m.map(z=>z.id));return[...m,...r.msgs.filter(z=>!ids.has(z.id))]});reload()}
+      const r=await __avJson("/chat/"+peer+"?read=1");
+      const s=r.msgs.map(z=>z.id+":"+(z.edited||0)).join(",");
+      if(s!==sig.current){sig.current=s;setMsgs(r.msgs);reload()}
     }catch{}
   },[peer]);
-  x.useEffect(()=>{last.current=0;setMsgs([]);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
+  x.useEffect(()=>{sig.current="";setMsgs([]);setEdit(null);pull();const t=setInterval(()=>{if(document.visibilityState==="visible")pull()},3000);return()=>clearInterval(t)},[peer]);
   x.useEffect(()=>{const b=box.current;if(b&&stick.current)b.scrollTop=b.scrollHeight},[msgs,up]);
   const send=async(t,fid)=>{
     const r=await __avJson("/chat/"+peer,{method:"POST",body:{text:t,...(fid?{file:{id:fid}}:{})}});
     last.current=Math.max(last.current,r.msg.at);stick.current=!0;
     setMsgs(m=>m.some(z=>z.id===r.msg.id)?m:[...m,r.msg]);reload();
   };
-  const sendText=async e=>{e&&e.preventDefault();const t=text.trim();if(!t)return;setErr("");setText("");try{await send(t)}catch(x2){setText(t);setErr(x2?.message||"Não foi possível enviar.")}};
+  const sendText=async e=>{e&&e.preventDefault();const t=text.trim();if(!t&&!edit)return;setErr("");
+    if(edit){try{await __avJson("/chat/"+peer+"/"+edit.id,{method:"PATCH",body:{text:t}});setEdit(null);setText("");sig.current="";await pull()}catch(x2){setErr(x2?.message||"Não foi possível editar.")}return}
+    setText("");try{await send(t)}catch(x2){setText(t);setErr(x2?.message||"Não foi possível enviar.")}};
+  const del=async m=>{if(!confirm("Apagar esta mensagem para os dois? Não dá para desfazer."))return;try{await __avJson("/chat/"+peer+"/"+m.id,{method:"DELETE"});sig.current="";if(edit&&edit.id===m.id){setEdit(null);setText("")}await pull()}catch(x2){setErr(x2?.message||"Não foi possível apagar.")}};
   const sendFiles=async files=>{
     setErr("");
     for(const f of files){
@@ -1631,9 +1654,11 @@ function AvThread({peer,onBack}){
       (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:who?who.name:"Conversa"}),(0,q.jsx)("small",{children:who&&who.online?"Online agora":"Offline"})]})]}),
     (0,q.jsxs)("div",{className:"avc-msgs",ref:box,onScroll:e=>{const b=e.target;stick.current=b.scrollHeight-b.scrollTop-b.clientHeight<60},children:[
       msgs.length===0&&(0,q.jsx)("p",{className:"avc-empty",children:"Diga olá! Você também pode arrastar arquivos para cá."}),
-      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:__avClock(m.at)})]})]},m.id)),
+      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:(m.edited?"editada · ":"")+__avClock(m.at)}),
+        m.from===me&&(0,q.jsxs)("span",{className:"avc-act",children:[(m.text||!m.file)&&(0,q.jsx)("button",{type:"button",title:"Editar mensagem","aria-label":"Editar mensagem",onClick:()=>{setEdit(m);setText(m.text||"")},children:"✎"}),(0,q.jsx)("button",{type:"button",title:"Apagar mensagem","aria-label":"Apagar mensagem",onClick:()=>del(m),children:"🗑"})]})]})]},m.id)),
       up&&(0,q.jsxs)("div",{className:"avc-row mine",children:[(0,q.jsxs)("div",{className:"avc-bub avc-up",children:["Enviando "+up.name+"… "+Math.round(up.p*100)+"%",(0,q.jsx)("i",{style:{width:Math.round(up.p*100)+"%"}})]})]})]}),
     err&&(0,q.jsx)("p",{className:"avc-err",role:"alert",children:err}),
+    edit&&(0,q.jsxs)("p",{className:"avc-editing",children:["Editando mensagem ",(0,q.jsx)("button",{type:"button",onClick:()=>{setEdit(null);setText("")},children:"cancelar"})]}),
     (0,q.jsxs)("form",{className:"avc-form",onSubmit:sendText,children:[
       (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),children:"📎"}),
       (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),
