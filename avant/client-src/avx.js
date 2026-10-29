@@ -420,7 +420,16 @@ function AvBulk({open,onClose}){
 function AvDocLink({doc,projects,tasks,onSaved}){
   const run=Oa();
   const save=(body,msg)=>run(()=>Yi.patch("/api/documents/"+doc.id,body),msg).then(r=>{r!==void 0&&onSaved()});
+  const fn=doc.filename||"documento",m=doc.mime||"",ext=(fn.split(".").pop()||"").toLowerCase();
+  const app=/^docx?$|^rtf$|^odt$/.test(ext)?"Word":/^xlsx?$|^csv$|^ods$/.test(ext)?"Excel":/^pptx?$|^odp$/.test(ext)?"PowerPoint":null;
+  const href="/api/documents/"+doc.id+"/file";
+  const inline=/pdf|image\/|text\/plain/.test(m);
   return(0,q.jsxs)("div",{className:"form-grid",style:{marginBottom:12},children:[
+    (0,q.jsxs)("div",{className:"btn-row",style:{gridColumn:"1/-1",gap:8,flexWrap:"wrap"},children:[
+      app&&(0,q.jsx)("a",{className:"btn primary",href,download:fn,title:"Baixa o arquivo original e abre no "+app+" do seu computador",children:"Abrir no "+app}),
+      inline&&(0,q.jsx)("a",{className:"btn primary",href,target:"_blank",rel:"noopener",title:"Abre o documento em tela cheia numa nova aba",children:"Abrir em tela cheia"}),
+      !app&&!inline&&(0,q.jsx)("a",{className:"btn primary",href,download:fn,children:"Abrir no programa de origem"}),
+      app&&(0,q.jsx)("span",{className:"small muted",style:{alignSelf:"center"},children:"Abre o arquivo original no programa instalado (o navegador pode pedir para escolher “Abrir”)."})]}),
     (0,q.jsx)(gl,{label:"Projeto de origem",children:(0,q.jsxs)("select",{className:"select",value:doc.project_id??"",onChange:e=>save({project_id:e.target.value?Number(e.target.value):null},"Vínculo atualizado."),children:[(0,q.jsx)("option",{value:"",children:"—"}),projects.map(p=>(0,q.jsx)("option",{value:p.id,children:p.name},p.id))]})}),
     (0,q.jsx)(gl,{label:"Tarefa de origem",hint:"Digite para buscar. Não cria nada sozinho.",children:(0,q.jsx)(AvPick,{items:tasks.map(t=>({id:t.id,label:t.title})),value:doc.task_id,placeholder:"Buscar tarefa…",ariaLabel:"Tarefa do documento",onPick:id=>save({task_id:id?Number(id):null},"Vínculo atualizado."),onCreate:title=>run(async()=>{const t=await Yi.post("/api/tasks",{title,project_id:doc.project_id||null});await Yi.patch("/api/documents/"+doc.id,{task_id:t.id});return t},"Tarefa criada e vinculada.").then(r=>{r!==void 0&&onSaved()})})})
   ]});
@@ -538,7 +547,7 @@ function AvHomeDash({done,total,late,doing,waiting}){
         (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"150",height:"150",children:[(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"var(--line)",strokeWidth:"12"}),(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g)",strokeWidth:"12",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:C*(1-pct/100),transform:"rotate(-90 64 64)",style:{transition:"stroke-dashoffset .6s"}}),(0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2f6bff"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffc83d"})]})})]}),
         (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:done+"/"+total}),(0,q.jsx)("small",{children:"feitas hoje"})]})]}),
       (0,q.jsxs)("div",{className:"avh-tiles",children:[tiles.map(([l,v,c])=>(0,q.jsxs)("div",{className:"avh-tile",children:[(0,q.jsx)("i",{style:{background:c},children:v}),(0,q.jsx)("span",{children:l})]},l)),
-        (0,q.jsxs)("div",{className:"avh-tile",children:[(0,q.jsx)("i",{style:{background:"#18794e",fontSize:11},children:p?__avHM(p.worked_ms):"—"}),(0,q.jsx)("span",{children:"Horas hoje"})]})]})]})]});
+        ]})]})]});
 }
 
 /* ---- Quem está online ---- */
@@ -552,7 +561,7 @@ function AvOnline(){
     (0,q.jsxs)("div",{className:"panel-head",children:[(0,q.jsx)("h2",{children:"Equipe agora"}),(0,q.jsx)("span",{className:"small muted",children:on.length+" online"})]}),
     (0,q.jsxs)("ul",{className:"avo-list",children:[shown.map(p=>(0,q.jsxs)("li",{className:p.online?"on":"off",children:[
       (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:34}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":""),title:p.online?"Online":"Offline"})]}),
-      (0,q.jsxs)("span",{className:"avo-txt",children:[(0,q.jsx)("strong",{children:p.name+(p.id===window.__avUid?" (você)":"")}),(0,q.jsx)("small",{children:p.working?"Trabalhando · "+__avHM(p.worked_ms):p.worked_ms>0?"Hoje: "+__avHM(p.worked_ms):p.online?"Online":"Offline"})]})]},p.id)),
+      (0,q.jsxs)("span",{className:"avo-txt",children:[(0,q.jsx)("strong",{children:p.name+(p.id===window.__avUid?" (você)":"")}),(0,q.jsx)("small",{children:p.online?"Online":"Offline"})]})]},p.id)),
       shown.length===0&&(0,q.jsx)("li",{className:"small muted",children:"Ninguém online agora."})]}),
     people.length>shown.length||all?(0,q.jsx)("button",{className:"btn sm ghost",style:{margin:"4px 12px 12px"},onClick:()=>setAll(a=>!a),children:all?"Mostrar só quem está online":"Ver toda a equipe ("+people.length+")"}):null]});
 }

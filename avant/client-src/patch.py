@@ -424,9 +424,9 @@ sub("(0,q.jsxs)(`button`,{className:`panel kpi`,style:{textAlign:`left`,padding:
 sub("e.name]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`", "e.name,Wi.auth?.me?.role===`admin`&&/ \\(conta removida\\)$/.test(e.name)&&(0,q.jsx)(`button`,{className:`av-rm`,title:`Remover do histórico da equipe`,onClick:t=>{t.stopPropagation(),confirm(`Remover ${e.name.replace(` (conta removida)`,``)} do histórico e do ranking? Os cartões dela serão apagados do quadro da equipe.`)&&Wi.team.removePerson(e.id).catch(t=>alert(t.message))},children:`Remover`})]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`")
 
 # ---- Tela inicial enxuta: só o dia, números, horas e quem está online ----
-cut("(0,q.jsxs)(`div`,{className:`dh-chips`", "]}),(0,q.jsx)(Fu,{done:u.doneToday.length,total:m})", "(0,q.jsx)(AvWorkTimer,{})")
+cut("(0,q.jsxs)(`div`,{className:`dh-chips`", "]}),(0,q.jsx)(Fu,{done:u.doneToday.length,total:m})", "")
 cut("p.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)(`h3`,{className:`day-sec suggest`", "u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`", "")
-sub("(0,q.jsx)(Lu,{today:c}),", "(0,q.jsx)(AvHomeDash,{done:u.doneToday.length,total:m,late:u.late.length,doing:u.doing.length,waiting:u.waiting}),(0,q.jsx)(AvOnline,{}),(0,q.jsx)(AvNotes,{children:(0,q.jsx)(Lu,{today:c})}),")
+sub("(0,q.jsx)(Lu,{today:c}),", "(0,q.jsx)(AvHomeDash,{done:u.doneToday.length,total:m,late:u.late.length,doing:u.doing.length,waiting:u.waiting}),(0,q.jsx)(AvOnline,{}),(0,q.jsx)(Lu,{today:c}),")
 cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
 # foto de perfil: botão da conta, menu e janela
 sub("children:l.trim().charAt(0).toUpperCase()});return e?", "children:(0,q.jsx)(AvPhoto,{id:window.__avUid,name:l,fallback:l.trim().charAt(0).toUpperCase()})});return e?")

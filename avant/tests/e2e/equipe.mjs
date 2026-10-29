@@ -291,12 +291,10 @@ try {
   await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
   const home = await texto(v);
   check("início mostra 'Equipe agora' com a Ana online", /Equipe agora/.test(home) && /Ana Souza/.test(home));
-  check("início mostra painel do dia e horas", /Seu dia em números/.test(home) && /Horas hoje/.test(home));
+  check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
-  await v.locator('.avw-btn:has-text("Iniciar")').click(); await v.waitForTimeout(1200);
-  check("cronômetro de horas liga", await v.locator('.avw.on').count() === 1);
-  await v.locator('.avw-btn:has-text("Pausar")').click(); await v.waitForTimeout(800);
-  check("cronômetro pausa", await v.locator('.avw.on').count() === 0);
+  check("cronômetro removido do início", await v.locator('.avw').count() === 0);
+  check("anotações voltaram visíveis (sem recolher)", await v.locator('.av-more2').count() === 0);
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
   await v.locator(".account-btn, .rail .avatar.me").first().click().catch(() => {});
   await v.locator('[role=menuitem]:has-text("Foto de perfil")').click();

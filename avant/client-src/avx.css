@@ -192,3 +192,15 @@ td .pill{padding-top:3px;padding-bottom:3px}
 .av-more2{border:1px dashed var(--line-strong);border-radius:14px;padding:8px 12px;margin-top:12px}
 .av-more2>summary{cursor:pointer;font-weight:600;color:var(--text-2);font-size:13px}
 .av-more2[open]>summary{margin-bottom:8px}
+/* ===== Tela inicial mais compacta (menos espaço vazio) ===== */
+.day-hero{padding:16px 22px!important;gap:12px!important}
+.day-hero h1{font-size:24px!important;margin:2px 0!important}
+.day-hero p{font-size:14px!important}
+.day-grid{gap:12px!important}
+.day-side{gap:12px!important}
+.avh-body{padding:0 14px 12px;gap:10px}
+.avh-ring,.avh-ring svg{width:112px;height:112px}
+.avh-center strong{font-size:20px}
+.avh-tiles{grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
+.avh-tile i{min-width:36px;height:36px;font-size:14px}
+.avo-list{padding:2px 12px 6px;gap:6px}
