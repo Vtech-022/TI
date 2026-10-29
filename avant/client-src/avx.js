@@ -557,7 +557,7 @@ function AvHomeDash({done,total,late,doing,waiting}){
     (0,q.jsxs)("div",{className:"avh-body",children:[
       (0,q.jsxs)("div",{className:"avh-ring",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
         (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"132",height:"132",children:[
-          (0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g2",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffe27a)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffffff"})]})}),
+          (0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g2",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffe27a)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"var(--accent)"})]})}),
           (0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"#ffffff30",strokeWidth:"11"}),
           (0,q.jsx)("circle",{className:"avh-arc",cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g2)",strokeWidth:"11",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:go?C*(1-pct/100):C,transform:"rotate(-90 64 64)"})]}),
         (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:nDone+"/"+total}),(0,q.jsx)("small",{children:nPct+"% feito hoje"})]})]}),
@@ -575,10 +575,8 @@ function AvOnline(){
   const total=Object.values(peers).reduce((s,v)=>s+v.unread,0);
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
   return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
-    (0,q.jsx)("span",{className:"avo-cnt",title:"Pessoas online agora",children:people.filter(p=>p.online).length}),
     shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
-    extra>0&&(0,q.jsx)("span",{className:"avo-cnt",title:extra+" pessoas a mais",children:"+"+extra}),
-    (0,q.jsxs)("button",{className:"avo-chat",onClick:()=>open(null),title:"Abrir conversas","aria-label":"Abrir conversas",children:["💬",total>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:total})]})]});
+    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
@@ -644,7 +642,7 @@ async function __avSendFile(peer,file,onProg){
 }
 
 function AvMsgFile({f,mine}){
-  const url="/api/chat/file/"+f.id;
+  const url=location.origin+"/api/chat/file/"+f.id; /* URL absoluta: o app intercepta links que começam com /api/ */
   if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("a",{href:url,target:"_blank",rel:"noopener",children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
   return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:"📎"}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
 }

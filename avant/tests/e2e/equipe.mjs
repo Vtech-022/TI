@@ -236,8 +236,7 @@ try {
   await ir(v, "Minhas tarefas");
   check("Minhas tarefas não ganhou lixo do documento", !/enviar o relatório|aprovar o orçamento/.test(await texto(v)));
   await ir(v, "Arquivos e Documentos");
-  await v.locator("input[placeholder*='Pesquisar arquivo']").fill("ata");
-  check("pesquisa de arquivo filtra a lista", /ata-reuniao/.test(await texto(v)));
+  check("campo 'Pesquisar arquivo' removido", (await v.locator("input[placeholder*='Pesquisar arquivo']").count()) === 0);
   const campoTarefa = v.locator("td input[placeholder='Buscar tarefa…']").first();
   check("campo Tarefa é uma caixa de busca (sem lista longa)", (await campoTarefa.count()) === 1 && (await v.locator(".avp-list").count()) === 0);
   await campoTarefa.fill("plano");
@@ -319,6 +318,8 @@ try {
   await a.locator('.avo-strip .avo-face[title^="Victor"]').click();
   await a.waitForSelector('.avc-file strong:has-text("contrato final.docx")', { timeout: 15000 });
   check("Ana recebe texto e arquivo", /Oi Ana, tudo bem\?/.test(await a.locator(".avc-msgs").innerText()));
+  const [dl] = await Promise.all([a.waitForEvent("download", { timeout: 15000 }), a.locator(".avc-file").click()]);
+  check("clicar no arquivo do chat baixa de verdade (sem 'Rota não encontrada')", dl.suggestedFilename() === "contrato final.docx", dl.suggestedFilename());
   const tam = await a.evaluate(async () => { const h = await fetch(document.querySelector(".avc-file").getAttribute("href")); return (await h.arrayBuffer()).byteLength; });
   check("download do arquivo volta inteiro", tam === 5 * 1024 * 1024 + 123, String(tam));
   await v.locator('.avc-row.mine:has-text("Oi Ana") .avc-bub').hover();

@@ -450,7 +450,7 @@ sub("return(0,q.jsxs)(`div`,{className:`myday`,children:[(0,q.jsxs)(`section`,{c
 sub("function Eu(){let{data:e,error:t}=Da(`/api/documents`),{data:n}=Da(`/api/tasks?include_closed=1`),",
     "function Eu(){let{data:avAll,error:t}=Da(`/api/documents`),[avq,setAvq]=(0,x.useState)(``),e=avAll&&avAll.filter(d=>!avq.trim()||__avNorm(d.filename).includes(__avNorm(avq))),{data:n}=Da(`/api/tasks?include_closed=1`),")
 sub("`${t.name}: importado e texto extraído.`", "`${t.name}: importado. Clique em “Ver” para abrir e ligar ao projeto ou tarefa.`")
-sub("(0,q.jsx)(ll,{error:t}),(0,q.jsx)(sl,{title:`Arquivos`,", "(0,q.jsx)(ll,{error:t}),(0,q.jsx)(`input`,{className:`input`,style:{maxWidth:420,marginBottom:12},placeholder:`Pesquisar arquivo pelo nome…`,\"aria-label\":`Pesquisar arquivo`,value:avq,onChange:e=>setAvq(e.target.value)}),(0,q.jsx)(sl,{title:`Arquivos`,")
+# (campo de pesquisa de arquivos removido a pedido)
 cut("e.parse_status===`ok`&&(0,q.jsxs)(`button`,{className:`btn sm`,title:`Enviar o texto para a Captura Inteligente`",
     "(0,q.jsx)(`a`,{className:`btn sm ghost`,href:`/api/documents/${e.id}/file`",
     "(0,q.jsx)(`button`,{className:`btn sm`,onClick:()=>d({doc:String(e.id)}),children:`Ver`}),")
