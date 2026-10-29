@@ -781,60 +781,53 @@ function AvChat(){
 }
 
 /* ===== Paletas de cores prontas (cada pessoa escolhe a sua) ===== */
-/* ===== Temas prontos (testados para leitura) + cores livres com contraste automático ===== */
+/* ===== Estilos de cor em gradiente — cada um funciona no modo claro E no escuro =====
+   A pessoa escolhe só as 2 cores do gradiente; fundo, cartões e letras são calculados
+   a partir do modo (claro fica claro, escuro fica escuro) e com contraste garantido. */
 const __avThemes=[
-  {key:"padrao",name:"Padrão Zênite",mode:"claro",bg:"#f3f6fb",card:"#ffffff",hero:"#1d3f8f",accent:"#2563eb",accent2:"#f5b301",tip:"Branco, azul e amarelo"},
-  {key:"neve",name:"Neve",mode:"claro",bg:"#f5f6f8",card:"#ffffff",hero:"#26292f",accent:"#3b5bdb",accent2:"#12b886",tip:"Claro e neutro"},
-  {key:"areia",name:"Areia",mode:"claro",bg:"#f6f1e8",card:"#fffaf2",hero:"#5b3a1e",accent:"#c2410c",accent2:"#d4a017",tip:"Tons quentes"},
-  {key:"menta",name:"Menta",mode:"claro",bg:"#edf6f1",card:"#ffffff",hero:"#0f4c3a",accent:"#059669",accent2:"#0ea5e9",tip:"Verde suave"},
-  {key:"lavanda",name:"Lavanda",mode:"claro",bg:"#f2f0fa",card:"#ffffff",hero:"#3b2a6b",accent:"#7c3aed",accent2:"#ec4899",tip:"Lilás claro"},
-  {key:"grafite",name:"Grafite",mode:"escuro",bg:"#0c0d0f",card:"#17191d",hero:"#1d2025",accent:"#4f8cff",accent2:"#7dd3fc",tip:"Escuro neutro"},
-  {key:"meianoite",name:"Meia-noite",mode:"escuro",bg:"#070a14",card:"#111827",hero:"#172036",accent:"#6366f1",accent2:"#a5b4fc",tip:"Azul profundo"},
-  {key:"floresta",name:"Floresta",mode:"escuro",bg:"#07100c",card:"#0f1d17",hero:"#132a20",accent:"#22c55e",accent2:"#a3e635",tip:"Verde escuro"},
-  {key:"oceano",name:"Oceano",mode:"escuro",bg:"#061214",card:"#0d1f24",hero:"#123038",accent:"#14b8a6",accent2:"#67e8f9",tip:"Azul-petróleo"},
-  {key:"vinho",name:"Vinho",mode:"escuro",bg:"#12070a",card:"#1f0f14",hero:"#2c141c",accent:"#e11d48",accent2:"#fda4af",tip:"Vermelho escuro"},
-  {key:"ametista",name:"Ametista",mode:"escuro",bg:"#0d0816",card:"#1a1228",hero:"#251a3a",accent:"#a855f7",accent2:"#f0abfc",tip:"Roxo escuro"}
+  {key:"padrao",name:"Padrão Zênite",a:"#2563eb",b:"#f5b301",tip:"Azul com amarelo"},
+  {key:"aurora",name:"Aurora boreal",a:"#0ea5a4",b:"#6366f1",tip:"Verde-água para índigo"},
+  {key:"porsol",name:"Pôr do sol",a:"#f97316",b:"#e11d74",tip:"Laranja para rosa"},
+  {key:"oceano",name:"Oceano",a:"#1d4ed8",b:"#06b6d4",tip:"Azul para ciano"},
+  {key:"floresta",name:"Floresta",a:"#047857",b:"#84cc16",tip:"Esmeralda para lima"},
+  {key:"ametista",name:"Ametista",a:"#7c3aed",b:"#db2777",tip:"Violeta para magenta"},
+  {key:"grafite",name:"Grafite",a:"#475569",b:"#3b82f6",tip:"Cinza com azul, discreto"}
 ];
 const __avPalettes=__avThemes;
 const __avHex=h=>/^#[0-9a-f]{6}$/i.test(h||"");
-function __avLum(h){if(!__avHex(h))return 0;const c=[1,3,5].map(i=>{let v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+const __avRgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+const __avToHex=c=>"#"+c.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+const __avMix=(a,b,w)=>{const x1=__avRgb(a),x2=__avRgb(b);return __avToHex(x1.map((v,i)=>v*w+x2[i]*(1-w)))};
+function __avLum(h){if(!__avHex(h))return 0;const c=__avRgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
 function __avContrast(a,b){const x1=__avLum(a)+.05,x2=__avLum(b)+.05;return x1>x2?x1/x2:x2/x1}
-/* chamada pelo efeito de aparência: aplica fundo, cartões e escolhe a cor das letras sozinha */
 function __avInk(l,dark){
   const root=document.documentElement,st=root.style;
-  const themed=!!(l.palette&&l.palette!=="custom"&&__avThemes.some(z=>z.key===l.palette))||l.palette==="custom";
-  const card=__avHex(l.card)?l.card:(dark?"#17191d":"#ffffff");
-  const bg=__avHex(l.bg)?l.bg:(dark?"#0c0d0f":"#f3f6fb");
-  const hero=__avHex(l.hero)?l.hero:card;
-  const ink=c=>__avLum(c)>.4?["#16181d","#454a55","#6b717d"]:["#f2f3f7","#bfc2cc","#8b909b"];
-  const ci=ink(card),bi=ink(bg),hi=ink(hero);
-  st.setProperty("--avcard",card);st.setProperty("--avbg",bg);st.setProperty("--avhero",hero);
-  st.setProperty("--avink",ci[0]);st.setProperty("--avink2",ci[1]);st.setProperty("--avink3",ci[2]);
-  st.setProperty("--avbgink",bi[0]);st.setProperty("--avbgink2",bi[1]);
-  st.setProperty("--avheroink",hi[0]);st.setProperty("--avheroink2",hi[1]);
-  root.classList.toggle("av-themed",themed);
-  root.classList.toggle("av-cardlight",__avLum(card)>.4);
-  root.classList.toggle("av-herolight",__avLum(hero)>.4);
+  const A=__avHex(l.accent)?l.accent:"#2563eb",B=__avHex(l.accent2)?l.accent2:"#f5b301";
+  let bg,card,h1,h2;
+  if(dark){bg=__avMix(A,"#0a0b0e",.06);card=__avMix(A,"#16181c",.07);h1=__avMix(A,"#000000",.62);h2=__avMix(B,"#000000",.5)}
+  else{bg=__avMix(A,"#f6f7fa",.05);card="#ffffff";h1=__avMix(A,"#000000",.92);h2=__avMix(__avMix(A,B,.45),"#000000",.92)}
+  const heroLight=Math.max(__avLum(h1),__avLum(h2))>.42;
+  const ci=dark?["#eef0f4","#b7bbc5","#868b96"]:["#14161b","#454a55","#6b717d"];
+  const hi=heroLight?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"];
+  [["--avbg",bg],["--avcard",card],["--avhero",h1],["--avhero1",h1],["--avhero2",h2],["--avink",ci[0]],["--avink2",ci[1]],["--avink3",ci[2]],["--avbgink",ci[0]],["--avbgink2",ci[1]],["--avheroink",hi[0]],["--avheroink2",hi[1]]].forEach(([k,v])=>st.setProperty(k,v));
+  root.classList.add("av-themed");
+  root.classList.toggle("av-cardlight",!dark);
+  root.classList.toggle("av-herolight",heroLight);
 }
 function AvPalettes({n,r}){
-  const[adv,setAdv]=x.useState(n.palette==="custom");
-  const pick=p=>r({palette:p.key,theme:p.mode,accent:p.accent,accent2:p.accent2,card:p.card,bg:p.bg,hero:p.hero});
-  const card=__avHex(n.card)?n.card:"#ffffff",acc=__avHex(n.accent)?n.accent:"#2563eb";
-  const weak=__avContrast(acc,card)<2.2;
-  const grp=m=>__avThemes.filter(z=>z.mode===m).map(p=>(0,q.jsxs)("button",{className:"avth"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>pick(p),style:{background:p.bg},children:[
-      (0,q.jsx)("span",{className:"avth-hero",style:{background:p.hero}}),
-      (0,q.jsxs)("span",{className:"avth-card",style:{background:p.card},children:[(0,q.jsx)("i",{style:{background:p.accent}}),(0,q.jsx)("i",{style:{background:p.accent2}}),(0,q.jsx)("b",{style:{background:__avLum(p.card)>.4?"#16181d22":"#ffffff2a"}})]}),
-      (0,q.jsxs)("span",{className:"avth-name",style:{color:__avLum(p.bg)>.4?"#16181d":"#f2f3f7"},children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:p.tip})]})]},p.key));
-  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Temas de cores"}),
-    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 10px"},children:"Temas prontos e testados para leitura. Ao escolher, o site muda para claro ou escuro conforme o tema. Vale só para você."}),
-    (0,q.jsx)("h4",{className:"avth-grp",children:"Claros"}),(0,q.jsx)("div",{className:"avth-grid",children:grp("claro")}),
-    (0,q.jsx)("h4",{className:"avth-grp",children:"Escuros"}),(0,q.jsx)("div",{className:"avth-grid",children:grp("escuro")}),
-    (0,q.jsxs)("details",{className:"avth-adv",open:adv,onToggle:e=>setAdv(e.target.open),children:[(0,q.jsx)("summary",{children:"Personalizar cores (avançado)"}),
-      (0,q.jsx)("p",{className:"small muted",children:"As letras se ajustam sozinhas: em cor clara ficam escuras, em cor escura ficam claras."}),
+  const pick=p=>r({palette:p.key,accent:p.a,accent2:p.b});
+  const A=__avHex(n.accent)?n.accent:"#2563eb",B=__avHex(n.accent2)?n.accent2:"#f5b301";
+  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Estilo de cores"}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 10px"},children:"Cada estilo é um gradiente de duas cores e funciona no modo claro e no escuro (botão de lua/sol no topo). As letras ajustam o contraste sozinhas. Vale só para você."}),
+    (0,q.jsx)("div",{className:"avth-grid",children:__avThemes.map(p=>(0,q.jsxs)("button",{className:"avth"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>pick(p),children:[
+      (0,q.jsx)("span",{className:"avth-grad",style:{background:"linear-gradient(135deg,"+p.a+","+p.b+")"}}),
+      (0,q.jsxs)("span",{className:"avth-modes",children:[(0,q.jsxs)("i",{className:"lt",children:[(0,q.jsx)("b",{style:{background:"linear-gradient(135deg,"+__avMix(p.a,"#000000",.92)+","+__avMix(__avMix(p.a,p.b,.45),"#000000",.92)+")"}}),"Claro"]}),(0,q.jsxs)("i",{className:"dk",children:[(0,q.jsx)("b",{style:{background:"linear-gradient(135deg,"+__avMix(p.a,"#000000",.62)+","+__avMix(p.b,"#000000",.5)+")"}}),"Escuro"]})]}),
+      (0,q.jsxs)("span",{className:"avth-name",children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:p.tip})]})]},p.key))}),
+    (0,q.jsxs)("div",{className:"avth-own",children:[(0,q.jsx)("strong",{children:"Monte o seu gradiente"}),
       (0,q.jsxs)("div",{className:"avp-custom",children:[
-        [["accent","Cor de destaque","#2563eb"],["accent2","Brilho","#f5b301"],["card","Cartões","#ffffff"],["hero","Faixa do topo","#1d3f8f"],["bg","Fundo","#f3f6fb"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:__avHex(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
-        (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>pick(__avThemes[0]),children:"Voltar ao padrão"})]}),
-      weak&&(0,q.jsx)("p",{className:"avth-warn",role:"status",children:"A cor de destaque está muito parecida com a dos cartões e pode ficar difícil de ver. Escolha uma cor mais contrastante."})]})]});
+        [["accent","Cor 1",A],["accent2","Cor 2",B]].map(([k,l,v])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:v,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
+        (0,q.jsx)("span",{className:"avth-prev",style:{background:"linear-gradient(135deg,"+A+","+B+")"}}),
+        (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>pick(__avThemes[0]),children:"Voltar ao padrão"})]})]})]});
 }
 
 /* ===== Animação ao trocar entre modo claro e escuro =====

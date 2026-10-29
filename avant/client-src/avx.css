@@ -674,3 +674,23 @@ html :is(.day-hero,.avh) :is(p,small,em,span,.avh2-big span){color:var(--avheroi
 :root[data-avant-theme=dark] .notes-card textarea::placeholder{color:var(--avink3)!important}
 
 :root.av-themed:not([data-avant-theme=dark]) .panel.kpi{background:var(--avcard)!important}
+
+/* ===== v4: claro é claro, escuro é escuro — cores do estilo só nos destaques e gradientes ===== */
+:root.av-themed{--text:var(--avink);--text-2:var(--avink2);--text-3:var(--avink3);--heading:var(--avink)}
+:root.av-themed:not([data-avant-theme=dark]) canvas.wallpaper{display:block!important;opacity:.35}
+:root.av-themed:not([data-avant-theme=dark]) .notes-card{background:#fffaeb!important;color:#3d3215!important}
+:root[data-avant-theme=dark] .notes-card{background:linear-gradient(160deg,color-mix(in srgb,var(--avcard) 92%,#f5b301 8%),var(--avcard))!important}
+html:root .day-hero.day-hero,html:root .avh.avh{background:linear-gradient(118deg,#ffffff1a 0%,#ffffff05 18%,#ffffff00 34%,#ffffff0a 55%,#ffffff00 70%,#ffffff12 100%),linear-gradient(135deg,var(--avhero1),var(--avhero2))!important;border:1px solid #ffffff22!important}
+html:root .avo-strip.avo-strip,html:root .avn-toast.avn-toast{background:linear-gradient(160deg,var(--avhero1),var(--avhero2))!important}
+html:root .avc-head.avc-head{background:linear-gradient(135deg,var(--avhero1),var(--avhero2))!important}
+html :is(.day-hero,.avh) .avh2-legend li.on,html :is(.day-hero,.avh) .avh2-legend li:hover{background:#ffffff1a}
+/* seletor */
+.avth{background:var(--surface)!important;color:var(--text)}
+.avth-grad{height:46px;border-radius:9px;box-shadow:inset 0 1px 0 #ffffff40}
+.avth-modes{display:flex;gap:6px}
+.avth-modes i{flex:1;display:flex;align-items:center;gap:5px;font-style:normal;font-size:10.5px;padding:3px 5px;border-radius:7px}
+.avth-modes i.lt{background:#f4f5f8;color:#333}.avth-modes i.dk{background:#121418;color:#ddd}
+.avth-modes b{width:14px;height:14px;border-radius:4px}
+.avth-own{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.avth-own strong{font-size:13px;color:var(--text)}
+.avth-prev{width:90px;height:26px;border-radius:8px}

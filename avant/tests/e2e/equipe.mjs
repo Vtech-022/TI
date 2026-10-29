@@ -381,18 +381,17 @@ try {
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
-  await v.waitForSelector(".avth"); await v.locator(".avth-adv summary").click().catch(()=>{});
+  await v.waitForSelector(".avth");
   await v.locator('.avth:has-text("Ametista")').click();
   await v.waitForTimeout(400);
   const ac = await v.evaluate(() => [getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(), getComputedStyle(document.documentElement).getPropertyValue("--accent2").trim()]);
-  check("tema pronto troca as cores de destaque", ac[0].toLowerCase() === "#a855f7" && ac[1].toLowerCase() === "#f0abfc", ac.join(" "));
-  await v.locator('.avp-pick input[aria-label="Cor de destaque"]').fill("#12a150");
+  check("tema pronto troca as cores de destaque", ac[0].toLowerCase() === "#7c3aed" && ac[1].toLowerCase() === "#db2777", ac.join(" "));
+  await v.locator('.avp-pick input[aria-label="Cor 1"]').fill("#12a150");
   await v.waitForTimeout(400);
   const cc = await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
   check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
-  await v.locator('.avp-pick input[aria-label="Cartões"]').fill("#2b2118");
-  await v.waitForTimeout(300);
-  check("cor dos cartões personalizável", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avcard").trim())).toLowerCase() === "#2b2118");
+  const ink = await v.evaluate(() => { const d = document.documentElement.getAttribute("data-avant-theme") === "dark"; const s = getComputedStyle(document.documentElement); return [d, s.getPropertyValue("--avink").trim(), s.getPropertyValue("--avbg").trim()]; });
+  check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#eef0f4" : ink[1] === "#14161b", ink.join(" "));
   await shot(v, "14-paletas");
   await v.locator('.modal button:has-text("Pronto")').click();
   await shot(v, "15-inicio-neon");
