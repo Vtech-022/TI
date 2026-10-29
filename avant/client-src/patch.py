@@ -437,9 +437,9 @@ sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarM
 # ---- Paletas prontas + cores secundárias vivas ----
 sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
 sub("(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "(0,q.jsx)(AvPalettes,{n,r}),(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
-sub("ba={accent:`#2f6bff`,", "ba={accent:`#6d63ff`,card:`#12132b`,accent2:`#9ad0ff`,deep:`#0b0c24`,palette:`indigo`,")
-sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "e.setProperty(`--avcard`,/^#[0-9a-f]{6}$/i.test(l.card)?l.card:`#1f2328`),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
-sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.font,l.scale,l.wallpaper]")
+sub("ba={accent:`#2f6bff`,", "ba={accent:`#6d63ff`,card:`#14141c`,bg:`#07070b`,accent2:`#9ad0ff`,deep:`#0b0c24`,palette:`indigo`,")
+sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "e.setProperty(`--avcard`,/^#[0-9a-f]{6}$/i.test(l.card)?l.card:`#18181c`),e.setProperty(`--avbg`,/^#[0-9a-f]{6}$/i.test(l.bg)?l.bg:`#08080a`),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
+sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.font,l.scale,l.wallpaper]")
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")

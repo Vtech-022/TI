@@ -547,10 +547,10 @@ function __avCount(v){
 function AvHomeDash({lists,waiting}){
   const L=lists||{done:[],todo:[],late:[]};
   const cats=[
-    {k:"done",label:"Concluídas",n:L.done.length,g:["#5b4dff","#8f86ff"],tips:L.done},
-    {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["#5cc8ff","#b6ecff"],tips:L.todo},
+    {k:"done",label:"Concluídas",n:L.done.length,g:["var(--accent)","color-mix(in srgb,var(--accent) 60%,#fff)"],tips:L.done},
+    {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["var(--accent2,#9ad0ff)","color-mix(in srgb,var(--accent2,#9ad0ff) 55%,#fff)"],tips:L.todo},
     {k:"late",label:"Atrasadas",n:L.late.length,g:["#ff5c8a","#ffa3b8"],tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["#3a3f78","#5d63a8"],tips:[]}
+    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["color-mix(in srgb,var(--avcard,#18181c) 60%,#fff 30%)","color-mix(in srgb,var(--avcard,#18181c) 40%,#fff 50%)"],tips:[]}
   ];
   const sum=cats.reduce((s,c)=>s+c.n,0);
   const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
@@ -570,13 +570,13 @@ function AvHomeDash({lists,waiting}){
         segs.map((s,i)=>(0,q.jsx)("circle",{className:"avh2-seg"+(hv===s.k?" on":hv?" dim":""),cx:"100",cy:"100",r:R,fill:"none",stroke:"url(#avg-"+s.k+")",strokeWidth:"22",strokeLinecap:"round",
           strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 100 100)",style:{transitionDelay:i*140+"ms","--glow":s.g[0]},onMouseEnter:()=>setHv(s.k)},s.k)),
         (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"url(#avh2-core)"}),
-        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2a2d55"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#0b0c1d"})]})}),
+        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"color-mix(in srgb,var(--avcard,#18181c) 100%,#fff 12%)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"color-mix(in srgb,var(--avcard,#18181c) 55%,#000)"})]})}),
         (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"none",stroke:"#ffffff1c",strokeWidth:"1"})]}),
       (0,q.jsx)("div",{className:"avh2-center",children:cur?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:cur.n}),(0,q.jsx)("small",{children:cur.label})]}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:pct+"%"}),(0,q.jsx)("small",{children:"do dia"})]})})]}),
     (0,q.jsxs)("div",{className:"avh2-info",children:[
       (0,q.jsx)("h2",{children:"Seu dia em números"}),
       (0,q.jsxs)("div",{className:"avh2-big",children:[(0,q.jsx)("b",{children:nDone}),(0,q.jsx)("span",{children:"/"+totalDay}),(0,q.jsx)("em",{children:"atividades concluídas hoje"})]}),
-      (0,q.jsx)("ul",{className:"avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:"linear-gradient(135deg,"+c.g[0]+","+c.g[1]+")",boxShadow:"0 0 12px "+c.g[0]+"88"}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})});
+      (0,q.jsx)("ul",{className:"avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:"linear-gradient(135deg,"+c.g[0]+","+c.g[1]+")",boxShadow:"0 0 12px color-mix(in srgb,"+c.g[0]+" 55%,transparent)"}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
@@ -638,7 +638,11 @@ const __avPaths={
   clip:["M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"],
   send:["M22 2L11 13","M22 2l-7 20-4-9-9-4 20-7z"],
   file:["M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z","M14 2v6h6"],
-  chat:["M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"]
+  chat:["M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"],
+  smile:["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z","M8 14s1.5 2 4 2 4-2 4-2","M9 9h.01","M15 9h.01"],
+  mic:["M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z","M19 10v2a7 7 0 0 1-14 0v-2","M12 19v3"],
+  stop:["M6 6h12v12H6z"],
+  x:["M18 6L6 18","M6 6l12 12"]
 };
 function AvIcon({n,s}){return(0,q.jsx)("svg",{width:s||16,height:s||16,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"1.9",strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:__avPaths[n].map((d,i)=>(0,q.jsx)("path",{d},i))})}
 
@@ -670,6 +674,7 @@ async function __avSendFile(peer,file,onProg){
 
 function AvMsgFile({f,mine}){
   const url=location.origin+"/api/chat/file/"+f.id; /* URL absoluta: o app intercepta links que começam com /api/ */
+  if(/^audio\//.test(f.type))return(0,q.jsxs)("div",{className:"avc-audio",children:[(0,q.jsx)("audio",{controls:!0,preload:"metadata",src:url}),(0,q.jsx)("a",{href:url+"?download=1",download:f.name,className:"avc-dl",children:"baixar"})]});
   if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("a",{href:url,target:"_blank",rel:"noopener",children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
   return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:(0,q.jsx)(AvIcon,{n:"file",s:20})}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
 }
@@ -680,7 +685,28 @@ function AvThread({peer,onBack}){
   const{reload}=useChatSummary();
   const who=people&&people.find(p=>p.id===peer);
   const[msgs,setMsgs]=x.useState([]),[text,setText]=x.useState(""),[up,setUp]=x.useState(null),[err,setErr]=x.useState("");
-  const[edit,setEdit]=x.useState(null);const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
+  const[edit,setEdit]=x.useState(null);const taRef=x.useRef(null),[rec,setRec]=x.useState(null);
+  const startRec=async()=>{
+    setErr("");
+    if(!navigator.mediaDevices||!window.MediaRecorder){setErr("Este navegador não grava áudio.");return}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:!0});
+      const mime=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg"].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
+      const mr=new MediaRecorder(stream,mime?{mimeType:mime}:void 0),chunks=[];
+      mr.ondataavailable=e=>e.data&&e.data.size&&chunks.push(e.data);
+      const r={mr,stream,chunks,t0:Date.now(),send:!1};
+      mr.onstop=async()=>{stream.getTracks().forEach(z=>z.stop());setRec(null);
+        if(!r.send||!chunks.length)return;
+        const type=(mr.mimeType||mime||"audio/webm").split(";")[0],ext=type.includes("mp4")?"m4a":type.includes("ogg")?"ogg":"webm";
+        const d=new Date(),name="Mensagem de voz "+String(d.getHours()).padStart(2,"0")+"h"+String(d.getMinutes()).padStart(2,"0")+"."+ext;
+        await sendFiles([new File(chunks,name,{type})]);
+      };
+      mr.start(250);setRec(r);
+    }catch(e){setErr(e&&e.name==="NotAllowedError"?"Permita o uso do microfone no navegador (cadeado ao lado do endereço) para gravar.":"Não foi possível acessar o microfone.")}
+  };
+  const stopRec=send=>{if(!rec)return;rec.send=send;try{rec.mr.stop()}catch{}};
+  x.useEffect(()=>()=>{if(rec){rec.send=!1;try{rec.mr.stop()}catch{}}},[rec]);
+  const last=x.useRef(0),box=x.useRef(null),stick=x.useRef(!0),fileIn=x.useRef(null);
   const sig=x.useRef("");
   const pull=x.useCallback(async()=>{
     try{
@@ -725,8 +751,9 @@ function AvThread({peer,onBack}){
     (0,q.jsxs)("form",{className:"avc-form",onSubmit:sendText,children:[
       (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),"aria-label":"Anexar arquivo",children:(0,q.jsx)(AvIcon,{n:"clip",s:18})}),
       (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),
-      (0,q.jsx)("textarea",{value:text,rows:1,placeholder:"Escreva uma mensagem",maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
-      (0,q.jsx)("button",{type:"submit",className:"avc-send",disabled:!text.trim(),"aria-label":"Enviar",children:(0,q.jsx)(AvIcon,{n:"send",s:17})})]})]});
+      (0,q.jsx)(AvEmoji,{onPick:em=>{const ta=taRef.current;if(!ta){setText(s=>s+em);return}const a=ta.selectionStart??text.length,b=ta.selectionEnd??text.length;const nv=text.slice(0,a)+em+text.slice(b);setText(nv);requestAnimationFrame(()=>{ta.focus();ta.selectionStart=ta.selectionEnd=a+em.length})}}),
+      rec?(0,q.jsx)(AvRecBar,{rec,onCancel:()=>stopRec(!1),onSend:()=>stopRec(!0)}):(0,q.jsx)("textarea",{ref:taRef,value:text,rows:1,placeholder:"Escreva uma mensagem",maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
+      !rec&&(text.trim()?(0,q.jsx)("button",{type:"submit",className:"avc-send","aria-label":"Enviar",children:(0,q.jsx)(AvIcon,{n:"send",s:17})}):(0,q.jsx)("button",{type:"button",className:"avc-send avc-mic",title:"Gravar mensagem de voz","aria-label":"Gravar mensagem de voz",onClick:startRec,children:(0,q.jsx)(AvIcon,{n:"mic",s:18})}))]})]});
 }
 
 function AvChat(){
@@ -754,7 +781,7 @@ function AvChat(){
 
 /* ===== Paletas de cores prontas (cada pessoa escolhe a sua) ===== */
 const __avPalettes=[
-  {key:"indigo",name:"Índigo noite",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",light:"#e8ecff",card:"#12132b"},
+  {key:"indigo",name:"Índigo noite",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",light:"#e8ecff",card:"#14141c",bg:"#07070b"},
   {key:"azul",name:"Azul Zênite",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",light:"#f4f7ff"},
   {key:"floresta",name:"Floresta",accent:"#518e45",accent2:"#f1ca30",deep:"#20372f",light:"#f9f6eb"},
   {key:"urbana",name:"Noite urbana",accent:"#1fa383",accent2:"#ebae29",deep:"#132228",light:"#f5eed2"},
@@ -766,11 +793,11 @@ const __avPalettes=[
 ];
 function AvPalettes({n,r}){
   return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Paletas prontas"}),
-    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação pronta ou monte a sua com qualquer cor. Vale só para você."}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação pronta ou monte a sua com qualquer cor. As cores valem para o site inteiro (cartões, menus, fundo, chat) e só para você."}),
     (0,q.jsxs)("div",{className:"avp-custom",children:[
-      [["accent","Cor de destaque","#2f6bff"],["accent2","Brilho","#ffc83d"],["card","Cartões","#1f2328"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:/^#[0-9a-f]{6}$/i.test(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
-      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"indigo",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",card:"#12132b"}),children:"Restaurar cores"})]}),
-    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep,card:p.card||"#1f2328"}),children:[
+      [["accent","Cor de destaque","#6d63ff"],["accent2","Brilho","#9ad0ff"],["card","Cartões","#18181c"],["bg","Fundo (modo escuro)","#08080a"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:/^#[0-9a-f]{6}$/i.test(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
+      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"indigo",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",card:"#14141c",bg:"#07070b"}),children:"Restaurar cores"})]}),
+    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep,card:p.card||"#18181c",bg:p.bg||"#08080a"}),children:[
       (0,q.jsx)("span",{className:"avp-dots",children:[p.accent2,p.accent,p.deep,p.light].map((c,i)=>(0,q.jsx)("i",{style:{background:c}},i))}),
       (0,q.jsx)("span",{className:"avp-bar",style:{background:"linear-gradient(90deg,"+p.accent2+","+p.accent+" 60%,"+p.deep+")"}}),
       (0,q.jsx)("strong",{children:p.name})]},p.key))})]});
@@ -886,4 +913,24 @@ function AvNotifyAsk(){
     (0,q.jsx)("span",{children:"Receba aviso de novas tarefas da equipe e de mensagens, mesmo com o Zênite em outra aba."}),
     (0,q.jsx)("button",{className:"btn sm primary",onClick:()=>Notification.requestPermission().then(setSt),children:"Ativar notificações"}),
     (0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>{try{localStorage.setItem("av:notifyAsk","no")}catch{}setHide(!0)},children:"Agora não"})]});
+}
+
+
+/* ---- Seletor de emojis e barra de gravação de voz (chat) ---- */
+const __avEmojis="😀 😂 😊 😍 🥰 😎 🤔 😅 😢 😭 😡 😴 🙏 👍 👎 👏 🙌 💪 👀 🤝 ✅ ❌ ⚠️ ❤️ 💙 💛 🔥 ⭐ 🎉 🚀 📌 📎 📅 ⏰ 📊 📝 💡 ☕ 🍕 🎂".split(" ");
+function AvEmoji({onPick}){
+  const[open,setOpen]=x.useState(!1),box=x.useRef(null);
+  x.useEffect(()=>{if(!open)return;const f=e=>{box.current&&!box.current.contains(e.target)&&setOpen(!1)};document.addEventListener("mousedown",f);return()=>document.removeEventListener("mousedown",f)},[open]);
+  return(0,q.jsxs)("div",{className:"avc-emo",ref:box,children:[
+    (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Emojis","aria-label":"Inserir emoji","aria-expanded":open,onClick:()=>setOpen(o=>!o),children:(0,q.jsx)(AvIcon,{n:"smile",s:18})}),
+    open&&(0,q.jsx)("div",{className:"avc-emo-pop",role:"listbox","aria-label":"Emojis",children:__avEmojis.map(e=>(0,q.jsx)("button",{type:"button",role:"option",onClick:()=>{onPick(e)},children:e},e))})]});
+}
+function AvRecBar({rec,onCancel,onSend}){
+  const[,tick]=x.useState(0);
+  x.useEffect(()=>{const t=setInterval(()=>tick(n=>n+1),500);return()=>clearInterval(t)},[]);
+  const s=Math.floor((Date.now()-rec.t0)/1000);
+  return(0,q.jsxs)("div",{className:"avc-rec",role:"status",children:[
+    (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Cancelar gravação","aria-label":"Cancelar gravação",onClick:onCancel,children:(0,q.jsx)(AvIcon,{n:"x",s:17})}),
+    (0,q.jsx)("i",{className:"avc-rec-dot"}),(0,q.jsx)("span",{children:"Gravando "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}),
+    (0,q.jsx)("button",{type:"button",className:"avc-send",title:"Parar e enviar","aria-label":"Parar e enviar áudio",onClick:onSend,children:(0,q.jsx)(AvIcon,{n:"send",s:17})})]});
 }

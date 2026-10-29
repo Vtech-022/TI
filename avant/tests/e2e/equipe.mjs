@@ -348,6 +348,19 @@ try {
   await a.locator(".avc-close").click();
   await v.locator(".avc-close").click();
 
+  // ---- chat: emoji e áudio
+  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.waitForSelector(".avc-form");
+  check("botão de microfone aparece com a caixa vazia", (await v.locator('.avc-mic').count()) === 1);
+  await v.locator('button[aria-label="Inserir emoji"]').click();
+  await v.locator('.avc-emo-pop button', { hasText: "👍" }).click();
+  check("emoji entra na caixa de mensagem", (await v.locator(".avc-form textarea").inputValue()).includes("👍"));
+  await v.locator(".avc-form textarea").press("Enter");
+  await v.locator('.avc-form input[type=file]').setInputFiles({ name: "recado.webm", mimeType: "audio/webm", buffer: Buffer.alloc(2048, 1) });
+  await v.waitForSelector(".avc-audio audio", { timeout: 15000 }).catch(() => {});
+  check("áudio aparece com player dentro da conversa", (await v.locator(".avc-audio audio").count()) > 0);
+  await v.locator(".avc-close").click();
+
   // ---- notificações: mensagem e tarefa nova
   const vid = await v.evaluate(() => window.__avUid);
   await a.evaluate(async (vid) => { await fetch("/api/chat/" + vid, { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ text: "Chegou?" }) }); }, vid);
