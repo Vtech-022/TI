@@ -227,7 +227,7 @@ try {
 
   // ---- Arquivos: upload não cria tarefa; pesquisa; vínculo
   const antes = (await v.evaluate(async () => (await (await fetch("/api/ping", { headers: { "x-avant": "1" } })).json()).k)) ?? "";
-  await ir(v, "Arquivos e Documentos");
+  await v.evaluate(() => document.querySelector('.rail a[aria-label="Arquivos e Documentos"]').click()); await v.waitForTimeout(900);
   fs.writeFileSync("/tmp/ata-reuniao.txt", "ATA\nJoão vai enviar o relatório até 10/11.\nMaria precisa aprovar o orçamento.\n");
   await v.locator('input[type="file"]').setInputFiles("/tmp/ata-reuniao.txt");
   await v.waitForFunction(() => /ata-reuniao/.test(document.body.innerText), null, { timeout: 15000 }).catch(() => {});
@@ -235,7 +235,7 @@ try {
   check("upload em Arquivos só importa (sem botão Capturar)", /ata-reuniao/.test(tAnt) && (await v.locator("td button:has-text('Capturar')").count()) === 0, tAnt.slice(0, 120).replace(/\s+/g, " ").slice(0, 200));
   await ir(v, "Minhas tarefas");
   check("Minhas tarefas não ganhou lixo do documento", !/enviar o relatório|aprovar o orçamento/.test(await texto(v)));
-  await ir(v, "Arquivos e Documentos");
+  await v.evaluate(() => document.querySelector('.rail a[aria-label="Arquivos e Documentos"]').click()); await v.waitForTimeout(900);
   check("campo 'Pesquisar arquivo' removido", (await v.locator("input[placeholder*='Pesquisar arquivo']").count()) === 0);
   const campoTarefa = v.locator("td input[placeholder='Buscar tarefa…']").first();
   check("campo Tarefa é uma caixa de busca (sem lista longa)", (await campoTarefa.count()) === 1 && (await v.locator(".avp-list").count()) === 0);
@@ -287,11 +287,20 @@ try {
 
   // ---- tela inicial: presença, horas, painel, foto
   await v.locator(".rail-brand").click(); await v.waitForTimeout(1500);
+  check("Arquivos e Documentos não aparece mais no menu lateral", !(await v.locator('.rail a[aria-label="Arquivos e Documentos"]').isVisible()));
   await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
   const home = await texto(v);
   check("faixa lateral mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
+  check("painel do dia: rosca segmentada com legenda", await v.locator(".avh-seg").count() >= 1 && (await v.locator(".avh-legend li").count()) === 4);
+  const t0 = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme"));
+  await v.locator('button[aria-label^="Ativar modo"]').click();
+  await v.waitForFunction(() => document.querySelector(".av-wave") || document.documentElement.classList.contains("av-vt"), null, { timeout: 3000 });
+  check("trocar o modo mostra a animação em onda", true);
+  await v.waitForTimeout(1200);
+  check("o modo realmente trocou", (await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme"))) !== t0);
+  await v.locator('button[aria-label^="Ativar modo"]').click(); await v.waitForTimeout(1200);
   check("cronômetro removido do início", await v.locator('.avw').count() === 0);
   check("anotações voltaram visíveis (sem recolher)", await v.locator('.av-more2').count() === 0);
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");

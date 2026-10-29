@@ -544,30 +544,35 @@ function __avCount(v){
   },[v]);
   return n;
 }
-function AvHomeDash({done,total,late,doing,waiting}){
-  const pct=total?Math.round(100*done/total):0;
+function AvHomeDash({lists,waiting}){
+  const L=lists||{done:[],todo:[],late:[]};
+  const cats=[
+    {k:"done",label:"Concluídas",n:L.done.length,c:"var(--accent)",tips:L.done},
+    {k:"todo",label:"A fazer hoje",n:L.todo.length,c:"color-mix(in srgb,var(--accent) 38%,#fff)",tips:L.todo},
+    {k:"late",label:"Atrasadas",n:L.late.length,c:"#e5484d",tips:L.late},
+    {k:"wait",label:"Aguardando terceiros",n:waiting||0,c:"#d9a441",tips:[]}
+  ];
+  const sum=cats.reduce((s,c)=>s+c.n,0);
+  const[hv,setHv]=x.useState(null);
   const[go,setGo]=x.useState(!1);
-  x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
-  const R=54,C=2*Math.PI*R;
-  const nDone=__avCount(done),nLate=__avCount(late),nDoing=__avCount(doing),nWait=__avCount(waiting);
-  const petals=[0,1,2,3,4,5].map(k=>k*30);
-  const chips=[["Atrasadas",nLate,"late"],["Em andamento",nDoing,"doing"],["Aguardando",nWait,"wait"]];
+  x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),80);return()=>clearTimeout(t)},[]);
+  const nDone=__avCount(L.done.length),totalDay=L.done.length+L.todo.length+L.late.length;
+  const R=56,C=2*Math.PI*R,GAP=sum>1?8:0;
+  let acc=0;
+  const segs=cats.filter(c=>c.n>0).map(c=>{
+    const len=Math.max(2,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
   return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
-    (0,q.jsxs)("div",{className:"avh-top",children:[(0,q.jsx)("h2",{children:"Seu dia em números"}),(0,q.jsx)("span",{children:pct+"% concluído"})]}),
     (0,q.jsxs)("div",{className:"avh-body",children:[
-      (0,q.jsxs)("div",{className:"avh-blob",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 200 200",width:"190",height:"190",children:[
-          (0,q.jsxs)("defs",{children:[
-            (0,q.jsxs)("linearGradient",{id:"avb1",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffc83d)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"var(--accent)"})]}),
-            (0,q.jsxs)("linearGradient",{id:"avb2",x1:"1",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffffff"})]}),
-            (0,q.jsx)("filter",{id:"avbf",x:"-20%",y:"-20%",width:"140%",height:"140%",children:(0,q.jsx)("feGaussianBlur",{stdDeviation:"1.6"})})]}),
-          (0,q.jsx)("g",{className:"avb-spin a",filter:"url(#avbf)",children:petals.map(r=>(0,q.jsx)("ellipse",{cx:"100",cy:"100",rx:"92",ry:"34",fill:"url(#avb1)",opacity:".55",transform:"rotate("+r+" 100 100)"},r))}),
-          (0,q.jsx)("g",{className:"avb-spin b",filter:"url(#avbf)",children:petals.map(r=>(0,q.jsx)("ellipse",{cx:"100",cy:"100",rx:"84",ry:"28",fill:"url(#avb2)",opacity:".5",transform:"rotate("+(r+15)+" 100 100)"},r))}),
-          (0,q.jsx)("circle",{cx:"100",cy:"100",r:"52",fill:"#0b0d16",stroke:"#ffffff1f",strokeWidth:"1"}),
-          (0,q.jsx)("circle",{cx:"100",cy:"100",r:R,fill:"none",stroke:"#ffffff14",strokeWidth:"4"}),
-          (0,q.jsx)("circle",{className:"avh-arc",cx:"100",cy:"100",r:R,fill:"none",stroke:"var(--accent2,#ffc83d)",strokeWidth:"4",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:go?C*(1-pct/100):C,transform:"rotate(-90 100 100)"})]}),
-        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("small",{children:"Feitas hoje"}),(0,q.jsx)("strong",{children:nDone+"/"+total})]})]}),
-      (0,q.jsx)("ul",{className:"avh-chips",children:chips.map(([l,v,k])=>(0,q.jsxs)("li",{className:k,children:[(0,q.jsx)("b",{children:v}),(0,q.jsx)("span",{children:l})]},l))})]})]});
+      (0,q.jsxs)("div",{className:"avh-donut",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",onMouseLeave:()=>setHv(null),children:[
+        (0,q.jsxs)("svg",{viewBox:"0 0 160 160",width:"170",height:"170",children:[
+          (0,q.jsx)("circle",{cx:"80",cy:"80",r:R,fill:"none",stroke:"#ffffff12",strokeWidth:"16"}),
+          segs.map((s,i)=>(0,q.jsx)("circle",{key:s.k,className:"avh-seg"+(hv===s.k?" on":""),cx:"80",cy:"80",r:R,fill:"none",stroke:s.c,strokeWidth:"16",strokeLinecap:"round",
+            strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 80 80)",style:{transitionDelay:i*120+"ms"},onMouseEnter:()=>setHv(s.k)}))]}),
+        (0,q.jsx)("div",{className:"avh-glyph","aria-hidden":!0,children:totalDay?Math.round(100*L.done.length/totalDay)+"%":"—"})]}),
+      (0,q.jsxs)("div",{className:"avh-info",children:[
+        (0,q.jsx)("small",{children:"Seu dia em números"}),
+        (0,q.jsxs)("strong",{className:"avh-big",children:[nDone,(0,q.jsx)("span",{children:" de "+totalDay+" concluídas"})]}),
+        (0,q.jsx)("ul",{className:"avh-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:c.c}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
@@ -621,6 +626,18 @@ function AvAvatarModal(){
       err&&(0,q.jsx)("p",{className:"gate-error",role:"alert",children:err})]})});
 }
 
+
+/* ===== ícones de linha (sem emojis) ===== */
+const __avPaths={
+  edit:["M12 20h9","M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"],
+  trash:["M3 6h18","M8 6V4h8v2","M19 6l-1 14H6L5 6","M10 11v6","M14 11v6"],
+  clip:["M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"],
+  send:["M22 2L11 13","M22 2l-7 20-4-9-9-4 20-7z"],
+  file:["M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z","M14 2v6h6"],
+  chat:["M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"]
+};
+function AvIcon({n,s}){return(0,q.jsx)("svg",{width:s||16,height:s||16,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"1.9",strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:__avPaths[n].map((d,i)=>(0,q.jsx)("path",{d},i))})}
+
 /* ===== Conversas (estilo Teams) ===== */
 const __avCS={data:null,subs:new Set(),timer:null};
 async function __avCSLoad(){try{const d=await __avJson("/chat");__avCS.data=d;__avCS.subs.forEach(f=>f())}catch{}}
@@ -650,7 +667,7 @@ async function __avSendFile(peer,file,onProg){
 function AvMsgFile({f,mine}){
   const url=location.origin+"/api/chat/file/"+f.id; /* URL absoluta: o app intercepta links que começam com /api/ */
   if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("a",{href:url,target:"_blank",rel:"noopener",children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
-  return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:"📎"}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
+  return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:(0,q.jsx)(AvIcon,{n:"file",s:20})}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
 }
 
 function AvThread({peer,onBack}){
@@ -694,16 +711,17 @@ function AvThread({peer,onBack}){
       (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:who?who.name:"Conversa"}),(0,q.jsx)("small",{children:who&&who.online?"Online agora":"Offline"})]})]}),
     (0,q.jsxs)("div",{className:"avc-msgs",ref:box,onScroll:e=>{const b=e.target;stick.current=b.scrollHeight-b.scrollTop-b.clientHeight<60},children:[
       msgs.length===0&&(0,q.jsx)("p",{className:"avc-empty",children:"Diga olá! Você também pode arrastar arquivos para cá."}),
-      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[(0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:(m.edited?"editada · ":"")+__avClock(m.at)}),
-        m.from===me&&(0,q.jsxs)("span",{className:"avc-act",children:[(m.text||!m.file)&&(0,q.jsx)("button",{type:"button",title:"Editar mensagem","aria-label":"Editar mensagem",onClick:()=>{setEdit(m);setText(m.text||"")},children:"✎"}),(0,q.jsx)("button",{type:"button",title:"Apagar mensagem","aria-label":"Apagar mensagem",onClick:()=>del(m),children:"🗑"})]})]})]},m.id)),
+      msgs.map(m=>(0,q.jsxs)("div",{className:"avc-row"+(m.from===me?" mine":""),children:[
+        m.from===me&&(0,q.jsxs)("span",{className:"avc-act",children:[(m.text||!m.file)&&(0,q.jsx)("button",{type:"button",title:"Editar mensagem","aria-label":"Editar mensagem",onClick:()=>{setEdit(m);setText(m.text||"")},children:(0,q.jsx)(AvIcon,{n:"edit",s:15})}),(0,q.jsx)("button",{type:"button",title:"Apagar mensagem","aria-label":"Apagar mensagem",onClick:()=>del(m),children:(0,q.jsx)(AvIcon,{n:"trash",s:15})})]}),
+        (0,q.jsxs)("div",{className:"avc-bub",children:[m.file&&(0,q.jsx)(AvMsgFile,{f:m.file,mine:m.from===me}),m.text&&(0,q.jsx)("span",{className:"avc-txt",children:m.text}),(0,q.jsx)("time",{children:(m.edited?"editada · ":"")+__avClock(m.at)})]})]},m.id)),
       up&&(0,q.jsxs)("div",{className:"avc-row mine",children:[(0,q.jsxs)("div",{className:"avc-bub avc-up",children:["Enviando "+up.name+"… "+Math.round(up.p*100)+"%",(0,q.jsx)("i",{style:{width:Math.round(up.p*100)+"%"}})]})]})]}),
     err&&(0,q.jsx)("p",{className:"avc-err",role:"alert",children:err}),
     edit&&(0,q.jsxs)("p",{className:"avc-editing",children:["Editando mensagem ",(0,q.jsx)("button",{type:"button",onClick:()=>{setEdit(null);setText("")},children:"cancelar"})]}),
     (0,q.jsxs)("form",{className:"avc-form",onSubmit:sendText,children:[
-      (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),children:"📎"}),
+      (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),"aria-label":"Anexar arquivo",children:(0,q.jsx)(AvIcon,{n:"clip",s:18})}),
       (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),
       (0,q.jsx)("textarea",{value:text,rows:1,placeholder:"Escreva uma mensagem",maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
-      (0,q.jsx)("button",{type:"submit",className:"avc-send",disabled:!text.trim(),"aria-label":"Enviar",children:"➤"})]})]});
+      (0,q.jsx)("button",{type:"submit",className:"avc-send",disabled:!text.trim(),"aria-label":"Enviar",children:(0,q.jsx)(AvIcon,{n:"send",s:17})})]})]});
 }
 
 function AvChat(){
@@ -724,13 +742,14 @@ function AvChat(){
       (0,q.jsx)("input",{className:"input avc-search",placeholder:"Buscar pessoa…","aria-label":"Buscar pessoa",value:qs,onChange:e=>setQs(e.target.value)}),
       (0,q.jsxs)("ul",{children:[list.map(p=>{const s=peers[p.id];return(0,q.jsx)("li",{children:(0,q.jsxs)("button",{className:"avc-item",onClick:()=>setPeer(p.id),children:[
         (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")})]}),
-        (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:s?((s.last.from===me?"Você: ":"")+(s.last.file?"📎 "+s.last.file:s.last.text)):(p.online?"Online":"Offline")})]}),
+        (0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:s?((s.last.from===me?"Você: ":"")+(s.last.file?"Arquivo: "+s.last.file:s.last.text)):(p.online?"Online":"Offline")})]}),
         s&&s.unread>0&&(0,q.jsx)("b",{className:"avc-badge",children:s.unread})]})},p.id)}),list.length===0&&(0,q.jsx)("li",{className:"small muted",style:{padding:12},children:"Ninguém encontrado."})]})]}),
     (0,q.jsx)("button",{className:"avc-close",onClick:()=>setOpen(!1),"aria-label":"Fechar conversas",children:"×"})]});
 }
 
 /* ===== Paletas de cores prontas (cada pessoa escolhe a sua) ===== */
 const __avPalettes=[
+  {key:"indigo",name:"Índigo noite",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",light:"#e8ecff",card:"#12132b"},
   {key:"azul",name:"Azul Zênite",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",light:"#f4f7ff"},
   {key:"floresta",name:"Floresta",accent:"#518e45",accent2:"#f1ca30",deep:"#20372f",light:"#f9f6eb"},
   {key:"urbana",name:"Noite urbana",accent:"#1fa383",accent2:"#ebae29",deep:"#132228",light:"#f5eed2"},
@@ -745,9 +764,41 @@ function AvPalettes({n,r}){
     (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação pronta ou monte a sua com qualquer cor. Vale só para você."}),
     (0,q.jsxs)("div",{className:"avp-custom",children:[
       [["accent","Cor de destaque","#2f6bff"],["accent2","Brilho","#ffc83d"],["card","Cartões","#1f2328"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:/^#[0-9a-f]{6}$/i.test(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
-      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"azul",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",card:"#1f2328"}),children:"Restaurar cores"})]}),
-    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep}),children:[
+      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"indigo",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",card:"#12132b"}),children:"Restaurar cores"})]}),
+    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep,card:p.card||"#1f2328"}),children:[
       (0,q.jsx)("span",{className:"avp-dots",children:[p.accent2,p.accent,p.deep,p.light].map((c,i)=>(0,q.jsx)("i",{style:{background:c}},i))}),
       (0,q.jsx)("span",{className:"avp-bar",style:{background:"linear-gradient(90deg,"+p.accent2+","+p.accent+" 60%,"+p.deep+")"}}),
       (0,q.jsx)("strong",{children:p.name})]},p.key))})]});
 }
+
+/* ===== Animação ao trocar entre modo claro e escuro (onda a partir do botão) ===== */
+(function(){
+  if(typeof document==="undefined")return;
+  document.addEventListener("click",e=>{
+    const b=e.target&&e.target.closest?e.target.closest('button[aria-label^="Ativar modo"]'):null;
+    if(!b)return;
+    if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    const toDark=/escuro/.test(b.getAttribute("aria-label")||"");
+    const r=b.getBoundingClientRect(),root=document.documentElement;
+    if(document.startViewTransition){
+      /* revela a tela já no novo tema, crescendo a partir do botão (como no vídeo de referência) */
+      const cx=r.left+r.width/2,cy=r.top+r.height/2,rad=Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy));
+      let vt;try{vt=document.startViewTransition(()=>new Promise(res=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(res,40)))))}catch{vt=null}
+      if(vt){
+        root.classList.add("av-vt");
+        vt.ready.then(()=>{root.animate({clipPath:["circle(0px at "+cx+"px "+cy+"px)","circle("+rad+"px at "+cx+"px "+cy+"px)"]},{duration:900,easing:"cubic-bezier(.65,0,.35,1)",pseudoElement:"::view-transition-new(root)"})}).catch(()=>{});
+        vt.finished.finally(()=>root.classList.remove("av-vt"));
+        return;
+      }
+    }
+    const ov=document.createElement("div");
+    ov.className="av-wave";
+    ov.style.setProperty("--x",(r.left+r.width/2)+"px");ov.style.setProperty("--y",(r.top+r.height/2)+"px");
+    ov.style.background=toDark?"radial-gradient(circle at var(--x) var(--y),#1b1f26,#0d0f12 70%)":"radial-gradient(circle at var(--x) var(--y),#ffffff,#eef1f8 70%)";
+    root.classList.add("av-theming");
+    document.body.appendChild(ov);
+    setTimeout(()=>root.classList.remove("av-theming"),900);
+    ov.addEventListener("animationend",()=>ov.remove());
+    setTimeout(()=>ov.remove(),1500);
+  },!0);
+})();
