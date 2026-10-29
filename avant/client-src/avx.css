@@ -204,3 +204,19 @@ td .pill{padding-top:3px;padding-bottom:3px}
 .avh-tiles{grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
 .avh-tile i{min-width:36px;height:36px;font-size:14px}
 .avo-list{padding:2px 12px 6px;gap:6px}
+
+/* ===== Início: painel limpo e faixa de online ===== */
+.av-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.avh-tiles,.avh-tile{display:none}
+.avh-rows{list-style:none;margin:0;padding:0;flex:1;min-width:150px;display:flex;flex-direction:column;gap:8px}
+.avh-rows li{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--text-2)}
+.avh-rows li:last-child{border-bottom:0}
+.avh-rows strong{font-size:18px;color:var(--heading)}
+.avh-ring{width:112px;height:112px}
+.avo-strip{position:fixed;right:14px;top:96px;z-index:30;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 8px;border-radius:26px;background:linear-gradient(180deg,#1f47b8,#14306f);box-shadow:0 10px 26px #14306f55}
+.avo-strip .avo-face{position:relative;width:38px;height:38px;flex:none}
+.avo-strip .avo-face.off{opacity:.55}
+.avo-strip .avo-dot{border-color:#14306f}
+.avo-cnt{min-width:30px;height:24px;padding:0 6px;border-radius:12px;background:#ffc83d;color:#0b1d38;font:700 12px/24px var(--font,system-ui);text-align:center}
+.myday{padding-right:78px}
+@media (max-width:820px){.avo-strip{position:static;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;border-radius:18px;margin-bottom:12px}.myday{padding-right:0}}

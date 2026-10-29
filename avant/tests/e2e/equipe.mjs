@@ -290,7 +290,7 @@ try {
   await v.locator(".rail-brand").click(); await v.waitForTimeout(1500);
   await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
   const home = await texto(v);
-  check("início mostra 'Equipe agora' com a Ana online", /Equipe agora/.test(home) && /Ana Souza/.test(home));
+  check("faixa lateral mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
   check("cronômetro removido do início", await v.locator('.avw').count() === 0);

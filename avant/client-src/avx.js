@@ -533,37 +533,30 @@ function AvWorkTimer(){
     (0,q.jsx)("span",{className:"avw-hint",children:working?"Contando… pausa sozinho se você sair do sistema.":"Ligue ao começar o expediente."})]});
 }
 
-/* ---- Painel de números do dia ---- */
+/* ---- Painel de números do dia (limpo: anel + números simples) ---- */
 function AvHomeDash({done,total,late,doing,waiting}){
-  const{people}=usePresence();
-  const p=people&&people.find(z=>z.id===window.__avUid);
   const pct=total?Math.round(100*done/total):0;
   const R=52,C=2*Math.PI*R;
-  const tiles=[["Atrasadas",late,"#b42318"],["Em andamento",doing,"#2f64c4"],["Aguardando",waiting,"#c49a2c"]];
+  const rows=[["Atrasadas",late],["Em andamento",doing],["Aguardando",waiting]];
   return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
     (0,q.jsx)("div",{className:"panel-head",children:(0,q.jsx)("h2",{children:"Seu dia em números"})}),
     (0,q.jsxs)("div",{className:"avh-body",children:[
       (0,q.jsxs)("div",{className:"avh-ring",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"150",height:"150",children:[(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"var(--line)",strokeWidth:"12"}),(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g)",strokeWidth:"12",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:C*(1-pct/100),transform:"rotate(-90 64 64)",style:{transition:"stroke-dashoffset .6s"}}),(0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2f6bff"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffc83d"})]})})]}),
+        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"112",height:"112",children:[(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"var(--line)",strokeWidth:"10"}),(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"#2f64c4",strokeWidth:"10",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:C*(1-pct/100),transform:"rotate(-90 64 64)",style:{transition:"stroke-dashoffset .6s"}})]}),
         (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:done+"/"+total}),(0,q.jsx)("small",{children:"feitas hoje"})]})]}),
-      (0,q.jsxs)("div",{className:"avh-tiles",children:[tiles.map(([l,v,c])=>(0,q.jsxs)("div",{className:"avh-tile",children:[(0,q.jsx)("i",{style:{background:c},children:v}),(0,q.jsx)("span",{children:l})]},l)),
-        ]})]})]});
+      (0,q.jsx)("ul",{className:"avh-rows",children:rows.map(([l,v])=>(0,q.jsxs)("li",{children:[(0,q.jsx)("span",{children:l}),(0,q.jsx)("strong",{style:l==="Atrasadas"&&v>0?{color:"#b42318"}:void 0,children:v})]},l))})]})]});
 }
 
-/* ---- Quem está online ---- */
+/* ---- Quem está online: faixa vertical na lateral, só avatares ---- */
 function AvOnline(){
   const{people}=usePresence();
-  const[all,setAll]=x.useState(!1);
   if(!people)return null;
-  const on=people.filter(p=>p.online);
-  const shown=(all?people:people.filter(p=>p.online||p.working)).slice(0,all?60:8);
-  return(0,q.jsxs)("section",{className:"avo panel","aria-label":"Quem está online",children:[
-    (0,q.jsxs)("div",{className:"panel-head",children:[(0,q.jsx)("h2",{children:"Equipe agora"}),(0,q.jsx)("span",{className:"small muted",children:on.length+" online"})]}),
-    (0,q.jsxs)("ul",{className:"avo-list",children:[shown.map(p=>(0,q.jsxs)("li",{className:p.online?"on":"off",children:[
-      (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:34}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":""),title:p.online?"Online":"Offline"})]}),
-      (0,q.jsxs)("span",{className:"avo-txt",children:[(0,q.jsx)("strong",{children:p.name+(p.id===window.__avUid?" (você)":"")}),(0,q.jsx)("small",{children:p.online?"Online":"Offline"})]})]},p.id)),
-      shown.length===0&&(0,q.jsx)("li",{className:"small muted",children:"Ninguém online agora."})]}),
-    people.length>shown.length||all?(0,q.jsx)("button",{className:"btn sm ghost",style:{margin:"4px 12px 12px"},onClick:()=>setAll(a=>!a),children:all?"Mostrar só quem está online":"Ver toda a equipe ("+people.length+")"}):null]});
+  const list=[...people].sort((a,b)=>(b.online?1:0)-(a.online?1:0));
+  const shown=list.slice(0,9),extra=list.length-shown.length;
+  return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
+    (0,q.jsx)("span",{className:"avo-cnt",title:"Pessoas online agora",children:people.filter(p=>p.online).length}),
+    shown.map(p=>(0,q.jsxs)("span",{className:"avo-face"+(p.online?"":" off"),title:p.name+(p.id===window.__avUid?" (você)":"")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")})]},p.id)),
+    extra>0&&(0,q.jsx)("span",{className:"avo-cnt",title:extra+" pessoas a mais",children:"+"+extra})]});
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
