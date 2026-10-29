@@ -262,6 +262,7 @@ TEAM = r'''function Mz(me){
       else load(!0).catch(e=>onErr&&onErr(e.message||"Falha ao ler as atividades da equipe."));
       return()=>{subs.delete(cb);if(onErr)errs.delete(onErr);if(!subs.size)__AVP.teamCbs.delete(refresh)};
     },
+    async removePerson(id){await __avJson(`/team/${id}`,{method:"DELETE"});await load(!0)},
     saveMine:items=>save(me.id,items),
     saveFor:(id,items)=>save(id,items),
     async upload(f){
@@ -408,6 +409,29 @@ sub("await i(()=>c.id?Yi.patch(`/api/waits/${c.id}`,e):Yi.post(`/api/waits`,e),c
 sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>void e.logout().then(()=>location.reload()),children:[(0,q.jsx)(xs,{\"aria-hidden\":!0}),` Sair`]})",
     "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`))),children:[(0,q.jsx)(ss,{\"aria-hidden\":!0}),` Código de recuperação`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>void e.logout().then(()=>location.reload()),children:[(0,q.jsx)(xs,{\"aria-hidden\":!0}),` Sair`]})")
 sub("(0,q.jsx)(`button`,{className:`fab`,onClick:()=>f(!0),\"aria-label\":`Nova tarefa`", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(`button`,{className:`fab`,onClick:()=>f(!0),\"aria-label\":`Nova tarefa`")
+
+# ---- Projetos (antes "Frentes de trabalho"), cores por pessoa, remover contas excluídas do ranking ----
+sub_all("Frentes de trabalho", "Projetos", 3)
+sub("function zc(e){let t=0;for(let n of e)", "function zc(e){let avc=window.__avProjColors&&window.__avProjColors[e];if(avc)return avc;let t=0;for(let n of e)")
+sub("return{...e,...JSON.parse(localStorage.getItem(Ca())??`{}`)}}catch{return e}}", "let avp={...e,...JSON.parse(localStorage.getItem(Ca())??`{}`)};window.__avProjColors=avp.projectColors||{};return avp}catch{return e}}")
+sub("u(t=>{let n={...t,...e};try{", "u(t=>{let n={...t,...e};window.__avProjColors=n.projectColors||{};try{")
+# Projetos: botão "Cores" e borda colorida no cartão
+sub("(0,q.jsxs)(`button`,{className:`btn primary`,onClick:()=>a({...Bu}),children:[(0,q.jsx)(Gs,{size:16}),` Novo projeto`]})]}),(0,q.jsx)(ll,{error:t}),e?",
+    "(0,q.jsxs)(`div`,{className:`btn-row`,children:[(0,q.jsx)(`button`,{className:`btn`,onClick:()=>avc(!0),children:`Cores dos projetos`}),(0,q.jsxs)(`button`,{className:`btn primary`,onClick:()=>a({...Bu}),children:[(0,q.jsx)(Gs,{size:16}),` Novo projeto`]})]})]}),(0,q.jsx)(ll,{error:t}),(0,q.jsx)(AvColorsModal,{open:avo,onClose:()=>avc(!1)}),e?")
+sub("function Hu(){let{data:e,error:t}=Da(`/api/projects`),n=ir(),r=Oa(),[i,a]=(0,x.useState)(null);", "function Hu(){let{data:e,error:t}=Da(`/api/projects`),n=ir(),r=Oa(),[i,a]=(0,x.useState)(null),[avo,avc]=(0,x.useState)(!1);")
+sub("(0,q.jsxs)(`button`,{className:`panel kpi`,style:{textAlign:`left`,padding:18},onClick:()=>n(`/projetos/${e.id}`)", "(0,q.jsxs)(`button`,{className:`panel kpi`,style:{textAlign:`left`,padding:18,borderLeft:`6px solid ${zc(e.name)}`},onClick:()=>n(`/projetos/${e.id}`)")
+# Ranking: administrador remove contas excluídas
+sub("e.name]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`", "e.name,Wi.auth?.me?.role===`admin`&&/ \\(conta removida\\)$/.test(e.name)&&(0,q.jsx)(`button`,{className:`av-rm`,title:`Remover do histórico da equipe`,onClick:t=>{t.stopPropagation(),confirm(`Remover ${e.name.replace(` (conta removida)`,``)} do histórico e do ranking? Os cartões dela serão apagados do quadro da equipe.`)&&Wi.team.removePerson(e.id).catch(t=>alert(t.message))},children:`Remover`})]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`")
+
+# ---- Tela inicial enxuta: só o dia, números, horas e quem está online ----
+cut("(0,q.jsxs)(`div`,{className:`dh-chips`", "]}),(0,q.jsx)(Fu,{done:u.doneToday.length,total:m})", "(0,q.jsx)(AvWorkTimer,{})")
+cut("p.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)(`h3`,{className:`day-sec suggest`", "u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`", "")
+sub("(0,q.jsx)(Lu,{today:c}),", "(0,q.jsx)(AvHomeDash,{done:u.doneToday.length,total:m,late:u.late.length,doing:u.doing.length,waiting:u.waiting}),(0,q.jsx)(AvOnline,{}),(0,q.jsx)(AvNotes,{children:(0,q.jsx)(Lu,{today:c})}),")
+cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
+# foto de perfil: botão da conta, menu e janela
+sub("children:l.trim().charAt(0).toUpperCase()});return e?", "children:(0,q.jsx)(AvPhoto,{id:window.__avUid,name:l,fallback:l.trim().charAt(0).toUpperCase()})});return e?")
+sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Foto de perfil`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
+sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),")
 
 # ---- Menu, rotas e painel ----
 sub("{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},", "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},")

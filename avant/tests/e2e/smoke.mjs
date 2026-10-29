@@ -92,7 +92,7 @@ try {
   check("Victor entrou no Zênite", /Meu dia/.test(await texto(v)));
   check("administrador vê o item Usuários no menu", (await v.locator('.rail a[aria-label="Usuários"]').count()) === 1);
   check("rodapé do menu mostra ● Ao vivo", /Ao vivo/.test(await v.locator(".rail").innerText()));
-  await ir(v, "Frentes de trabalho");
+  await ir(v, "Projetos");
   check("carga inicial: as frentes de trabalho do Victor existem", /Revista de Experiências Exitosas/.test(await texto(v)));
 
   // ------------------------------------------------------------ Ana (membro, outro navegador)
@@ -101,7 +101,7 @@ try {
   await criarConta(a, "Ana Souza", "Av@2026");
   check("membro entrou", /Meu dia/.test(await texto(a)));
   check("membro NÃO vê Usuários", (await a.locator('.rail a[aria-label="Usuários"]').count()) === 0);
-  await ir(a, "Frentes de trabalho");
+  await ir(a, "Projetos");
   check("membro NÃO recebe as frentes do Victor", !/Revista de Experiências Exitosas/.test(await texto(a)));
 
   // nome repetido (sem diferenciar maiúsculas/acentos) é recusado

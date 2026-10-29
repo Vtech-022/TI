@@ -248,52 +248,95 @@ function AvMine(){
 }
 
 /* ---- Página: Calendário da equipe ---- */
+const __avMonths=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const __avDows=["dom","seg","ter","qua","qui","sex","sáb"];
+const __avTint=(hex,a)=>{const h=String(hex||"#2f64c4").replace("#","");const n=parseInt(h.length===3?h.replace(/./g,c=>c+c):h,16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
 function AvCalendar(){
-  const{tasks,me,error,reload}=useAvTasks();
+  const{tasks:shared,me,error,reload}=useAvTasks();
+  const mine=Da("/api/tasks?include_closed=1");
+  const open=_l();
   const dir=useAvDir();
   const todayS=__avToday();
-  const[ym,setYm]=x.useState(()=>todayS.slice(0,7)),[sel,setSel]=x.useState(todayS),[who,setWho]=x.useState(""),[addOpen,setAddOpen]=x.useState(!1);
+  const[ym,setYm]=x.useState(()=>todayS.slice(0,7)),[sel,setSel]=x.useState(todayS),[who,setWho]=x.useState(""),[addOpen,setAddOpen]=x.useState(!1),[colorsOpen,setColorsOpen]=x.useState(!1);
   const[y,m]=ym.split("-").map(Number);
-  const first=new Date(Date.UTC(y,m-1,1)),startDow=first.getUTCDay();
-  const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+  const startDow=new Date(Date.UTC(y,m-1,1)).getUTCDay(),dim=new Date(Date.UTC(y,m,0)).getUTCDate();
   const iso=d=>`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-  const vis=(tasks||[]).filter(t=>t.due_date&&(!who||t.assignee===who||(!t.assignee&&t.owner===who)));
+  const myName=Wi.userName||"Eu";
+  /* junta as tarefas da equipe com as minhas (as minhas usam a cor do projeto) */
+  const items=[];
+  for(const t of shared||[]){
+    if(!t.due_date)continue;
+    const pid=t.assignee||t.owner;
+    if(who&&pid!==who)continue;
+    items.push({key:"s"+t.id,title:t.title,date:t.due_date,time:t.due_time,done:t.status==="concluida",status:t.status,who:pid,whoName:t.assignee_name||t.owner_name||"Sem responsável",color:__avColor(pid),kind:"shared",validar:t.kind==="validar",subs:t.subtasks||[]});
+  }
+  if(!who||who===me)for(const t of mine.data||[]){
+    if(!t.due_date||t.status==="cancelada")continue;
+    items.push({key:"l"+t.id,title:t.title,date:t.due_date,time:t.due_time,done:t.status==="concluida",status:t.status,who:me,whoName:myName,color:t.project_name?zc(t.project_name):"#2f64c4",project:t.project_name,kind:"local",localId:t.id,subs:[]});
+  }
   const byDay=new Map();
-  for(const t of vis)byDay.set(t.due_date,[...(byDay.get(t.due_date)||[]),t]);
+  for(const it of items)byDay.set(it.date,[...(byDay.get(it.date)||[]),it]);
+  for(const l of byDay.values())l.sort((a,b)=>(a.done-b.done)||String(a.time||"99").localeCompare(String(b.time||"99")));
   const move=n=>{const d=new Date(Date.UTC(y,m-1+n,1));setYm(`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,"0")}`)};
-  const months=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
   const cells=[];for(let i=0;i<startDow;i++)cells.push(null);for(let d=1;d<=dim;d++)cells.push(d);
   const day=byDay.get(sel)||[];
-  const groups=new Map();
-  for(const t of day){const k=t.assignee_name||t.owner_name;groups.set(k,[...(groups.get(k)||[]),t])}
+  const openCount=day.filter(i=>!i.done).length;
+  const goItem=it=>{if(it.kind==="local")open(it.localId);else nav("/tarefas-equipe")};
   const nav=ir();
+  const stLabel=it=>it.done?"Concluída":it.status==="em_andamento"?"Em andamento":"Pendente";
   return(0,q.jsxs)(q.Fragment,{children:[
-    (0,q.jsx)("div",{className:"page-head",children:(0,q.jsxs)("div",{children:[(0,q.jsx)("div",{className:"eyebrow",children:"Equipe"}),(0,q.jsx)("h1",{children:"Calendário da equipe"}),(0,q.jsx)("p",{children:"O que cada pessoa tem para fazer em cada dia. Aparecem as tarefas da equipe com prazo (as individuais só para quem pode ver)."})]})}),
+    (0,q.jsxs)("div",{className:"page-head",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("div",{className:"eyebrow",children:"Equipe"}),(0,q.jsx)("h1",{children:"Calendário da equipe"}),(0,q.jsx)("p",{children:"O que cada pessoa tem para fazer em cada dia. Suas tarefas aparecem com a cor do projeto."})]}),
+      (0,q.jsxs)("div",{className:"btn-row",children:[(0,q.jsx)("button",{className:"btn",onClick:()=>setColorsOpen(!0),children:"Cores dos projetos"}),(0,q.jsx)("button",{className:"btn primary",onClick:()=>setAddOpen(!0),children:"+ Nova tarefa"})]})]}),
     (0,q.jsx)(ll,{error}),
-    (0,q.jsxs)("div",{className:"toolbar",children:[
-      (0,q.jsxs)("div",{className:"btn-row",role:"group","aria-label":"Mês",style:{flexWrap:"nowrap"},children:[(0,q.jsx)("button",{className:"btn sm",onClick:()=>move(-1),"aria-label":"Mês anterior",children:"‹"}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{setYm(todayS.slice(0,7));setSel(todayS)},children:"Hoje"}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>move(1),"aria-label":"Próximo mês",children:"›"})]}),
-      (0,q.jsx)("strong",{className:"avc-title",children:months[m-1]+" de "+y}),(0,q.jsx)("span",{style:{flex:1}}),(0,q.jsx)("button",{className:"btn primary",onClick:()=>setAddOpen(!0),children:"+ Nova tarefa em "+na(sel)}),
-      (0,q.jsxs)("select",{className:"select",value:who,onChange:e=>setWho(e.target.value),"aria-label":"Pessoa",children:[(0,q.jsx)("option",{value:"",children:"Todas as pessoas"}),dir.map(p=>(0,q.jsx)("option",{value:p.id,children:p.name+(p.id===me?" (você)":"")},p.id))]})]}),
-    (0,q.jsxs)("div",{className:"avc",children:[
-      (0,q.jsx)("div",{className:"avc-grid",role:"grid","aria-label":"Calendário",children:[
-        ["dom","seg","ter","qua","qui","sex","sáb"].map(w=>(0,q.jsx)("div",{className:"avc-dow",children:w},w)),
-        cells.map((d,i)=>{
-          if(!d)return(0,q.jsx)("div",{className:"avc-cell empty"},"e"+i);
-          const k=iso(d),list=byDay.get(k)||[];
-          return(0,q.jsxs)("button",{type:"button",className:"avc-cell"+(k===todayS?" today":"")+(k===sel?" sel":""),onClick:()=>setSel(k),"aria-label":d+" de "+months[m-1]+", "+list.length+" tarefa(s)",children:[
-            (0,q.jsx)("span",{className:"avc-n",children:d}),
-            (0,q.jsxs)("span",{className:"avc-dots",children:[list.slice(0,4).map(t=>(0,q.jsx)("i",{style:{background:__avColor(t.assignee||t.owner),opacity:t.status==="concluida"?.35:1}},t.id)),list.length>4&&(0,q.jsx)("em",{children:"+"+(list.length-4)})]})
-          ]},k);
-        })]}),
-      (0,q.jsxs)("section",{className:"avc-day panel","aria-live":"polite",children:[
-        (0,q.jsxs)("div",{className:"panel-head",children:[(0,q.jsx)("h2",{children:na(sel)+(sel===todayS?" · hoje":"")}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>setAddOpen(!0),children:"+ Adicionar"})]}),
-        (0,q.jsx)("div",{className:"panel-body",children:!tasks?(0,q.jsx)(cl,{rows:3}):day.length===0?(0,q.jsx)("p",{className:"small muted",children:"Nada marcado para este dia."}):[...groups.entries()].map(([name,list])=>(0,q.jsxs)("div",{className:"avc-grp",children:[
-          (0,q.jsxs)("div",{className:"avc-who",children:[(0,q.jsx)("span",{className:"avt-av sm",style:{background:__avColor(list[0].assignee||list[0].owner)},"aria-hidden":!0,children:__avInit(name)}),(0,q.jsx)("strong",{children:name})]}),
-          (0,q.jsx)("ul",{children:list.map(t=>(0,q.jsxs)("li",{className:t.status==="concluida"?"is-done":"",onClick:()=>nav("/tarefas-equipe"),children:[t.due_time&&(0,q.jsx)("span",{className:"mono small",children:t.due_time+" "}),t.title,(0,q.jsx)("span",{className:"small muted",children:" · "+__avStatus[t.status]+(t.kind==="validar"?" · validar":"")})]},t.id))})]},name))})
-      ]})
-    ]}),
-    (0,q.jsx)(AvTaskModal,{open:addOpen,task:null,defaults:{due_date:sel,assignee:who||""},onClose:()=>setAddOpen(!1),onSaved:reload})
+    (0,q.jsxs)("div",{className:"avc2",children:[
+      (0,q.jsxs)("section",{className:"avc2-main panel",children:[
+        (0,q.jsxs)("div",{className:"avc2-head",children:[
+          (0,q.jsxs)("div",{className:"avc2-title",children:[(0,q.jsx)("strong",{children:__avMonths[m-1]}),(0,q.jsx)("span",{children:y})]}),
+          (0,q.jsxs)("div",{className:"avc2-ctl",children:[
+            (0,q.jsxs)("select",{className:"select",value:who,onChange:e=>setWho(e.target.value),"aria-label":"Pessoa",children:[(0,q.jsx)("option",{value:"",children:"Todas as pessoas"}),dir.map(p=>(0,q.jsx)("option",{value:p.id,children:p.name+(p.id===me?" (você)":"")},p.id))]}),
+            (0,q.jsx)("button",{className:"avc2-round",onClick:()=>move(-1),"aria-label":"Mês anterior",children:"‹"}),
+            (0,q.jsx)("button",{className:"avc2-today",onClick:()=>{setYm(todayS.slice(0,7));setSel(todayS)},children:"Hoje"}),
+            (0,q.jsx)("button",{className:"avc2-round",onClick:()=>move(1),"aria-label":"Próximo mês",children:"›"})]})]}),
+        (0,q.jsxs)("div",{className:"avc2-grid",role:"grid","aria-label":"Calendário",children:[
+          __avDows.map(w=>(0,q.jsx)("div",{className:"avc2-dow",children:w},w)),
+          cells.map((d,i)=>{
+            if(!d)return(0,q.jsx)("div",{className:"avc2-cell empty"},"e"+i);
+            const k=iso(d),list=byDay.get(k)||[],dow=(startDow+d-1)%7;
+            return(0,q.jsxs)("button",{type:"button",className:"avc2-cell"+(k===todayS?" today":"")+(k===sel?" sel":"")+(dow===0||dow===6?" wknd":"")+(list.length?" has":""),onClick:()=>setSel(k),onDoubleClick:()=>{setSel(k);setAddOpen(!0)},"aria-label":d+" de "+__avMonths[m-1]+", "+list.length+" tarefa(s)",children:[
+              (0,q.jsx)("span",{className:"avc2-n",children:d}),
+              (0,q.jsxs)("span",{className:"avc2-chips",children:[list.slice(0,2).map(it=>(0,q.jsx)("span",{className:"avc2-chip"+(it.done?" done":""),style:{background:__avTint(it.color,.2),borderLeftColor:it.color},title:it.title,children:it.title},it.key)),list.length>2&&(0,q.jsx)("em",{className:"avc2-more",children:"+"+(list.length-2)+" mais"})]}),
+              (0,q.jsx)("span",{className:"avc2-faces",children:[...new Map(list.map(it=>[it.who,it])).values()].slice(0,3).map(it=>(0,q.jsx)("i",{style:{background:it.color},title:it.whoName,children:__avInit(it.whoName)},it.who))})
+            ]},k);
+          })]})]}),
+      (0,q.jsxs)("aside",{className:"avc2-side","aria-live":"polite",children:[
+        (0,q.jsxs)("div",{className:"avc2-side-head",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("small",{children:sel===todayS?"Hoje":__avDows[new Date(sel+"T12:00:00Z").getUTCDay()]}),(0,q.jsx)("h2",{children:na(sel)})]}),(0,q.jsx)("button",{className:"btn sm primary",onClick:()=>setAddOpen(!0),children:"+ Adicionar"})]}),
+        (0,q.jsx)("div",{className:"avc2-count",children:!shared&&!mine.data?"Carregando…":day.length===0?"Nada marcado para este dia.":openCount+" em aberto · "+(day.length-openCount)+" concluída(s)"}),
+        (0,q.jsx)("ul",{className:"avc2-list",children:day.map(it=>(0,q.jsxs)("li",{className:"avc2-card"+(it.done?" done":""),style:{borderLeftColor:it.color,background:__avTint(it.color,.1)},onClick:()=>goItem(it),children:[
+          (0,q.jsxs)("div",{className:"avc2-card-top",children:[(0,q.jsx)("strong",{children:it.title}),(0,q.jsx)("span",{className:"avc2-st",children:stLabel(it)})]}),
+          (0,q.jsxs)("div",{className:"avc2-card-meta",children:[(0,q.jsx)("i",{style:{background:it.color},children:__avInit(it.whoName)}),(0,q.jsx)("span",{children:it.whoName}),it.time&&(0,q.jsx)("span",{className:"mono",children:it.time}),it.project&&(0,q.jsx)("span",{className:"avc2-proj",style:{color:it.color},children:it.project}),it.validar&&(0,q.jsx)("span",{className:"avc2-proj",children:"validar"})]}),
+          it.subs.length>0&&(0,q.jsx)("div",{className:"avc2-bar",title:it.subs.filter(s=>s.done).length+"/"+it.subs.length+" subtarefas",children:(0,q.jsx)("span",{style:{width:Math.round(100*it.subs.filter(s=>s.done).length/it.subs.length)+"%",background:it.color}})})]},it.key))}),
+        (0,q.jsx)("button",{className:"btn ghost sm",style:{marginTop:10},onClick:()=>nav("/tarefas-equipe"),children:"Abrir Tarefas da equipe"})
+      ]})]}),
+    (0,q.jsx)(AvTaskModal,{open:addOpen,task:null,defaults:{due_date:sel,assignee:who&&who!==me?who:""},onClose:()=>setAddOpen(!1),onSaved:reload}),
+    (0,q.jsx)(AvColorsModal,{open:colorsOpen,onClose:()=>setColorsOpen(!1)})
   ]});
+}
+
+/* ---- Cores dos projetos (cada pessoa escolhe as suas) ---- */
+const __avSwatches=["#2f64c4","#0e7490","#18794e","#4d7c0f","#c49a2c","#b25e09","#b42318","#be185d","#6941c6","#475569","#e11d48","#0ea5e9"];
+function AvColorsModal({open,onClose}){
+  const{data:projects}=Da(open?"/api/projects":null);
+  const{prefs,setPrefs}=Ea();
+  const colors=prefs.projectColors||{};
+  const setColor=(name,c)=>{const n={...colors};if(c)n[name]=c;else delete n[name];window.__avProjColors=n;setPrefs({projectColors:n})};
+  return(0,q.jsx)(dl,{open,title:"Cores dos projetos",onClose,footer:(0,q.jsx)("button",{className:"btn primary",onClick:onClose,children:"Pronto"}),
+    children:!projects?(0,q.jsx)(cl,{rows:4}):projects.length===0?(0,q.jsx)("p",{className:"muted small",children:"Você ainda não tem projetos."}):
+      (0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("p",{className:"small muted",style:{marginBottom:10},children:"A cor escolhida aparece nos seus projetos, nas etiquetas das tarefas e no calendário. Só você vê as suas escolhas."}),
+        (0,q.jsx)("ul",{className:"avcol-list",children:projects.map(p=>(0,q.jsxs)("li",{children:[
+          (0,q.jsx)("span",{className:"avcol-name",children:[(0,q.jsx)("i",{style:{background:zc(p.name)}}),p.name]}),
+          (0,q.jsxs)("span",{className:"avcol-sw",children:[__avSwatches.map(c=>(0,q.jsx)("button",{type:"button",className:"avcol-dot"+(zc(p.name).toLowerCase()===c?" on":""),style:{background:c},"aria-label":"Cor "+c+" para "+p.name,onClick:()=>setColor(p.name,c)},c)),
+            (0,q.jsx)("input",{type:"color",className:"avcol-pick","aria-label":"Outra cor para "+p.name,value:/^#[0-9a-f]{6}$/i.test(zc(p.name))?zc(p.name):"#2f64c4",onChange:e=>setColor(p.name,e.target.value)}),
+            colors[p.name]&&(0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>setColor(p.name,null),children:"Padrão"})]})]},p.id))})]})});
 }
 
 /* ---- Recuperar senha (tela de entrada) ---- */
@@ -433,3 +476,119 @@ function AvCodeModal(){
   document.addEventListener("click",hide,!0);
   document.addEventListener("scroll",hide,!0);
 })();
+
+/* ===== Presença (quem está online), horas do dia e foto de perfil ===== */
+const __avPS={data:null,at:0,subs:new Set(),timer:null,busy:!1};
+async function __avPSLoad(){
+  if(__avPS.busy)return;__avPS.busy=!0;
+  try{const d=await __avJson("/presence");__avPS.data=d;__avPS.at=Date.now();__avPS.subs.forEach(f=>f())}catch{}finally{__avPS.busy=!1}
+}
+function usePresence(){
+  const[,tick]=x.useState(0);
+  x.useEffect(()=>{
+    const f=()=>tick(n=>n+1);__avPS.subs.add(f);
+    if(!__avPS.timer){__avPSLoad();__avPS.timer=setInterval(()=>{if(document.visibilityState==="visible")__avPSLoad()},20000)}
+    else if(__avPS.data)f();
+    const t=setInterval(f,30000); /* o relógio de horas anda sozinho entre uma consulta e outra */
+    return()=>{__avPS.subs.delete(f);clearInterval(t);if(!__avPS.subs.size&&__avPS.timer){clearInterval(__avPS.timer);__avPS.timer=null}};
+  },[]);
+  const d=__avPS.data;
+  const lag=d?Date.now()-__avPS.at:0;
+  const people=d?d.people.map(p=>({...p,worked_ms:p.worked_ms+(p.working?lag:0)})):null;
+  return{people,reload:__avPSLoad};
+}
+const __avHM=ms=>{const m=Math.floor(Math.max(0,ms)/60000);return m<60?m+"min":Math.floor(m/60)+"h"+String(m%60).padStart(2,"0")};
+
+/* foto (se tiver) ou iniciais coloridas */
+function AvPhoto({id,name,fallback,size}){
+  const{people}=usePresence();
+  const p=people&&people.find(z=>z.id===id);
+  const[bad,setBad]=x.useState(!1);
+  const st=size?{width:size,height:size}:void 0;
+  if(p&&p.av&&!bad)return(0,q.jsx)("img",{className:"av-img",src:"/api/avatar/"+id+"?v="+p.av,alt:"",style:st,onError:()=>setBad(!0)});
+  return(0,q.jsx)("span",{className:"av-ini",style:{...(st||{}),background:__avColor(id)},"aria-hidden":!0,children:fallback??__avInit(name)});
+}
+
+/* ---- Horas do dia (cronômetro que a pessoa liga e pausa) ---- */
+function AvWorkTimer(){
+  const{people,reload}=usePresence();
+  const me=window.__avUid;
+  const p=people&&people.find(z=>z.id===me);
+  const[busy,setBusy]=x.useState(!1);
+  const{fail}=Ea();
+  const go=async a=>{setBusy(!0);try{await __avJson("/presence/work",{method:"POST",body:{action:a}});await reload()}catch(e){fail(e)}finally{setBusy(!1)}};
+  const working=!!(p&&p.working);
+  return(0,q.jsxs)("div",{className:"avw"+(working?" on":""),children:[
+    (0,q.jsxs)("div",{className:"avw-time",children:[(0,q.jsx)("small",{children:"Horas hoje"}),(0,q.jsx)("strong",{className:"mono",children:p?__avHM(p.worked_ms):"—"})]}),
+    (0,q.jsx)("button",{className:"avw-btn",disabled:busy||!p,onClick:()=>go(working?"stop":"start"),title:working?"Pausa o cronômetro de hoje":"Liga o cronômetro enquanto você trabalha",children:working?"⏸ Pausar":"▶ Iniciar"}),
+    (0,q.jsx)("span",{className:"avw-hint",children:working?"Contando… pausa sozinho se você sair do sistema.":"Ligue ao começar o expediente."})]});
+}
+
+/* ---- Painel de números do dia ---- */
+function AvHomeDash({done,total,late,doing,waiting}){
+  const{people}=usePresence();
+  const p=people&&people.find(z=>z.id===window.__avUid);
+  const pct=total?Math.round(100*done/total):0;
+  const R=52,C=2*Math.PI*R;
+  const tiles=[["Atrasadas",late,"#b42318"],["Em andamento",doing,"#2f64c4"],["Aguardando",waiting,"#c49a2c"]];
+  return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
+    (0,q.jsx)("div",{className:"panel-head",children:(0,q.jsx)("h2",{children:"Seu dia em números"})}),
+    (0,q.jsxs)("div",{className:"avh-body",children:[
+      (0,q.jsxs)("div",{className:"avh-ring",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
+        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"150",height:"150",children:[(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"var(--line)",strokeWidth:"12"}),(0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g)",strokeWidth:"12",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:C*(1-pct/100),transform:"rotate(-90 64 64)",style:{transition:"stroke-dashoffset .6s"}}),(0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2f6bff"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffc83d"})]})})]}),
+        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:done+"/"+total}),(0,q.jsx)("small",{children:"feitas hoje"})]})]}),
+      (0,q.jsxs)("div",{className:"avh-tiles",children:[tiles.map(([l,v,c])=>(0,q.jsxs)("div",{className:"avh-tile",children:[(0,q.jsx)("i",{style:{background:c},children:v}),(0,q.jsx)("span",{children:l})]},l)),
+        (0,q.jsxs)("div",{className:"avh-tile",children:[(0,q.jsx)("i",{style:{background:"#18794e",fontSize:11},children:p?__avHM(p.worked_ms):"—"}),(0,q.jsx)("span",{children:"Horas hoje"})]})]})]})]});
+}
+
+/* ---- Quem está online ---- */
+function AvOnline(){
+  const{people}=usePresence();
+  const[all,setAll]=x.useState(!1);
+  if(!people)return null;
+  const on=people.filter(p=>p.online);
+  const shown=(all?people:people.filter(p=>p.online||p.working)).slice(0,all?60:8);
+  return(0,q.jsxs)("section",{className:"avo panel","aria-label":"Quem está online",children:[
+    (0,q.jsxs)("div",{className:"panel-head",children:[(0,q.jsx)("h2",{children:"Equipe agora"}),(0,q.jsx)("span",{className:"small muted",children:on.length+" online"})]}),
+    (0,q.jsxs)("ul",{className:"avo-list",children:[shown.map(p=>(0,q.jsxs)("li",{className:p.online?"on":"off",children:[
+      (0,q.jsxs)("span",{className:"avo-face",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:34}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":""),title:p.online?"Online":"Offline"})]}),
+      (0,q.jsxs)("span",{className:"avo-txt",children:[(0,q.jsx)("strong",{children:p.name+(p.id===window.__avUid?" (você)":"")}),(0,q.jsx)("small",{children:p.working?"Trabalhando · "+__avHM(p.worked_ms):p.worked_ms>0?"Hoje: "+__avHM(p.worked_ms):p.online?"Online":"Offline"})]})]},p.id)),
+      shown.length===0&&(0,q.jsx)("li",{className:"small muted",children:"Ninguém online agora."})]}),
+    people.length>shown.length||all?(0,q.jsx)("button",{className:"btn sm ghost",style:{margin:"4px 12px 12px"},onClick:()=>setAll(a=>!a),children:all?"Mostrar só quem está online":"Ver toda a equipe ("+people.length+")"}):null]});
+}
+
+/* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
+function AvNotes({children}){
+  return(0,q.jsxs)("details",{className:"av-more2",children:[(0,q.jsx)("summary",{children:"Anotações do dia"}),children]});
+}
+
+/* ---- Foto de perfil: escolher, reduzir e enviar ---- */
+function AvAvatarModal(){
+  const[open,setOpen]=x.useState(!1),[busy,setBusy]=x.useState(!1),[err,setErr]=x.useState("");
+  const{people,reload}=usePresence();
+  const me=window.__avUid,p=people&&people.find(z=>z.id===me);
+  x.useEffect(()=>{const f=()=>{setErr("");setOpen(!0)};window.addEventListener("prumo:avatar",f);return()=>window.removeEventListener("prumo:avatar",f)},[]);
+  const pick=async file=>{
+    setErr("");if(!file)return;
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)){setErr("Use uma foto JPG, PNG ou WEBP.");return}
+    setBusy(!0);
+    try{
+      const bmp=await createImageBitmap(file);
+      const S=192,cv=document.createElement("canvas");cv.width=cv.height=S;
+      const side=Math.min(bmp.width,bmp.height),sx=(bmp.width-side)/2,sy=(bmp.height-side)/2;
+      cv.getContext("2d").drawImage(bmp,sx,sy,side,side,0,0,S,S);
+      const blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.85));
+      const bytes=new Uint8Array(await blob.arrayBuffer());
+      await __avJson("/avatar",{method:"PUT",body:bytes});
+      await reload();setOpen(!1);
+    }catch(e){setErr(e?.message||"Não foi possível enviar a foto.")}finally{setBusy(!1)}
+  };
+  const remove=async()=>{setBusy(!0);try{await __avJson("/avatar",{method:"DELETE"});await reload();setOpen(!1)}catch(e){setErr(e?.message||"Erro ao remover.")}finally{setBusy(!1)}};
+  return(0,q.jsx)(dl,{open,title:"Foto de perfil",onClose:()=>setOpen(!1),footer:(0,q.jsx)("button",{className:"btn",onClick:()=>setOpen(!1),children:"Fechar"}),
+    children:(0,q.jsxs)("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:12},children:[
+      (0,q.jsx)("div",{className:"av-big",children:(0,q.jsx)(AvPhoto,{id:me,name:Wi.userName||"?",size:120})}),
+      (0,q.jsx)("p",{className:"small muted",style:{textAlign:"center"},children:"A foto aparece para a equipe em “Equipe agora” e no seu perfil. Ela é recortada em quadrado e reduzida automaticamente."}),
+      (0,q.jsxs)("label",{className:"btn primary",style:{cursor:"pointer"},children:[busy?"Enviando…":"Escolher foto",(0,q.jsx)("input",{type:"file",accept:"image/jpeg,image/png,image/webp",hidden:!0,disabled:busy,onChange:e=>{pick(e.target.files&&e.target.files[0]);e.target.value=""}})]}),
+      p&&p.av>0&&(0,q.jsx)("button",{className:"btn ghost",disabled:busy,onClick:remove,children:"Remover foto"}),
+      err&&(0,q.jsx)("p",{className:"gate-error",role:"alert",children:err})]})});
+}

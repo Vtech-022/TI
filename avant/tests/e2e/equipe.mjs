@@ -119,13 +119,30 @@ try {
   check("calendário mostra a tarefa no dia e a pessoa responsável", /Revisar planilha de custos/.test(await texto(v)) && /Ana Souza/.test(await texto(v)));
 
   // criar tarefa direto do calendário
-  await v.locator('button:has-text("+ Nova tarefa em")').click();
+  await v.locator('.avc2-side button:has-text("+ Adicionar")').click();
   await v.waitForSelector(".modal");
   check("calendário: nova tarefa já vem com a data do dia selecionado", (await v.locator('.modal input[type="date"]').inputValue()) === hoje);
   await v.locator('.modal input[data-autofocus]').fill("Reunião de alinhamento");
   await v.locator('.modal button:has-text("Criar tarefa")').click();
   await v.waitForTimeout(1500);
-  check("tarefa criada pelo calendário aparece no dia", /Reunião de alinhamento/.test(await v.locator(".avc-day").innerText()));
+  check("tarefa criada pelo calendário aparece no dia", /Reunião de alinhamento/.test(await v.locator(".avc2-side").innerText()));
+  // cores dos projetos: escolher cor aparece no cartão do projeto e no calendário
+  await ir(v, "Projetos");
+  await v.locator('button:has-text("Cores dos projetos")').first().click();
+  await v.waitForSelector(".avcol-list");
+  const primeiro = v.locator(".avcol-list li").first();
+  const nomeProj = (await primeiro.locator(".avcol-name").innerText()).trim();
+  await primeiro.locator('.avcol-dot[aria-label^="Cor #e11d48"]').click();
+  await v.locator('.modal button:has-text("Pronto")').click();
+  await v.waitForTimeout(600);
+  const borda = await v.locator(".panel.kpi", { hasText: nomeProj }).first().evaluate((e) => getComputedStyle(e).borderLeftColor);
+  check("cor escolhida para o projeto aparece no cartão", borda === "rgb(225, 29, 72)", borda);
+  const salvo = await v.evaluate(async () => (await (await fetch("/api/prefs", { headers: { "x-avant": "1" } })).json()).prefs?.projectColors);
+  check("a cor fica salva no servidor, na conta da pessoa", !!salvo && Object.values(salvo).includes("#e11d48"), JSON.stringify(salvo));
+  await ir(v, "Calendário da equipe");
+  await shot(v, "12-calendario-novo");
+  check("calendário novo: grade com chips e lista do dia em cartões", (await v.locator(".avc2-cell").count()) >= 28 && (await v.locator(".avc2-card").count()) >= 1);
+
   // menu lateral em tela baixa: dá para chegar no último item
   await v.setViewportSize({ width: 1280, height: 520 });
   await v.waitForTimeout(400);
@@ -268,6 +285,25 @@ try {
   await v.waitForSelector(".modal .avt-code");
   check("menu da conta gera um novo código de recuperação", /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test((await v.locator(".modal .avt-code").innerText()).trim()));
   await v.locator('.modal button:has-text("Guardei o código")').click();
+
+  // ---- tela inicial: presença, horas, painel, foto
+  await v.locator(".rail-brand").click(); await v.waitForTimeout(1500);
+  await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
+  const home = await texto(v);
+  check("início mostra 'Equipe agora' com a Ana online", /Equipe agora/.test(home) && /Ana Souza/.test(home));
+  check("início mostra painel do dia e horas", /Seu dia em números/.test(home) && /Horas hoje/.test(home));
+  check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
+  await v.locator('.avw-btn:has-text("Iniciar")').click(); await v.waitForTimeout(1200);
+  check("cronômetro de horas liga", await v.locator('.avw.on').count() === 1);
+  await v.locator('.avw-btn:has-text("Pausar")').click(); await v.waitForTimeout(800);
+  check("cronômetro pausa", await v.locator('.avw.on').count() === 0);
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+  await v.locator(".account-btn, .rail .avatar.me").first().click().catch(() => {});
+  await v.locator('[role=menuitem]:has-text("Foto de perfil")').click();
+  await v.locator('.modal input[type=file]').setInputFiles({ name: "f.png", mimeType: "image/png", buffer: png });
+  await v.waitForTimeout(1500);
+  check("foto de perfil enviada e exibida", await v.locator("img.av-img").count() > 0);
+  await shot(v, "09-inicio");
 
   // ---- celular
   const m = await novo(390, 800);

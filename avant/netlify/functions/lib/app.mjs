@@ -557,6 +557,8 @@ async function handleDeleteUser(request, ctx, id) {
   await ctx.store.del(`names/${target.key ?? nameKey(target.name)}`);
   await ctx.store.del(`data/${id}`).catch(() => {});
   await ctx.store.del(`prefs/${id}`).catch(() => {});
+  await ctx.store.del(`presence/${id}`).catch(() => {});
+  await ctx.store.del(`avatars/${id}`).catch(() => {});
   for (const k of await ctx.store.list(`docfiles/${id}/`)) await ctx.store.del(k).catch(() => {});
   // tarefas que estavam com ela voltam a ficar sem responsável
   await updateJSON(ctx.store, TASKS_KEY, (doc) => {
@@ -577,6 +579,121 @@ async function handleDeleteUser(request, ctx, id) {
     return board;
   });
   return json(200, { ok: true });
+}
+
+
+// ---------------------------------------------------------------- presença, horas do dia e foto de perfil
+
+const GRACE_MS = 150_000; // sem sinal por mais que isso: o cronômetro do dia pausa sozinho
+const ONLINE_MS = 90_000; // "online" = deu sinal há menos de 90 s
+const TOUCH_MS = 25_000; // grava presença no máximo a cada 25 s por pessoa
+const AVATAR_MAX = 80 * 1024;
+const dayOf = (ms) => new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date(ms));
+
+function normPresence(doc, now) {
+  const d = { seen: 0, date: dayOf(now), ms: 0, since: null, av: 0, ...(doc ?? {}) };
+  if (d.date !== dayOf(now)) { d.date = dayOf(now); d.ms = 0; d.since = null; } // virou o dia
+  return d;
+}
+function bank(d, now) {
+  if (d.since) {
+    const end = Math.min(now, d.seen + GRACE_MS);
+    if (end > d.since) d.ms += end - d.since;
+    d.since = null;
+  }
+}
+function presenceView(id, name, doc, now) {
+  const d = doc && doc.date === dayOf(now) ? doc : { ...(doc ?? {}), ms: 0, since: null };
+  const running = !!d.since && now - (d.seen ?? 0) <= GRACE_MS;
+  const extra = d.since ? Math.max(0, Math.min(now, (d.seen ?? 0) + GRACE_MS) - d.since) : 0;
+  return {
+    id, name,
+    online: !!d.seen && now - d.seen <= ONLINE_MS,
+    working: running,
+    worked_ms: Math.round((d.ms ?? 0) + extra),
+    av: doc?.av ?? 0,
+  };
+}
+
+async function touchPresence(ctx, user) {
+  const now = ctx.now();
+  const cur = await getJSON(ctx.store, `presence/${user.id}`);
+  if (cur && now - (cur.value.seen ?? 0) < TOUCH_MS && cur.value.date === dayOf(now)) return;
+  const d = normPresence(cur?.value, now);
+  const wasRunning = !!d.since && now - d.seen <= GRACE_MS;
+  bank(d, now);
+  if (wasRunning) d.since = now;
+  d.seen = now;
+  await putJSON(ctx.store, `presence/${user.id}`, d);
+}
+
+async function handlePresenceList(request, ctx) {
+  await requireUser(request, ctx);
+  const now = ctx.now();
+  const users = await allUsers(ctx);
+  const rows = await Promise.all(users.map(async (u) => {
+    const cur = await getJSON(ctx.store, `presence/${u.id}`);
+    return presenceView(u.id, u.name, cur?.value, now);
+  }));
+  rows.sort((a, b) => (b.online - a.online) || a.name.localeCompare(b.name, "pt-BR"));
+  return json(200, { now, people: rows });
+}
+
+async function handleWorkTimer(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  if (body.action !== "start" && body.action !== "stop") throw new ApiError(400, "acao", "Ação inválida.");
+  const now = ctx.now();
+  const cur = await getJSON(ctx.store, `presence/${user.id}`);
+  const d = normPresence(cur?.value, now);
+  bank(d, now);
+  d.seen = now;
+  if (body.action === "start") d.since = now;
+  await putJSON(ctx.store, `presence/${user.id}`, d);
+  return json(200, presenceView(user.id, user.name, d, now));
+}
+
+function sniffImage(b) {
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png";
+  if (b.length > 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "image/webp";
+  return null;
+}
+
+async function handlePutAvatar(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const bytes = await readBytes(request, AVATAR_MAX).catch((e) => {
+    if (e.status === 413) throw new ApiError(413, "grande_demais", "A foto passa de 80 KB depois de reduzida. Escolha outra imagem.");
+    throw e;
+  });
+  const mime = sniffImage(bytes);
+  if (!mime) throw new ApiError(400, "imagem", "Use uma foto JPG, PNG ou WEBP.");
+  await ctx.store.put(`avatars/${user.id}`, bytes, { metadata: { mime } });
+  const now = ctx.now();
+  const cur = await getJSON(ctx.store, `presence/${user.id}`);
+  const d = normPresence(cur?.value, now);
+  d.av = now;
+  await putJSON(ctx.store, `presence/${user.id}`, d);
+  return json(200, { av: d.av });
+}
+
+async function handleDeleteAvatar(request, ctx) {
+  const user = await requireUser(request, ctx);
+  await ctx.store.del(`avatars/${user.id}`).catch(() => {});
+  const now = ctx.now();
+  const cur = await getJSON(ctx.store, `presence/${user.id}`);
+  if (cur) { const d = normPresence(cur.value, now); d.av = 0; await putJSON(ctx.store, `presence/${user.id}`, d); }
+  return json(200, { av: 0 });
+}
+
+async function handleGetAvatar(request, ctx, id) {
+  await requireUser(request, ctx);
+  const r = await ctx.store.get(`avatars/${id}`);
+  if (!r) throw new ApiError(404, "foto", "Sem foto.");
+  return new Response(r.bytes, {
+    status: 200,
+    headers: { "content-type": r.metadata.mime ?? "image/jpeg", "x-content-type-options": "nosniff", "cache-control": "private, max-age=86400" },
+  });
 }
 
 // ---------------------------------------------------------------- quadro da equipe
@@ -607,6 +724,21 @@ async function handleGetTeam(request, ctx) {
       }))
     : [];
   return json(200, { tag, people }, { etag: tag });
+}
+
+/** Administrador tira do quadro/ranking os cartões de uma conta que já foi removida. */
+async function handleDeleteTeamPerson(request, ctx, uid) {
+  const user = await requireUser(request, ctx);
+  if (user.role !== "admin") throw new ApiError(403, "sem_permissao", "Somente o administrador pode remover do histórico.");
+  await updateJSON(ctx.store, BOARD_KEY, (board) => {
+    const doc = board?.docs[uid];
+    if (!doc) throw new ApiError(404, "pessoa", "Essa pessoa não está no quadro.");
+    if (!doc.removed) throw new ApiError(400, "conta_ativa", "Só dá para remover do histórico contas que já foram excluídas.");
+    delete board.docs[uid];
+    board.version++;
+    return board;
+  });
+  return json(200, { ok: true });
 }
 
 async function handlePutTeam(request, ctx, uid) {
@@ -693,6 +825,7 @@ async function handlePutData(request, ctx) {
 
 async function handlePing(request, ctx) {
   const user = await requireUser(request, ctx);
+  await touchPresence(ctx, user).catch(() => {});
   const [board, data, tasks] = await Promise.all([
     ctx.store.getMeta(BOARD_KEY),
     ctx.store.getMeta(dataKey(user.id)),
@@ -854,10 +987,16 @@ export async function handle(request, ctx) {
 
     if (method === "GET" && path === "/team") return await handleGetTeam(request, ctx);
     if (method === "PUT" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handlePutTeam(request, ctx, m[1]);
+    if (method === "DELETE" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handleDeleteTeamPerson(request, ctx, m[1]);
 
     if (method === "GET" && path === "/data") return await handleGetData(request, ctx);
     if (method === "PUT" && path === "/data") return await handlePutData(request, ctx);
     if (method === "GET" && path === "/ping") return await handlePing(request, ctx);
+    if (method === "GET" && path === "/presence") return await handlePresenceList(request, ctx);
+    if (method === "POST" && path === "/presence/work") return await handleWorkTimer(request, ctx);
+    if (method === "PUT" && path === "/avatar") return await handlePutAvatar(request, ctx);
+    if (method === "DELETE" && path === "/avatar") return await handleDeleteAvatar(request, ctx);
+    if (method === "GET" && (m = path.match(/^\/avatar\/([0-9a-f]{24})$/))) return await handleGetAvatar(request, ctx, m[1]);
     if (method === "GET" && path === "/prefs") return await handleGetPrefs(request, ctx);
     if (method === "PUT" && path === "/prefs") return await handlePutPrefs(request, ctx);
 

@@ -195,3 +195,20 @@ test("conta antiga (sem código) gera um código novo com a senha atual", async 
   assert.equal((await guest.post("/auth/recover", { name: "Dora Alves", code: r.recoveryCode, next: "Nova#2027" })).status, 200);
   assert.equal((await makeClient(ctx).post("/auth/recovery-code", { current: "x" })).status, 401);
 });
+
+test("administrador remove do quadro/ranking os cartões de conta excluída (e só dela)", async () => {
+  const { admin, ana, beto } = await team();
+  const bid = beto.data.user.id;
+  const listIds = async () => (await body(await admin.c.get("/team"))).people.map((p) => p.id);
+  assert.ok((await listIds()).includes(bid));
+  // conta ativa não pode ser tirada do quadro
+  assert.equal((await admin.c.del(`/team/${bid}`)).status, 400);
+  assert.equal((await admin.c.del(`/users/${bid}`)).status, 200);
+  // membro não pode
+  assert.equal((await ana.c.del(`/team/${bid}`)).status, 403);
+  assert.equal((await admin.c.del(`/team/${bid}`)).status, 200);
+  const ids = await listIds();
+  assert.ok(!ids.includes(bid));
+  assert.ok(ids.includes(ana.data.user.id));
+  assert.equal((await admin.c.del(`/team/${bid}`)).status, 404);
+});

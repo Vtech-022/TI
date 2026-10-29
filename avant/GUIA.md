@@ -37,3 +37,11 @@
 - Fechar a aba imediatamente após alterar pode perder essa última alteração.
 - Anexos de cartões excluídos podem ficar órfãos no armazenamento.
 - `AVANT.html` (nesta pasta) é a versão de arquivo único, **só local**: não compartilha nada com a equipe.
+
+## Novidades (projetos, calendário, tela inicial)
+- **Projetos**: "Frentes de trabalho" agora se chama *Projetos*. Em *Calendário da equipe → Cores dos projetos* cada pessoa escolhe as cores dos seus projetos (valem só para ela).
+- **Calendário** em células arredondadas, tarefas com a cor do projeto, avatares de quem tem tarefa no dia e lista lateral do dia selecionado.
+- **Ranking/histórico da equipe**: o Administrador vê "Remover" nas linhas "(conta removida)" para limpá-las.
+- **Tela inicial (Meu dia)** enxuta: só as atividades do dia, painel "Seu dia em números" (feitas/total, atrasadas, em andamento, aguardando, horas), **Equipe agora** (quem está online, com bolinha verde) e anotações recolhidas.
+- **Horas trabalhadas**: botão Iniciar/Pausar no topo da tela inicial. O cronômetro pausa sozinho ~2,5 min após você sair do sistema e zera à meia-noite (Brasília).
+- **Foto de perfil**: menu da conta → "Foto de perfil" (JPG/PNG/WEBP; recortada e reduzida automaticamente).
