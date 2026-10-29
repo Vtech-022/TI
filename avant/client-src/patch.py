@@ -379,7 +379,7 @@ sub("effort:e?.effort??``,", "effort:e?.effort??``,__assignee:``,__scope:`indivi
 sub("let n=Dl(wl()),r=Oa(),i=_l(),[a,o]=(0,x.useState)(!1),s=()=>n.dirty?o(!0):t();",
     "let n=Dl(wl()),r=Oa(),i=_l(),avn=ir(),[a,o]=(0,x.useState)(!1),s=()=>n.dirty?o(!0):t();")
 sub("onClick:async()=>{let e=await r(()=>Yi.post(`/api/tasks`,Tl(n.value)),`Tarefa criada.`);e&&(n.reset(wl()),t(),i(e.id))}",
-    "onClick:async()=>{if(__avIsShared(n.value)){let e=await r(()=>__avCreateShared(n.value),n.value.__assignee?`Tarefa enviada.`:`Tarefa criada para a equipe.`);e&&(n.reset(wl()),t(),avn(`/equipe`));return}let e=await r(()=>Yi.post(`/api/tasks`,Tl(n.value)),`Tarefa criada.`);e&&(n.reset(wl()),t(),i(e.id))}")
+    "onClick:async()=>{if(__avIsShared(n.value)){let e=await r(()=>__avCreateShared(n.value),n.value.__assignee?`Tarefa enviada.`:`Tarefa criada para a equipe.`);e&&(n.reset(wl()),t(),avn(`/tarefas-equipe`));return}let e=await r(()=>Yi.post(`/api/tasks`,Tl(n.value)),`Tarefa criada.`);e&&(n.reset(wl()),t(),i(e.id))}")
 sub("children:(0,q.jsx)(El,{draft:n.value,onChange:n.setValue})}),(0,q.jsx)(pl,{open:a,title:`Descartar nova tarefa?`",
     "children:(0,q.jsx)(El,{draft:n.value,onChange:n.setValue,share:!0})}),(0,q.jsx)(pl,{open:a,title:`Descartar nova tarefa?`")
 
@@ -437,9 +437,9 @@ sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarM
 # ---- Paletas prontas + cores secundárias vivas ----
 sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
 sub("(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "(0,q.jsx)(AvPalettes,{n,r}),(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
-sub("ba={accent:`#2f6bff`,", "ba={accent:`#6d63ff`,card:`#14141c`,bg:`#07070b`,accent2:`#9ad0ff`,deep:`#0b0c24`,palette:`indigo`,")
-sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "e.setProperty(`--avcard`,/^#[0-9a-f]{6}$/i.test(l.card)?l.card:`#18181c`),e.setProperty(`--avbg`,/^#[0-9a-f]{6}$/i.test(l.bg)?l.bg:`#08080a`),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
-sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.font,l.scale,l.wallpaper]")
+sub("ba={accent:`#2f6bff`,", "ba={accent:`#2563eb`,card:`#ffffff`,bg:`#f3f6fb`,hero:`#1d3f8f`,accent2:`#f5b301`,deep:`#0b0c24`,palette:`padrao`,")
+sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "__avInk(l,b),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
+sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,l.font,l.scale,l.wallpaper]")
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
@@ -448,8 +448,6 @@ sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnim
 # ---- Agenda de hoje: compromissos + tarefas com prazo hoje (minhas e da equipe) ----
 sub('children:h.length?(0,q.jsx)(`ul`,{className:`today-events`,children:h.map(e=>(0,q.jsxs)(`li`,{className:`clickable`,onClick:()=>i(`/agenda?evento=${e.id}`),children:[(0,q.jsx)(`span`,{className:`te-time`,children:e.all_day?`Dia todo`:fa(e.start_at)}),(0,q.jsxs)(`span`,{children:[(0,q.jsx)(`strong`,{children:e.title}),e.location&&(0,q.jsxs)(`small`,{className:`muted`,children:[` · `,e.location]})]})]},e.id))}):(0,q.jsx)(`p`,{className:`small muted`,style:{padding:`4px 20px 16px`},children:`Nenhum compromisso na agenda hoje.`})', 'children:(0,q.jsx)(AvAgendaToday,{events:h,mine:u.dueToday,today:c,go:i})')
 
-# ---- Tarefas da equipe dentro de "Atividades da equipe" (o item separado sai do menu) ----
-sub("o&&(0,q.jsx)(`div`,{className:`error-box`,style:{marginBottom:14},children:o}),c&&!c.canWrite", "(0,q.jsx)(`section`,{className:`avt-embed panel`,children:(0,q.jsx)(AvTeamTasks,{embedded:!0})}),o&&(0,q.jsx)(`div`,{className:`error-box`,style:{marginBottom:14},children:o}),c&&!c.canWrite")
 
 # ---- Menu, rotas e painel ----
 sub("{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},", "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},")

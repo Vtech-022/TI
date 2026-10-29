@@ -625,3 +625,52 @@ html.av-switching canvas.wallpaper{visibility:hidden}
 .avt-embed-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 .avt-embed-head h2{margin:0 0 4px;font-size:18px;color:var(--heading)}
 .avt-embed-head p{margin:0;max-width:560px}
+
+/* =====================================================================
+   TEMAS v3 — letras com contraste automático (nunca branco no branco)
+   --avink*: letras sobre os cartões · --avbgink*: letras sobre o fundo · --avheroink*: sobre a faixa do topo
+   ===================================================================== */
+:root.av-themed,:root[data-avant-theme=dark]{--text:var(--avink);--text-2:var(--avink2);--text-3:var(--avink3);--heading:var(--avink)}
+:root.av-themed .page-head h1,:root[data-avant-theme=dark] .page-head h1{color:var(--avbgink)!important}
+:root.av-themed .page-head p,:root.av-themed .page-head .eyebrow,:root[data-avant-theme=dark] .page-head p{color:var(--avbgink2)!important}
+:root[data-avant-theme=dark] .notes-card,:root[data-avant-theme=dark] .notes-card textarea{color:var(--avink)!important}
+/* temas claros: fundo e cartões lisos, sem papel de parede */
+:root.av-themed:not([data-avant-theme=dark]){--bg:var(--avbg);--surface:var(--avcard);--surface-2:color-mix(in srgb,var(--avcard) 93%,#000 5%);--line:color-mix(in srgb,var(--avcard) 86%,#000 12%);--line-strong:color-mix(in srgb,var(--avcard) 74%,#000 24%);--header-bg:var(--avcard);background:var(--avbg)!important}
+:root.av-themed:not([data-avant-theme=dark]) canvas.wallpaper{display:none!important}
+:root.av-themed:not([data-avant-theme=dark]) body,:root.av-themed:not([data-avant-theme=dark]) #root{background:var(--avbg)!important}
+:root.av-themed:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.modal,.avc-panel,.rail,.topbar>*,.rail-brand):not(.avh):not(.day-hero):not(.kpi){background:var(--avcard)!important;border:1px solid var(--line)!important;box-shadow:0 1px 2px #0000000d,0 6px 20px #0000000f!important}
+:root.av-themed:not([data-avant-theme=dark]) .notes-card{background:color-mix(in srgb,var(--avcard) 88%,var(--accent2) 12%)!important;border:1px solid var(--line)!important;color:var(--avink)!important}
+:root.av-themed:not([data-avant-theme=dark]) .rail-item:not(.active){background:color-mix(in srgb,var(--avcard) 94%,#000 4%)!important;color:var(--avink2)}
+:root.av-themed:not([data-avant-theme=dark]) :is(input.input,.select,textarea.input,.quick-add){background-color:color-mix(in srgb,var(--avcard) 95%,#000 3%)!important;color:var(--avink)!important}
+/* faixa do topo, painel do dia, faixa de colegas, avisos e cabeçalho do chat: cor "hero" + letras automáticas */
+.day-hero,.avh,.avo-strip,.avn-toast{color:var(--avheroink)!important}
+html:root .day-hero.day-hero,html:root .avh.avh{background:linear-gradient(118deg,#ffffff18 0%,#ffffff05 18%,#ffffff00 34%,#ffffff08 55%,#ffffff00 70%,#ffffff10 100%),radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--accent) 34%,transparent),#0000 55%),linear-gradient(155deg,color-mix(in srgb,var(--avhero) 100%,#fff 7%),color-mix(in srgb,var(--avhero) 78%,#000))!important;border:1px solid color-mix(in srgb,var(--avhero) 70%,#fff 18%)!important}
+html:root .avo-strip.avo-strip,html:root .avn-toast.avn-toast{background:linear-gradient(160deg,color-mix(in srgb,var(--avhero) 100%,#fff 7%),color-mix(in srgb,var(--avhero) 78%,#000))!important}
+html:root .avc-head.avc-head{background:var(--avhero)!important;color:var(--avheroink)!important}
+:root .avc-head :is(strong,small,.avc-x){color:var(--avheroink)!important}
+html :is(.day-hero,.avh) :is(h1,h2,strong,b,.dh-date,.avh2-big b){color:var(--avheroink)!important}
+html :is(.day-hero,.avh) :is(p,small,em,span,.avh2-big span){color:var(--avheroink2)!important}
+.avh2-legend li span,.avh2-legend li b{color:var(--avheroink)!important}
+.avh2-center strong{color:var(--avheroink)!important}.avh2-center small{color:var(--avheroink2)!important}
+.avn-toast .avn-txt strong{color:var(--avheroink)}.avn-toast .avn-txt small{color:var(--avheroink2)}
+.av-herolight .avh2-legend li.on,.av-herolight .avh2-legend li:hover{background:#0000000d}
+
+/* seletor de temas */
+.avth-grp{margin:12px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3)}
+.avth-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.avth{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:14px;border:2px solid var(--line);cursor:pointer;text-align:left;transition:transform .15s,border-color .15s}
+.avth:hover{transform:translateY(-2px)}
+.avth.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.avth-hero{height:16px;border-radius:6px}
+.avth-card{display:flex;align-items:center;gap:5px;height:30px;border-radius:7px;padding:0 7px;box-shadow:0 1px 3px #0002}
+.avth-card i{width:12px;height:12px;border-radius:50%}
+.avth-card b{flex:1;height:6px;border-radius:3px}
+.avth-name{display:flex;flex-direction:column;line-height:1.2}
+.avth-name strong{font-size:12.5px}.avth-name small{font-size:10.5px;opacity:.75}
+.avth-adv{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.avth-adv summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--text-2)}
+.avth-warn{margin:6px 0 0;font-size:12px;color:#b45309;background:#f59e0b1f;border-radius:8px;padding:6px 10px}
+:root[data-avant-theme=dark] .notes-card :is(h2,h3,.notes-title,strong,span){color:var(--avink)!important}
+:root[data-avant-theme=dark] .notes-card textarea::placeholder{color:var(--avink3)!important}
+
+:root.av-themed:not([data-avant-theme=dark]) .panel.kpi{background:var(--avcard)!important}

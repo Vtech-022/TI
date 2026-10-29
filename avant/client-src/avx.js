@@ -244,8 +244,8 @@ function AvMine(){
   const mine=(tasks||[]).filter(t=>t.assignee===me&&t.status!=="concluida");
   if(!tasks||mine.length===0)return null;
   const today=__avToday();
-  return(0,q.jsx)(sl,{title:"Atribuídas a você pela equipe",count:mine.length,accent:!0,actions:(0,q.jsx)("button",{className:"btn sm",onClick:()=>nav("/equipe"),children:"Abrir"}),children:
-    (0,q.jsx)("ul",{className:"avt-mini",children:mine.slice(0,5).map(t=>(0,q.jsxs)("li",{onClick:()=>nav("/equipe"),children:[(0,q.jsx)("strong",{children:t.title}),(0,q.jsxs)("span",{className:"small muted",children:[" · de "+t.owner_name,t.due_date?" · prazo "+na(t.due_date):""," ",t.due_date&&t.due_date<today?"(atrasada)":""]})]},t.id))})});
+  return(0,q.jsx)(sl,{title:"Atribuídas a você pela equipe",count:mine.length,accent:!0,actions:(0,q.jsx)("button",{className:"btn sm",onClick:()=>nav("/tarefas-equipe"),children:"Abrir"}),children:
+    (0,q.jsx)("ul",{className:"avt-mini",children:mine.slice(0,5).map(t=>(0,q.jsxs)("li",{onClick:()=>nav("/tarefas-equipe"),children:[(0,q.jsx)("strong",{children:t.title}),(0,q.jsxs)("span",{className:"small muted",children:[" · de "+t.owner_name,t.due_date?" · prazo "+na(t.due_date):""," ",t.due_date&&t.due_date<today?"(atrasada)":""]})]},t.id))})});
 }
 
 /* ---- Página: Calendário da equipe ---- */
@@ -282,7 +282,7 @@ function AvCalendar(){
   const cells=[];for(let i=0;i<startDow;i++)cells.push(null);for(let d=1;d<=dim;d++)cells.push(d);
   const day=byDay.get(sel)||[];
   const openCount=day.filter(i=>!i.done).length;
-  const goItem=it=>{if(it.kind==="local")open(it.localId);else nav("/equipe")};
+  const goItem=it=>{if(it.kind==="local")open(it.localId);else nav("/tarefas-equipe")};
   const nav=ir();
   const stLabel=it=>it.done?"Concluída":it.status==="em_andamento"?"Em andamento":"Pendente";
   return(0,q.jsxs)(q.Fragment,{children:[
@@ -316,7 +316,7 @@ function AvCalendar(){
           (0,q.jsxs)("div",{className:"avc2-card-top",children:[(0,q.jsx)("strong",{children:it.title}),(0,q.jsx)("span",{className:"avc2-st",children:stLabel(it)})]}),
           (0,q.jsxs)("div",{className:"avc2-card-meta",children:[(0,q.jsx)("i",{style:{background:it.color},children:__avInit(it.whoName)}),(0,q.jsx)("span",{children:it.whoName}),it.time&&(0,q.jsx)("span",{className:"mono",children:it.time}),it.project&&(0,q.jsx)("span",{className:"avc2-proj",style:{color:it.color},children:it.project}),it.validar&&(0,q.jsx)("span",{className:"avc2-proj",children:"validar"})]}),
           it.subs.length>0&&(0,q.jsx)("div",{className:"avc2-bar",title:it.subs.filter(s=>s.done).length+"/"+it.subs.length+" subtarefas",children:(0,q.jsx)("span",{style:{width:Math.round(100*it.subs.filter(s=>s.done).length/it.subs.length)+"%",background:it.color}})})]},it.key))}),
-        (0,q.jsx)("button",{className:"btn ghost sm",style:{marginTop:10},onClick:()=>nav("/equipe"),children:"Abrir Atividades da equipe"})
+        (0,q.jsx)("button",{className:"btn ghost sm",style:{marginTop:10},onClick:()=>nav("/tarefas-equipe"),children:"Abrir Tarefas da equipe"})
       ]})]}),
     (0,q.jsx)(AvTaskModal,{open:addOpen,task:null,defaults:{due_date:sel,assignee:who&&who!==me?who:""},onClose:()=>setAddOpen(!1),onSaved:reload}),
     (0,q.jsx)(AvColorsModal,{open:colorsOpen,onClose:()=>setColorsOpen(!1)})
@@ -551,7 +551,7 @@ function AvHomeDash({lists,waiting}){
     {k:"done",label:"Concluídas",n:L.done.length,g:["var(--accent)","color-mix(in srgb,var(--accent) 60%,#fff)"],tips:L.done},
     {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["var(--accent2,#9ad0ff)","color-mix(in srgb,var(--accent2,#9ad0ff) 55%,#fff)"],tips:L.todo},
     {k:"late",label:"Atrasadas",n:L.late.length,g:["#ff5c8a","#ffa3b8"],tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["color-mix(in srgb,var(--avcard,#18181c) 60%,#fff 30%)","color-mix(in srgb,var(--avcard,#18181c) 40%,#fff 50%)"],tips:[]}
+    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["color-mix(in srgb,var(--avhero,#18181c) 60%,#fff 30%)","color-mix(in srgb,var(--avhero,#18181c) 40%,#fff 50%)"],tips:[]}
   ];
   const sum=cats.reduce((s,c)=>s+c.n,0);
   const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
@@ -571,7 +571,7 @@ function AvHomeDash({lists,waiting}){
         segs.map((s,i)=>(0,q.jsx)("circle",{className:"avh2-seg"+(hv===s.k?" on":hv?" dim":""),cx:"100",cy:"100",r:R,fill:"none",stroke:"url(#avg-"+s.k+")",strokeWidth:"22",strokeLinecap:"round",
           strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 100 100)",style:{transitionDelay:i*140+"ms","--glow":s.g[0]},onMouseEnter:()=>setHv(s.k)},s.k)),
         (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"url(#avh2-core)"}),
-        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"color-mix(in srgb,var(--avcard,#18181c) 100%,#fff 12%)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"color-mix(in srgb,var(--avcard,#18181c) 55%,#000)"})]})}),
+        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"color-mix(in srgb,var(--avhero,#18181c) 100%,#fff 12%)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"color-mix(in srgb,var(--avhero,#18181c) 55%,#000)"})]})}),
         (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"none",stroke:"#ffffff1c",strokeWidth:"1"})]}),
       (0,q.jsx)("div",{className:"avh2-center",children:cur?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:cur.n}),(0,q.jsx)("small",{children:cur.label})]}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:pct+"%"}),(0,q.jsx)("small",{children:"do dia"})]})})]}),
     (0,q.jsxs)("div",{className:"avh2-info",children:[
@@ -781,27 +781,60 @@ function AvChat(){
 }
 
 /* ===== Paletas de cores prontas (cada pessoa escolhe a sua) ===== */
-const __avPalettes=[
-  {key:"indigo",name:"Índigo noite",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",light:"#e8ecff",card:"#14141c",bg:"#07070b"},
-  {key:"azul",name:"Azul Zênite",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",light:"#f4f7ff"},
-  {key:"floresta",name:"Floresta",accent:"#518e45",accent2:"#f1ca30",deep:"#20372f",light:"#f9f6eb"},
-  {key:"urbana",name:"Noite urbana",accent:"#1fa383",accent2:"#ebae29",deep:"#132228",light:"#f5eed2"},
-  {key:"neon",name:"Neon rosa",accent:"#da0090",accent2:"#f2cb30",deep:"#2c0e63",light:"#12002e"},
-  {key:"eletrico",name:"Elétrico",accent:"#ff2801",accent2:"#c8e600",deep:"#111e26",light:"#edf2f6"},
-  {key:"rubi",name:"Rubi e ouro",accent:"#ac0f2c",accent2:"#f5dc06",deep:"#570511",light:"#1e1518"},
-  {key:"ceu",name:"Céu aberto",accent:"#02a3fe",accent2:"#fdfc0c",deep:"#122835",light:"#ffffff"},
-  {key:"ouro",name:"Ouro",accent:"#c98a12",accent2:"#f6df75",deep:"#5c3f08",light:"#faf398"}
+/* ===== Temas prontos (testados para leitura) + cores livres com contraste automático ===== */
+const __avThemes=[
+  {key:"padrao",name:"Padrão Zênite",mode:"claro",bg:"#f3f6fb",card:"#ffffff",hero:"#1d3f8f",accent:"#2563eb",accent2:"#f5b301",tip:"Branco, azul e amarelo"},
+  {key:"neve",name:"Neve",mode:"claro",bg:"#f5f6f8",card:"#ffffff",hero:"#26292f",accent:"#3b5bdb",accent2:"#12b886",tip:"Claro e neutro"},
+  {key:"areia",name:"Areia",mode:"claro",bg:"#f6f1e8",card:"#fffaf2",hero:"#5b3a1e",accent:"#c2410c",accent2:"#d4a017",tip:"Tons quentes"},
+  {key:"menta",name:"Menta",mode:"claro",bg:"#edf6f1",card:"#ffffff",hero:"#0f4c3a",accent:"#059669",accent2:"#0ea5e9",tip:"Verde suave"},
+  {key:"lavanda",name:"Lavanda",mode:"claro",bg:"#f2f0fa",card:"#ffffff",hero:"#3b2a6b",accent:"#7c3aed",accent2:"#ec4899",tip:"Lilás claro"},
+  {key:"grafite",name:"Grafite",mode:"escuro",bg:"#0c0d0f",card:"#17191d",hero:"#1d2025",accent:"#4f8cff",accent2:"#7dd3fc",tip:"Escuro neutro"},
+  {key:"meianoite",name:"Meia-noite",mode:"escuro",bg:"#070a14",card:"#111827",hero:"#172036",accent:"#6366f1",accent2:"#a5b4fc",tip:"Azul profundo"},
+  {key:"floresta",name:"Floresta",mode:"escuro",bg:"#07100c",card:"#0f1d17",hero:"#132a20",accent:"#22c55e",accent2:"#a3e635",tip:"Verde escuro"},
+  {key:"oceano",name:"Oceano",mode:"escuro",bg:"#061214",card:"#0d1f24",hero:"#123038",accent:"#14b8a6",accent2:"#67e8f9",tip:"Azul-petróleo"},
+  {key:"vinho",name:"Vinho",mode:"escuro",bg:"#12070a",card:"#1f0f14",hero:"#2c141c",accent:"#e11d48",accent2:"#fda4af",tip:"Vermelho escuro"},
+  {key:"ametista",name:"Ametista",mode:"escuro",bg:"#0d0816",card:"#1a1228",hero:"#251a3a",accent:"#a855f7",accent2:"#f0abfc",tip:"Roxo escuro"}
 ];
+const __avPalettes=__avThemes;
+const __avHex=h=>/^#[0-9a-f]{6}$/i.test(h||"");
+function __avLum(h){if(!__avHex(h))return 0;const c=[1,3,5].map(i=>{let v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function __avContrast(a,b){const x1=__avLum(a)+.05,x2=__avLum(b)+.05;return x1>x2?x1/x2:x2/x1}
+/* chamada pelo efeito de aparência: aplica fundo, cartões e escolhe a cor das letras sozinha */
+function __avInk(l,dark){
+  const root=document.documentElement,st=root.style;
+  const themed=!!(l.palette&&l.palette!=="custom"&&__avThemes.some(z=>z.key===l.palette))||l.palette==="custom";
+  const card=__avHex(l.card)?l.card:(dark?"#17191d":"#ffffff");
+  const bg=__avHex(l.bg)?l.bg:(dark?"#0c0d0f":"#f3f6fb");
+  const hero=__avHex(l.hero)?l.hero:card;
+  const ink=c=>__avLum(c)>.4?["#16181d","#454a55","#6b717d"]:["#f2f3f7","#bfc2cc","#8b909b"];
+  const ci=ink(card),bi=ink(bg),hi=ink(hero);
+  st.setProperty("--avcard",card);st.setProperty("--avbg",bg);st.setProperty("--avhero",hero);
+  st.setProperty("--avink",ci[0]);st.setProperty("--avink2",ci[1]);st.setProperty("--avink3",ci[2]);
+  st.setProperty("--avbgink",bi[0]);st.setProperty("--avbgink2",bi[1]);
+  st.setProperty("--avheroink",hi[0]);st.setProperty("--avheroink2",hi[1]);
+  root.classList.toggle("av-themed",themed);
+  root.classList.toggle("av-cardlight",__avLum(card)>.4);
+  root.classList.toggle("av-herolight",__avLum(hero)>.4);
+}
 function AvPalettes({n,r}){
-  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Paletas prontas"}),
-    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação pronta ou monte a sua com qualquer cor. As cores valem para o site inteiro (cartões, menus, fundo, chat) e só para você."}),
-    (0,q.jsxs)("div",{className:"avp-custom",children:[
-      [["accent","Cor de destaque","#6d63ff"],["accent2","Brilho","#9ad0ff"],["card","Cartões","#18181c"],["bg","Fundo (modo escuro)","#08080a"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:/^#[0-9a-f]{6}$/i.test(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
-      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"indigo",accent:"#6d63ff",accent2:"#9ad0ff",deep:"#0b0c24",card:"#14141c",bg:"#07070b"}),children:"Restaurar cores"})]}),
-    (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep,card:p.card||"#18181c",bg:p.bg||"#08080a"}),children:[
-      (0,q.jsx)("span",{className:"avp-dots",children:[p.accent2,p.accent,p.deep,p.light].map((c,i)=>(0,q.jsx)("i",{style:{background:c}},i))}),
-      (0,q.jsx)("span",{className:"avp-bar",style:{background:"linear-gradient(90deg,"+p.accent2+","+p.accent+" 60%,"+p.deep+")"}}),
-      (0,q.jsx)("strong",{children:p.name})]},p.key))})]});
+  const[adv,setAdv]=x.useState(n.palette==="custom");
+  const pick=p=>r({palette:p.key,theme:p.mode,accent:p.accent,accent2:p.accent2,card:p.card,bg:p.bg,hero:p.hero});
+  const card=__avHex(n.card)?n.card:"#ffffff",acc=__avHex(n.accent)?n.accent:"#2563eb";
+  const weak=__avContrast(acc,card)<2.2;
+  const grp=m=>__avThemes.filter(z=>z.mode===m).map(p=>(0,q.jsxs)("button",{className:"avth"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>pick(p),style:{background:p.bg},children:[
+      (0,q.jsx)("span",{className:"avth-hero",style:{background:p.hero}}),
+      (0,q.jsxs)("span",{className:"avth-card",style:{background:p.card},children:[(0,q.jsx)("i",{style:{background:p.accent}}),(0,q.jsx)("i",{style:{background:p.accent2}}),(0,q.jsx)("b",{style:{background:__avLum(p.card)>.4?"#16181d22":"#ffffff2a"}})]}),
+      (0,q.jsxs)("span",{className:"avth-name",style:{color:__avLum(p.bg)>.4?"#16181d":"#f2f3f7"},children:[(0,q.jsx)("strong",{children:p.name}),(0,q.jsx)("small",{children:p.tip})]})]},p.key));
+  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Temas de cores"}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 10px"},children:"Temas prontos e testados para leitura. Ao escolher, o site muda para claro ou escuro conforme o tema. Vale só para você."}),
+    (0,q.jsx)("h4",{className:"avth-grp",children:"Claros"}),(0,q.jsx)("div",{className:"avth-grid",children:grp("claro")}),
+    (0,q.jsx)("h4",{className:"avth-grp",children:"Escuros"}),(0,q.jsx)("div",{className:"avth-grid",children:grp("escuro")}),
+    (0,q.jsxs)("details",{className:"avth-adv",open:adv,onToggle:e=>setAdv(e.target.open),children:[(0,q.jsx)("summary",{children:"Personalizar cores (avançado)"}),
+      (0,q.jsx)("p",{className:"small muted",children:"As letras se ajustam sozinhas: em cor clara ficam escuras, em cor escura ficam claras."}),
+      (0,q.jsxs)("div",{className:"avp-custom",children:[
+        [["accent","Cor de destaque","#2563eb"],["accent2","Brilho","#f5b301"],["card","Cartões","#ffffff"],["hero","Faixa do topo","#1d3f8f"],["bg","Fundo","#f3f6fb"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:__avHex(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
+        (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>pick(__avThemes[0]),children:"Voltar ao padrão"})]}),
+      weak&&(0,q.jsx)("p",{className:"avth-warn",role:"status",children:"A cor de destaque está muito parecida com a dos cartões e pode ficar difícil de ver. Escolha uma cor mais contrastante."})]})]});
 }
 
 /* ===== Animação ao trocar entre modo claro e escuro =====
@@ -887,7 +920,7 @@ function AvNotifier(){
         fresh.forEach(t=>seen.add(t.id));if(fresh.length)save();
         for(const t of fresh.filter(t=>t.owner!==me).slice(0,5)){
           const mine=t.assignee===me;
-          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/equipe"),"task-"+t.id);
+          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/tarefas-equipe"),"task-"+t.id);
         }
       }catch{}
     };
@@ -943,7 +976,7 @@ function AvAgendaToday({events,mine,today,go}){
   const items=[];
   (events||[]).forEach(e=>items.push({k:"e"+e.id,time:e.all_day?"":fa(e.start_at),title:e.title,sub:e.location||"",tag:"Compromisso",cls:"ev",onClick:()=>go("/agenda?evento="+e.id)}));
   (mine||[]).forEach(t=>items.push({k:"t"+t.id,time:t.due_time||"",title:t.title,sub:t.project_name||"",tag:"Minha tarefa",cls:"mine",onClick:()=>openTask(t.id)}));
-  (tasks||[]).filter(t=>t.due_date===today&&t.status!=="concluida"&&t.status!=="cancelada"&&(t.assignee===me||t.owner===me||!t.assignee)).forEach(t=>items.push({k:"s"+t.id,time:t.due_time||"",title:t.title,sub:t.assignee_name?"Responsável: "+t.assignee_name:"Equipe",tag:"Equipe",cls:"team",onClick:()=>go("/equipe")}));
+  (tasks||[]).filter(t=>t.due_date===today&&t.status!=="concluida"&&t.status!=="cancelada"&&(t.assignee===me||t.owner===me||!t.assignee)).forEach(t=>items.push({k:"s"+t.id,time:t.due_time||"",title:t.title,sub:t.assignee_name?"Responsável: "+t.assignee_name:"Equipe",tag:"Equipe",cls:"team",onClick:()=>go("/tarefas-equipe")}));
   items.sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
   if(!items.length)return(0,q.jsx)("p",{className:"small muted",style:{padding:"4px 20px 16px"},children:"Nada marcado para hoje: sem compromissos nem tarefas com prazo hoje."});
   return(0,q.jsx)("ul",{className:"today-events av-agenda",children:items.map(it=>(0,q.jsxs)("li",{className:"clickable "+it.cls,onClick:it.onClick,children:[
