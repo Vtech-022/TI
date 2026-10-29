@@ -503,6 +503,9 @@ s = s.replace("Central Inteligente de Gestão", "Central de Acompanhamento do Tr
 s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</title>")
 
 # título da aba
+import hashlib as _hl
+_bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
+s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(s, encoding="utf8")
 print(f"OK: {OUT} ({len(s):,} caracteres)")

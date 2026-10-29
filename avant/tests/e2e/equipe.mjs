@@ -373,6 +373,10 @@ try {
   await shot(v, "16-notificacao");
   await v.waitForFunction(() => /Revisar planilha do evento/.test(document.querySelector(".av-agenda")?.innerText || ""), null, { timeout: 30000 }).catch(() => {});
   check("Agenda de hoje mostra tarefa da equipe com prazo hoje", /Revisar planilha do evento/.test(await v.locator(".av-agenda").innerText().catch(() => "")));
+  await v.locator('.quick-add input').fill("Ligar para Aysla sobre as correções");
+  await v.locator('.quick-add input').press("Enter");
+  await v.waitForFunction(() => /Ligar para Aysla/.test(document.querySelector(".av-agenda")?.innerText || ""), null, { timeout: 15000 }).catch(() => {});
+  check("Agenda de hoje mostra minha tarefa com prazo hoje", /Ligar para Aysla/.test(await v.locator(".av-agenda").innerText().catch(() => "")));
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();

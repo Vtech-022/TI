@@ -616,3 +616,5 @@ html.av-switching canvas.wallpaper{visibility:hidden}
 .day-grid>*{min-width:0}
 .avh2-info{min-width:0;flex:1 1 220px;max-width:420px}
 @media (max-width:820px){.avh2{padding:18px!important}.avh2-wrap{gap:18px}.avh2-big b{font-size:36px}}
+.av-update{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100000;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 20px;border-radius:14px;border:1px solid #ffffff2a;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 12px 30px #0007;font:inherit;animation:avn-in .4s}
+.av-update strong{font-size:13.5px}.av-update span{font-size:12px;opacity:.9}

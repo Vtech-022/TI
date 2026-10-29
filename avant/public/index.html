@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
+<head><meta name="av-build" content="db71d4e24544">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%234f86ff%22%2F%3E%3Cstop%20offset%3D%220.55%22%20stop-color%3D%22%232447d6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2314267f%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22s%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffffff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ffd34d%22%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%22h%22%20cx%3D%220.3%22%20cy%3D%220.2%22%20r%3D%220.8%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffffff%22%20stop-opacity%3D%220.35%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ffffff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2218%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2218%22%20fill%3D%22url%28%23h%29%22%2F%3E%3Cellipse%20cx%3D%2232%22%20cy%3D%2233%22%20rx%3D%2225%22%20ry%3D%229.5%22%20transform%3D%22rotate%28-28%2032%2033%29%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.5%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M32%209C33.6%2023.5%2040.5%2030.4%2055%2032C40.5%2033.6%2033.6%2040.5%2032%2055C30.4%2040.5%2023.5%2033.6%209%2032C23.5%2030.4%2030.4%2023.5%2032%209Z%22%20fill%3D%22url%28%23s%29%22%2F%3E%3Ccircle%20cx%3D%2250.5%22%20cy%3D%2220.5%22%20r%3D%223.2%22%20fill%3D%22%23ffd34d%22%2F%3E%3C%2Fsvg%3E">
@@ -630,6 +630,8 @@ html.av-switching canvas.wallpaper{visibility:hidden}
 .day-grid>*{min-width:0}
 .avh2-info{min-width:0;flex:1 1 220px;max-width:420px}
 @media (max-width:820px){.avh2{padding:18px!important}.avh2-wrap{gap:18px}.avh2-big b{font-size:36px}}
+.av-update{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100000;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 20px;border-radius:14px;border:1px solid #ffffff2a;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 12px 30px #0007;font:inherit;animation:avn-in .4s}
+.av-update strong{font-size:13.5px}.av-update span{font-size:12px;opacity:.9}
 
 </style>
 </head>
@@ -2205,6 +2207,29 @@ function AvAgendaToday({events,mine,today,go}){
     (0,q.jsxs)("span",{className:"ag-main",children:[(0,q.jsx)("strong",{children:it.title}),it.sub&&(0,q.jsxs)("small",{className:"muted",children:[" · ",it.sub]})]}),
     (0,q.jsx)("em",{className:"ag-tag",children:it.tag})]},it.k))});
 }
+
+
+/* ===== Aviso de nova versão: quando sai uma atualização, oferece recarregar ===== */
+(function(){
+  if(typeof document==="undefined")return;
+  const mine=()=>{const m=document.querySelector('meta[name="av-build"]');return m?m.content:""};
+  let shown=!1;
+  const check=async()=>{
+    if(shown||document.visibilityState!=="visible")return;
+    try{
+      const r=await fetch("/?v="+Date.now(),{cache:"no-store",credentials:"same-origin"});
+      const h=await r.text();const m=h.match(/<meta name="av-build" content="([0-9a-f]+)"/);
+      if(m&&mine()&&m[1]!==mine()){
+        shown=!0;
+        const b=document.createElement("button");b.className="av-update";
+        b.innerHTML="<strong>Nova versão do Zênite disponível</strong><span>Clique para atualizar</span>";
+        b.onclick=()=>location.reload();document.body.appendChild(b);
+      }
+    }catch{}
+  };
+  setTimeout(check,15000);setInterval(check,90000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")check()});
+})();
 
 function Nz({firstAccount:e,needCode:t=!1,subtitle:n,login:r,register:i,onForgot:avf}){let[a,o]=(0,x.useState)(e?`criar`:`entrar`),[s,c]=(0,x.useState)(``),[l,u]=(0,x.useState)(``),[d,f]=(0,x.useState)(``),[p,m]=(0,x.useState)(``),[h,g]=(0,x.useState)(!1),[_,v]=(0,x.useState)(null),[y,b]=(0,x.useState)(!1),S=async e=>{e.preventDefault(),v(null);let t=Rl(s);if(t)return v(t);if(a===`criar`){let e=Ll(l);if(e)return v(e);if(l!==d)return v(`As senhas não conferem.`)}else if(!l)return v(`Informe sua senha.`);b(!0);try{a===`criar`?await i(s.trim(),l,p.trim()):await r(s.trim(),l)}catch(e){v(e?.message??`Não foi possível entrar.`),b(!1)}},C=(e,t,n,r)=>(0,q.jsxs)(`label`,{className:`field`,children:[(0,q.jsx)(`span`,{children:n}),(0,q.jsxs)(`span`,{className:`pw-wrap`,children:[(0,q.jsx)(`input`,{className:`input`,type:h?`text`:`password`,value:e,onChange:e=>t(e.target.value),maxLength:64,autoComplete:r}),(0,q.jsx)(`button`,{type:`button`,className:`icon-btn`,onClick:()=>g(!h),"aria-label":h?`Esconder senha`:`Mostrar senha`,title:h?`Esconder senha`:`Mostrar senha`,children:h?(0,q.jsx)(No,{}):(0,q.jsx)(Fo,{})})]})]});return(0,q.jsx)(`div`,{className:`gate`,children:(0,q.jsxs)(`form`,{className:`gate-card`,onSubmit:S,noValidate:!0,children:[(0,q.jsx)(fu,{size:64}),(0,q.jsx)(`h1`,{children:a===`entrar`?`Entrar no Zênite`:e?`Criar a conta do administrador`:`Criar sua conta`}),(0,q.jsx)(`p`,{children:e?`Ainda não há contas. Esta primeira conta será a do administrador do sistema.`:n}),!e&&(0,q.jsxs)(`div`,{className:`seg`,role:`tablist`,"aria-label":`Entrar ou criar conta`,children:[(0,q.jsx)(`button`,{type:`button`,role:`tab`,"aria-selected":a===`entrar`,className:a===`entrar`?`on`:``,onClick:()=>(o(`entrar`),v(null)),children:`Entrar`}),(0,q.jsx)(`button`,{type:`button`,role:`tab`,"aria-selected":a===`criar`,className:a===`criar`?`on`:``,onClick:()=>(o(`criar`),v(null)),children:`Criar conta`})]}),(0,q.jsxs)(`label`,{className:`field`,children:[(0,q.jsx)(`span`,{children:`Nome`}),(0,q.jsx)(`input`,{className:`input`,value:s,onChange:e=>c(e.target.value),placeholder:`Ex.: Ana Souza`,autoFocus:!0,maxLength:60,autoComplete:`username`})]}),C(l,u,`Senha`,a===`criar`?`new-password`:`current-password`),a===`criar`&&(0,q.jsxs)(q.Fragment,{children:[C(d,f,`Confirmar senha`,`new-password`),(0,q.jsx)(`p`,{className:`small muted pw-rule`,children:`No mínimo 7 caracteres, com pelo menos uma letra, um número e um caractere especial (ex.: Av@2026).`}),t&&(0,q.jsxs)(`label`,{className:`field`,children:[(0,q.jsx)(`span`,{children:`Código da equipe`}),(0,q.jsx)(`input`,{className:`input`,type:`password`,value:p,onChange:e=>m(e.target.value),autoComplete:`off`})]})]}),_&&(0,q.jsx)(`p`,{className:`gate-error`,role:`alert`,children:_}),(0,q.jsx)(`button`,{className:`btn primary`,type:`submit`,disabled:y,children:y?`Aguarde…`:a===`entrar`?`Entrar`:`Criar conta e entrar`}),a===`entrar`&&!e&&avf&&(0,q.jsx)(`button`,{className:`btn ghost`,type:`button`,onClick:avf,children:`Esqueci minha senha`})]})})}function Wz(me){
   return{

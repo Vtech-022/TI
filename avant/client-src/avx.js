@@ -950,3 +950,26 @@ function AvAgendaToday({events,mine,today,go}){
     (0,q.jsxs)("span",{className:"ag-main",children:[(0,q.jsx)("strong",{children:it.title}),it.sub&&(0,q.jsxs)("small",{className:"muted",children:[" · ",it.sub]})]}),
     (0,q.jsx)("em",{className:"ag-tag",children:it.tag})]},it.k))});
 }
+
+
+/* ===== Aviso de nova versão: quando sai uma atualização, oferece recarregar ===== */
+(function(){
+  if(typeof document==="undefined")return;
+  const mine=()=>{const m=document.querySelector('meta[name="av-build"]');return m?m.content:""};
+  let shown=!1;
+  const check=async()=>{
+    if(shown||document.visibilityState!=="visible")return;
+    try{
+      const r=await fetch("/?v="+Date.now(),{cache:"no-store",credentials:"same-origin"});
+      const h=await r.text();const m=h.match(/<meta name="av-build" content="([0-9a-f]+)"/);
+      if(m&&mine()&&m[1]!==mine()){
+        shown=!0;
+        const b=document.createElement("button");b.className="av-update";
+        b.innerHTML="<strong>Nova versão do Zênite disponível</strong><span>Clique para atualizar</span>";
+        b.onclick=()=>location.reload();document.body.appendChild(b);
+      }
+    }catch{}
+  };
+  setTimeout(check,15000);setInterval(check,90000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")check()});
+})();
