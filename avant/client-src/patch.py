@@ -445,6 +445,9 @@ sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.c
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
 sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnimationFrame(g)}", "g=e=>{p=requestAnimationFrame(g);if(e-(g.l||0)<32)return;g.l=e;let t=Math.min(.1,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t)}")
 
+# ---- Agenda de hoje: compromissos + tarefas com prazo hoje (minhas e da equipe) ----
+sub('children:h.length?(0,q.jsx)(`ul`,{className:`today-events`,children:h.map(e=>(0,q.jsxs)(`li`,{className:`clickable`,onClick:()=>i(`/agenda?evento=${e.id}`),children:[(0,q.jsx)(`span`,{className:`te-time`,children:e.all_day?`Dia todo`:fa(e.start_at)}),(0,q.jsxs)(`span`,{children:[(0,q.jsx)(`strong`,{children:e.title}),e.location&&(0,q.jsxs)(`small`,{className:`muted`,children:[` · `,e.location]})]})]},e.id))}):(0,q.jsx)(`p`,{className:`small muted`,style:{padding:`4px 20px 16px`},children:`Nenhum compromisso na agenda hoje.`})', 'children:(0,q.jsx)(AvAgendaToday,{events:h,mine:u.dueToday,today:c,go:i})')
+
 # ---- Menu, rotas e painel ----
 sub("{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},", "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},")
 sub("{path:`equipe`,element:(0,q.jsx)(yd,{})},", "{path:`equipe`,element:(0,q.jsx)(yd,{})},{path:`tarefas-equipe`,element:(0,q.jsx)(AvTeamTasks,{})},{path:`calendario-equipe`,element:(0,q.jsx)(AvCalendar,{})},")

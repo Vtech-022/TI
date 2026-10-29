@@ -934,3 +934,19 @@ function AvRecBar({rec,onCancel,onSend}){
     (0,q.jsx)("i",{className:"avc-rec-dot"}),(0,q.jsx)("span",{children:"Gravando "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}),
     (0,q.jsx)("button",{type:"button",className:"avc-send",title:"Parar e enviar","aria-label":"Parar e enviar áudio",onClick:onSend,children:(0,q.jsx)(AvIcon,{n:"send",s:17})})]});
 }
+
+/* ===== Agenda de hoje: compromissos + tarefas que vencem hoje (minhas e da equipe) ===== */
+function AvAgendaToday({events,mine,today,go}){
+  const{tasks,me}=useAvTasks();
+  const openTask=_l();
+  const items=[];
+  (events||[]).forEach(e=>items.push({k:"e"+e.id,time:e.all_day?"":fa(e.start_at),title:e.title,sub:e.location||"",tag:"Compromisso",cls:"ev",onClick:()=>go("/agenda?evento="+e.id)}));
+  (mine||[]).forEach(t=>items.push({k:"t"+t.id,time:t.due_time||"",title:t.title,sub:t.project_name||"",tag:"Minha tarefa",cls:"mine",onClick:()=>openTask(t.id)}));
+  (tasks||[]).filter(t=>t.due_date===today&&t.status!=="concluida"&&t.status!=="cancelada"&&(t.assignee===me||t.owner===me||!t.assignee)).forEach(t=>items.push({k:"s"+t.id,time:t.due_time||"",title:t.title,sub:t.assignee_name?"Responsável: "+t.assignee_name:"Equipe",tag:"Equipe",cls:"team",onClick:()=>go("/tarefas-equipe")}));
+  items.sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
+  if(!items.length)return(0,q.jsx)("p",{className:"small muted",style:{padding:"4px 20px 16px"},children:"Nada marcado para hoje: sem compromissos nem tarefas com prazo hoje."});
+  return(0,q.jsx)("ul",{className:"today-events av-agenda",children:items.map(it=>(0,q.jsxs)("li",{className:"clickable "+it.cls,onClick:it.onClick,children:[
+    (0,q.jsx)("span",{className:"te-time",children:it.time||"Hoje"}),
+    (0,q.jsxs)("span",{className:"ag-main",children:[(0,q.jsx)("strong",{children:it.title}),it.sub&&(0,q.jsxs)("small",{className:"muted",children:[" · ",it.sub]})]}),
+    (0,q.jsx)("em",{className:"ag-tag",children:it.tag})]},it.k))});
+}

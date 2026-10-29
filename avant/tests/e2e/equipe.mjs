@@ -367,10 +367,12 @@ try {
   await v.waitForSelector('.avn-toast:has-text("Nova mensagem de Ana Souza")', { timeout: 15000 }).catch(() => {});
   check("aviso de nova mensagem aparece", (await v.locator('.avn-toast:has-text("Nova mensagem de Ana Souza")').count()) > 0);
   check("título da aba mostra mensagens não lidas", /^\(\d+\)/.test(await v.title()), await v.title());
-  await a.evaluate(async (vid) => { await fetch("/api/shared-tasks", { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ title: "Revisar planilha do evento", assignee: vid, visibility: "equipe" }) }); }, vid);
+  await a.evaluate(async (vid) => { await fetch("/api/shared-tasks", { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ title: "Revisar planilha do evento", assignee: vid, visibility: "equipe", due_date: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), due_time: "15:30" }) }); }, vid);
   await v.waitForSelector('.avn-toast:has-text("Revisar planilha do evento")', { timeout: 30000 }).catch(() => {});
   check("aviso de nova tarefa atribuída aparece", (await v.locator('.avn-toast:has-text("atribuiu uma tarefa a você")').count()) > 0);
   await shot(v, "16-notificacao");
+  await v.waitForFunction(() => /Revisar planilha do evento/.test(document.querySelector(".av-agenda")?.innerText || ""), null, { timeout: 30000 }).catch(() => {});
+  check("Agenda de hoje mostra tarefa da equipe com prazo hoje", /Revisar planilha do evento/.test(await v.locator(".av-agenda").innerText().catch(() => "")));
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
@@ -400,7 +402,7 @@ try {
   await m.goto(base + "/calendario-equipe").catch(() => {});
   await m.waitForTimeout(1200);
   const exc = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  check("celular: sem rolagem lateral", exc <= 1, `${exc}px`);
+  check("celular: sem rolagem lateral", exc <= 1, `${exc}px ` + JSON.stringify(await m.evaluate(() => [...document.querySelectorAll("body *")].filter(e => e.getBoundingClientRect().right > innerWidth + 2).map(e => e.tagName + "." + String(e.className).slice(0, 30) + " w=" + Math.round(e.getBoundingClientRect().width)).slice(0, 6))));
   await shot(m, "10-celular");
   // esperados: o aparelho antigo da Ana perde a sessão ao recuperar a senha; e a checagem "o original já está no servidor?" (HEAD) responde 404 antes do primeiro envio
   const reais = errors.filter((e) => !/401|404|status of 4/.test(e));

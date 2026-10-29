@@ -608,3 +608,11 @@ html.av-switching canvas.wallpaper{visibility:hidden}
 .avc-audio{display:flex;flex-direction:column;gap:2px}
 .avc-audio audio{width:240px;max-width:100%;height:36px}
 .avc-dl{font-size:10.5px;color:inherit;opacity:.75;align-self:flex-end}
+.av-agenda li{display:flex;align-items:center;gap:10px}
+.av-agenda .ag-main{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av-agenda .ag-tag{font-style:normal;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--text-2);white-space:nowrap}
+.av-agenda li.team .ag-tag{background:color-mix(in srgb,var(--accent2,#9ad0ff) 22%,transparent)}
+.av-agenda li.ev .ag-tag{background:color-mix(in srgb,#d9a441 25%,transparent)}
+.day-grid>*{min-width:0}
+.avh2-info{min-width:0;flex:1 1 220px;max-width:420px}
+@media (max-width:820px){.avh2{padding:18px!important}.avh2-wrap{gap:18px}.avh2-big b{font-size:36px}}
