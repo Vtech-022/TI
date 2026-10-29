@@ -346,6 +346,13 @@ try {
   await v.waitForTimeout(400);
   const ac = await v.evaluate(() => [getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(), getComputedStyle(document.documentElement).getPropertyValue("--accent2").trim()]);
   check("paleta pronta troca as cores de destaque", ac[0].toLowerCase() === "#da0090" && ac[1].toLowerCase() === "#f2cb30", ac.join(" "));
+  await v.locator('.avp-pick input[aria-label="Cor de destaque"]').fill("#12a150");
+  await v.waitForTimeout(400);
+  const cc = await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
+  check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
+  await v.locator('.avp-pick input[aria-label="Cartões"]').fill("#2b2118");
+  await v.waitForTimeout(300);
+  check("cor dos cartões personalizável", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avcard").trim())).toLowerCase() === "#2b2118");
   await shot(v, "14-paletas");
   await v.locator('.modal button:has-text("Pronto")').click();
   await shot(v, "15-inicio-neon");

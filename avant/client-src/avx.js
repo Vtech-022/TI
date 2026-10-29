@@ -548,20 +548,26 @@ function AvHomeDash({done,total,late,doing,waiting}){
   const pct=total?Math.round(100*done/total):0;
   const[go,setGo]=x.useState(!1);
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
-  const R=52,C=2*Math.PI*R;
-  const nDone=__avCount(done),nLate=__avCount(late),nDoing=__avCount(doing),nWait=__avCount(waiting),nPct=__avCount(pct);
-  const rows=[["Atrasadas",nLate,"late"],["Em andamento",nDoing,"doing"],["Aguardando",nWait,"wait"]];
+  const R=54,C=2*Math.PI*R;
+  const nDone=__avCount(done),nLate=__avCount(late),nDoing=__avCount(doing),nWait=__avCount(waiting);
+  const petals=[0,1,2,3,4,5].map(k=>k*30);
+  const chips=[["Atrasadas",nLate,"late"],["Em andamento",nDoing,"doing"],["Aguardando",nWait,"wait"]];
   return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
-    (0,q.jsx)("i",{className:"avh-orb o1","aria-hidden":!0}),(0,q.jsx)("i",{className:"avh-orb o2","aria-hidden":!0}),
-    (0,q.jsx)("div",{className:"avh-top",children:(0,q.jsx)("h2",{children:"Seu dia em números"})}),
+    (0,q.jsxs)("div",{className:"avh-top",children:[(0,q.jsx)("h2",{children:"Seu dia em números"}),(0,q.jsx)("span",{children:pct+"% concluído"})]}),
     (0,q.jsxs)("div",{className:"avh-body",children:[
-      (0,q.jsxs)("div",{className:"avh-ring",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 128 128",width:"132",height:"132",children:[
-          (0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"avh-g2",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffe27a)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"var(--accent)"})]})}),
-          (0,q.jsx)("circle",{cx:"64",cy:"64",r:R,fill:"none",stroke:"#ffffff30",strokeWidth:"11"}),
-          (0,q.jsx)("circle",{className:"avh-arc",cx:"64",cy:"64",r:R,fill:"none",stroke:"url(#avh-g2)",strokeWidth:"11",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:go?C*(1-pct/100):C,transform:"rotate(-90 64 64)"})]}),
-        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("strong",{children:nDone+"/"+total}),(0,q.jsx)("small",{children:nPct+"% feito hoje"})]})]}),
-      (0,q.jsx)("ul",{className:"avh-rows",children:rows.map(([l,v,k])=>(0,q.jsxs)("li",{className:k,children:[(0,q.jsx)("span",{children:l}),(0,q.jsx)("strong",{children:v})]},l))})]})]});
+      (0,q.jsxs)("div",{className:"avh-blob",role:"img","aria-label":done+" de "+total+" atividades feitas hoje",children:[
+        (0,q.jsxs)("svg",{viewBox:"0 0 200 200",width:"190",height:"190",children:[
+          (0,q.jsxs)("defs",{children:[
+            (0,q.jsxs)("linearGradient",{id:"avb1",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent2,#ffc83d)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"var(--accent)"})]}),
+            (0,q.jsxs)("linearGradient",{id:"avb2",x1:"1",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"var(--accent)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffffff"})]}),
+            (0,q.jsx)("filter",{id:"avbf",x:"-20%",y:"-20%",width:"140%",height:"140%",children:(0,q.jsx)("feGaussianBlur",{stdDeviation:"1.6"})})]}),
+          (0,q.jsx)("g",{className:"avb-spin a",filter:"url(#avbf)",children:petals.map(r=>(0,q.jsx)("ellipse",{cx:"100",cy:"100",rx:"92",ry:"34",fill:"url(#avb1)",opacity:".55",transform:"rotate("+r+" 100 100)"},r))}),
+          (0,q.jsx)("g",{className:"avb-spin b",filter:"url(#avbf)",children:petals.map(r=>(0,q.jsx)("ellipse",{cx:"100",cy:"100",rx:"84",ry:"28",fill:"url(#avb2)",opacity:".5",transform:"rotate("+(r+15)+" 100 100)"},r))}),
+          (0,q.jsx)("circle",{cx:"100",cy:"100",r:"52",fill:"#0b0d16",stroke:"#ffffff1f",strokeWidth:"1"}),
+          (0,q.jsx)("circle",{cx:"100",cy:"100",r:R,fill:"none",stroke:"#ffffff14",strokeWidth:"4"}),
+          (0,q.jsx)("circle",{className:"avh-arc",cx:"100",cy:"100",r:R,fill:"none",stroke:"var(--accent2,#ffc83d)",strokeWidth:"4",strokeLinecap:"round",strokeDasharray:C,strokeDashoffset:go?C*(1-pct/100):C,transform:"rotate(-90 100 100)"})]}),
+        (0,q.jsxs)("div",{className:"avh-center",children:[(0,q.jsx)("small",{children:"Feitas hoje"}),(0,q.jsx)("strong",{children:nDone+"/"+total})]})]}),
+      (0,q.jsx)("ul",{className:"avh-chips",children:chips.map(([l,v,k])=>(0,q.jsxs)("li",{className:k,children:[(0,q.jsx)("b",{children:v}),(0,q.jsx)("span",{children:l})]},l))})]})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
@@ -736,7 +742,10 @@ const __avPalettes=[
 ];
 function AvPalettes({n,r}){
   return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Paletas prontas"}),
-    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação: ela muda a cor de destaque e o brilho do seu painel, só para você."}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 8px"},children:"Escolha uma combinação pronta ou monte a sua com qualquer cor. Vale só para você."}),
+    (0,q.jsxs)("div",{className:"avp-custom",children:[
+      [["accent","Cor de destaque","#2f6bff"],["accent2","Brilho","#ffc83d"],["card","Cartões","#1f2328"]].map(([k,l,d])=>(0,q.jsxs)("label",{className:"avp-pick",children:[(0,q.jsx)("input",{type:"color","aria-label":l,value:/^#[0-9a-f]{6}$/i.test(n[k])?n[k]:d,onChange:e=>r({[k]:e.target.value,palette:"custom"})}),(0,q.jsx)("span",{children:l})]},k)),
+      (0,q.jsx)("button",{type:"button",className:"btn sm ghost",onClick:()=>r({palette:"azul",accent:"#2f6bff",accent2:"#ffc83d",deep:"#1b1250",card:"#1f2328"}),children:"Restaurar cores"})]}),
     (0,q.jsx)("div",{className:"avp-grid",children:__avPalettes.map(p=>(0,q.jsxs)("button",{className:"avp-card"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.accent,accent2:p.accent2,deep:p.deep}),children:[
       (0,q.jsx)("span",{className:"avp-dots",children:[p.accent2,p.accent,p.deep,p.light].map((c,i)=>(0,q.jsx)("i",{style:{background:c}},i))}),
       (0,q.jsx)("span",{className:"avp-bar",style:{background:"linear-gradient(90deg,"+p.accent2+","+p.accent+" 60%,"+p.deep+")"}}),
