@@ -547,32 +547,36 @@ function __avCount(v){
 function AvHomeDash({lists,waiting}){
   const L=lists||{done:[],todo:[],late:[]};
   const cats=[
-    {k:"done",label:"Concluídas",n:L.done.length,c:"var(--accent)",tips:L.done},
-    {k:"todo",label:"A fazer hoje",n:L.todo.length,c:"color-mix(in srgb,var(--accent) 38%,#fff)",tips:L.todo},
-    {k:"late",label:"Atrasadas",n:L.late.length,c:"#e5484d",tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",n:waiting||0,c:"#d9a441",tips:[]}
+    {k:"done",label:"Concluídas",n:L.done.length,g:["#5b4dff","#8f86ff"],tips:L.done},
+    {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["#5cc8ff","#b6ecff"],tips:L.todo},
+    {k:"late",label:"Atrasadas",n:L.late.length,g:["#ff5c8a","#ffa3b8"],tips:L.late},
+    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["#3a3f78","#5d63a8"],tips:[]}
   ];
   const sum=cats.reduce((s,c)=>s+c.n,0);
-  const[hv,setHv]=x.useState(null);
-  const[go,setGo]=x.useState(!1);
+  const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),80);return()=>clearTimeout(t)},[]);
-  const nDone=__avCount(L.done.length),totalDay=L.done.length+L.todo.length+L.late.length;
-  const R=56,C=2*Math.PI*R,GAP=sum>1?8:0;
+  const totalDay=L.done.length+L.todo.length+L.late.length;
+  const nDone=__avCount(L.done.length);
+  const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
+  const R=74,C=2*Math.PI*R,GAP=sum>1?14:0;
   let acc=0;
-  const segs=cats.filter(c=>c.n>0).map(c=>{
-    const len=Math.max(2,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
-  return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
-    (0,q.jsxs)("div",{className:"avh-body",children:[
-      (0,q.jsxs)("div",{className:"avh-donut",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",onMouseLeave:()=>setHv(null),children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 160 160",width:"170",height:"170",children:[
-          (0,q.jsx)("circle",{cx:"80",cy:"80",r:R,fill:"none",stroke:"#ffffff12",strokeWidth:"16"}),
-          segs.map((s,i)=>(0,q.jsx)("circle",{key:s.k,className:"avh-seg"+(hv===s.k?" on":""),cx:"80",cy:"80",r:R,fill:"none",stroke:s.c,strokeWidth:"16",strokeLinecap:"round",
-            strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 80 80)",style:{transitionDelay:i*120+"ms"},onMouseEnter:()=>setHv(s.k)}))]}),
-        (0,q.jsx)("div",{className:"avh-glyph","aria-hidden":!0,children:totalDay?Math.round(100*L.done.length/totalDay)+"%":"—"})]}),
-      (0,q.jsxs)("div",{className:"avh-info",children:[
-        (0,q.jsx)("small",{children:"Seu dia em números"}),
-        (0,q.jsxs)("strong",{className:"avh-big",children:[nDone,(0,q.jsx)("span",{children:" de "+totalDay+" concluídas"})]}),
-        (0,q.jsx)("ul",{className:"avh-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:c.c}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})]});
+  const segs=cats.filter(c=>c.n>0).map(c=>{const len=Math.max(1,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
+  const cur=hv?cats.find(c=>c.k===hv):null;
+  return(0,q.jsx)("section",{className:"avh panel avh2","aria-label":"Seu dia em números",children:(0,q.jsxs)("div",{className:"avh2-wrap",children:[
+    (0,q.jsxs)("div",{className:"avh2-donut",onMouseLeave:()=>setHv(null),children:[
+      (0,q.jsxs)("svg",{viewBox:"0 0 200 200",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",children:[
+        (0,q.jsx)("defs",{children:cats.map(c=>(0,q.jsxs)("linearGradient",{id:"avg-"+c.k,x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:c.g[0]}),(0,q.jsx)("stop",{offset:"1",stopColor:c.g[1]})]},c.k))}),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:R,fill:"none",stroke:"#ffffff0d",strokeWidth:"22"}),
+        segs.map((s,i)=>(0,q.jsx)("circle",{className:"avh2-seg"+(hv===s.k?" on":hv?" dim":""),cx:"100",cy:"100",r:R,fill:"none",stroke:"url(#avg-"+s.k+")",strokeWidth:"22",strokeLinecap:"round",
+          strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 100 100)",style:{transitionDelay:i*140+"ms","--glow":s.g[0]},onMouseEnter:()=>setHv(s.k)},s.k)),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"url(#avh2-core)"}),
+        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2a2d55"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#0b0c1d"})]})}),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"none",stroke:"#ffffff1c",strokeWidth:"1"})]}),
+      (0,q.jsx)("div",{className:"avh2-center",children:cur?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:cur.n}),(0,q.jsx)("small",{children:cur.label})]}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:pct+"%"}),(0,q.jsx)("small",{children:"do dia"})]})})]}),
+    (0,q.jsxs)("div",{className:"avh2-info",children:[
+      (0,q.jsx)("h2",{children:"Seu dia em números"}),
+      (0,q.jsxs)("div",{className:"avh2-big",children:[(0,q.jsx)("b",{children:nDone}),(0,q.jsx)("span",{children:"/"+totalDay}),(0,q.jsx)("em",{children:"atividades concluídas hoje"})]}),
+      (0,q.jsx)("ul",{className:"avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:"linear-gradient(135deg,"+c.g[0]+","+c.g[1]+")",boxShadow:"0 0 12px "+c.g[0]+"88"}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */

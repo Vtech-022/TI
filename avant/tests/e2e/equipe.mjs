@@ -293,7 +293,7 @@ try {
   check("faixa lateral mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
-  check("painel do dia: rosca segmentada com legenda", await v.locator(".avh-seg").count() >= 1 && (await v.locator(".avh-legend li").count()) === 4);
+  check("painel do dia: rosca segmentada com legenda", await v.locator(".avh2-seg").count() >= 1 && (await v.locator(".avh2-legend li").count()) === 4);
   const t0 = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme"));
   await v.locator('button[aria-label^="Ativar modo"]').click();
   await v.waitForFunction(() => document.querySelector(".av-wave") || document.documentElement.classList.contains("av-vt"), null, { timeout: 3000 });

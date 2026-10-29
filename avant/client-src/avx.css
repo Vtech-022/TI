@@ -506,3 +506,28 @@ td .pill{padding-top:3px;padding-bottom:3px}
 
 /* "Arquivos e Documentos" some do menu lateral (a página continua existindo por link direto) */
 .rail a[aria-label="Arquivos e Documentos"],.tabbar a[aria-label="Arquivos e Documentos"]{display:none!important}
+
+/* ===== Painel do dia v2 — rosca grossa com gradiente e brilho, número grande e legenda (estilo da referência) ===== */
+.avh2{padding:26px 30px!important}
+.avh2-wrap{display:flex;align-items:center;justify-content:center;gap:42px;flex-wrap:wrap}
+.avh2-donut{position:relative;width:210px;height:210px;flex:none}
+.avh2-donut>svg{width:210px;height:210px;overflow:visible}
+.avh2-seg{transition:stroke-dasharray 1.1s cubic-bezier(.2,.75,.2,1),stroke-width .2s,opacity .2s;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--glow) 70%,transparent));cursor:pointer}
+.avh2-seg.on{stroke-width:26}
+.avh2-seg.dim{opacity:.35}
+.avh2-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:0 64px}
+.avh2-center strong{font-size:30px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em}
+.avh2-center small{margin-top:4px;font-size:11px;color:#ffffff99;line-height:1.2}
+.avh2-info{display:flex;flex-direction:column;min-width:240px}
+.avh2-info h2{margin:0 0 6px;font-size:16px;font-weight:600;color:#fff;letter-spacing:.01em}
+.avh2-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 4px;margin-bottom:18px}
+.avh2-big b{font-size:44px;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+.avh2-big span{font-size:24px;font-weight:600;color:#ffffff80}
+.avh2-big em{flex-basis:100%;font-style:normal;font-size:12.5px;color:#ffffff8c;margin-top:4px}
+.avh2-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.avh2-legend li{display:flex;align-items:center;gap:12px;font-size:13.5px;color:#ffffffd9;padding:4px 8px;margin:0 -8px;border-radius:10px;transition:background .15s}
+.avh2-legend li.on,.avh2-legend li:hover{background:#ffffff10}
+.avh2-legend i{width:18px;height:18px;border-radius:5px;flex:none}
+.avh2-legend span{flex:1}
+.avh2-legend b{color:#fff;font-weight:700;min-width:22px;text-align:right}
+@media (prefers-reduced-motion:reduce){.avh2-seg{transition:none}}

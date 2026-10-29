@@ -521,6 +521,31 @@ td .pill{padding-top:3px;padding-bottom:3px}
 /* "Arquivos e Documentos" some do menu lateral (a página continua existindo por link direto) */
 .rail a[aria-label="Arquivos e Documentos"],.tabbar a[aria-label="Arquivos e Documentos"]{display:none!important}
 
+/* ===== Painel do dia v2 — rosca grossa com gradiente e brilho, número grande e legenda (estilo da referência) ===== */
+.avh2{padding:26px 30px!important}
+.avh2-wrap{display:flex;align-items:center;justify-content:center;gap:42px;flex-wrap:wrap}
+.avh2-donut{position:relative;width:210px;height:210px;flex:none}
+.avh2-donut>svg{width:210px;height:210px;overflow:visible}
+.avh2-seg{transition:stroke-dasharray 1.1s cubic-bezier(.2,.75,.2,1),stroke-width .2s,opacity .2s;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--glow) 70%,transparent));cursor:pointer}
+.avh2-seg.on{stroke-width:26}
+.avh2-seg.dim{opacity:.35}
+.avh2-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:0 64px}
+.avh2-center strong{font-size:30px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em}
+.avh2-center small{margin-top:4px;font-size:11px;color:#ffffff99;line-height:1.2}
+.avh2-info{display:flex;flex-direction:column;min-width:240px}
+.avh2-info h2{margin:0 0 6px;font-size:16px;font-weight:600;color:#fff;letter-spacing:.01em}
+.avh2-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 4px;margin-bottom:18px}
+.avh2-big b{font-size:44px;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+.avh2-big span{font-size:24px;font-weight:600;color:#ffffff80}
+.avh2-big em{flex-basis:100%;font-style:normal;font-size:12.5px;color:#ffffff8c;margin-top:4px}
+.avh2-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.avh2-legend li{display:flex;align-items:center;gap:12px;font-size:13.5px;color:#ffffffd9;padding:4px 8px;margin:0 -8px;border-radius:10px;transition:background .15s}
+.avh2-legend li.on,.avh2-legend li:hover{background:#ffffff10}
+.avh2-legend i{width:18px;height:18px;border-radius:5px;flex:none}
+.avh2-legend span{flex:1}
+.avh2-legend b{color:#fff;font-weight:700;min-width:22px;text-align:right}
+@media (prefers-reduced-motion:reduce){.avh2-seg{transition:none}}
+
 </style>
 </head>
 <body>
@@ -1692,32 +1717,36 @@ function __avCount(v){
 function AvHomeDash({lists,waiting}){
   const L=lists||{done:[],todo:[],late:[]};
   const cats=[
-    {k:"done",label:"Concluídas",n:L.done.length,c:"var(--accent)",tips:L.done},
-    {k:"todo",label:"A fazer hoje",n:L.todo.length,c:"color-mix(in srgb,var(--accent) 38%,#fff)",tips:L.todo},
-    {k:"late",label:"Atrasadas",n:L.late.length,c:"#e5484d",tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",n:waiting||0,c:"#d9a441",tips:[]}
+    {k:"done",label:"Concluídas",n:L.done.length,g:["#5b4dff","#8f86ff"],tips:L.done},
+    {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["#5cc8ff","#b6ecff"],tips:L.todo},
+    {k:"late",label:"Atrasadas",n:L.late.length,g:["#ff5c8a","#ffa3b8"],tips:L.late},
+    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["#3a3f78","#5d63a8"],tips:[]}
   ];
   const sum=cats.reduce((s,c)=>s+c.n,0);
-  const[hv,setHv]=x.useState(null);
-  const[go,setGo]=x.useState(!1);
+  const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),80);return()=>clearTimeout(t)},[]);
-  const nDone=__avCount(L.done.length),totalDay=L.done.length+L.todo.length+L.late.length;
-  const R=56,C=2*Math.PI*R,GAP=sum>1?8:0;
+  const totalDay=L.done.length+L.todo.length+L.late.length;
+  const nDone=__avCount(L.done.length);
+  const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
+  const R=74,C=2*Math.PI*R,GAP=sum>1?14:0;
   let acc=0;
-  const segs=cats.filter(c=>c.n>0).map(c=>{
-    const len=Math.max(2,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
-  return(0,q.jsxs)("section",{className:"avh panel","aria-label":"Seu dia em números",children:[
-    (0,q.jsxs)("div",{className:"avh-body",children:[
-      (0,q.jsxs)("div",{className:"avh-donut",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",onMouseLeave:()=>setHv(null),children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 160 160",width:"170",height:"170",children:[
-          (0,q.jsx)("circle",{cx:"80",cy:"80",r:R,fill:"none",stroke:"#ffffff12",strokeWidth:"16"}),
-          segs.map((s,i)=>(0,q.jsx)("circle",{key:s.k,className:"avh-seg"+(hv===s.k?" on":""),cx:"80",cy:"80",r:R,fill:"none",stroke:s.c,strokeWidth:"16",strokeLinecap:"round",
-            strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 80 80)",style:{transitionDelay:i*120+"ms"},onMouseEnter:()=>setHv(s.k)}))]}),
-        (0,q.jsx)("div",{className:"avh-glyph","aria-hidden":!0,children:totalDay?Math.round(100*L.done.length/totalDay)+"%":"—"})]}),
-      (0,q.jsxs)("div",{className:"avh-info",children:[
-        (0,q.jsx)("small",{children:"Seu dia em números"}),
-        (0,q.jsxs)("strong",{className:"avh-big",children:[nDone,(0,q.jsx)("span",{children:" de "+totalDay+" concluídas"})]}),
-        (0,q.jsx)("ul",{className:"avh-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:c.c}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})]});
+  const segs=cats.filter(c=>c.n>0).map(c=>{const len=Math.max(1,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
+  const cur=hv?cats.find(c=>c.k===hv):null;
+  return(0,q.jsx)("section",{className:"avh panel avh2","aria-label":"Seu dia em números",children:(0,q.jsxs)("div",{className:"avh2-wrap",children:[
+    (0,q.jsxs)("div",{className:"avh2-donut",onMouseLeave:()=>setHv(null),children:[
+      (0,q.jsxs)("svg",{viewBox:"0 0 200 200",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",children:[
+        (0,q.jsx)("defs",{children:cats.map(c=>(0,q.jsxs)("linearGradient",{id:"avg-"+c.k,x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:c.g[0]}),(0,q.jsx)("stop",{offset:"1",stopColor:c.g[1]})]},c.k))}),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:R,fill:"none",stroke:"#ffffff0d",strokeWidth:"22"}),
+        segs.map((s,i)=>(0,q.jsx)("circle",{className:"avh2-seg"+(hv===s.k?" on":hv?" dim":""),cx:"100",cy:"100",r:R,fill:"none",stroke:"url(#avg-"+s.k+")",strokeWidth:"22",strokeLinecap:"round",
+          strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 100 100)",style:{transitionDelay:i*140+"ms","--glow":s.g[0]},onMouseEnter:()=>setHv(s.k)},s.k)),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"url(#avh2-core)"}),
+        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#2a2d55"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#0b0c1d"})]})}),
+        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"none",stroke:"#ffffff1c",strokeWidth:"1"})]}),
+      (0,q.jsx)("div",{className:"avh2-center",children:cur?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:cur.n}),(0,q.jsx)("small",{children:cur.label})]}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:pct+"%"}),(0,q.jsx)("small",{children:"do dia"})]})})]}),
+    (0,q.jsxs)("div",{className:"avh2-info",children:[
+      (0,q.jsx)("h2",{children:"Seu dia em números"}),
+      (0,q.jsxs)("div",{className:"avh2-big",children:[(0,q.jsx)("b",{children:nDone}),(0,q.jsx)("span",{children:"/"+totalDay}),(0,q.jsx)("em",{children:"atividades concluídas hoje"})]}),
+      (0,q.jsx)("ul",{className:"avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:"linear-gradient(135deg,"+c.g[0]+","+c.g[1]+")",boxShadow:"0 0 12px "+c.g[0]+"88"}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
