@@ -144,7 +144,7 @@ try {
   check("os dois cartões convivem no quadro (nada se perdeu)", /Cartão criado pela Ana/.test(await texto(v)) && /Cartão do Victor/.test(await texto(v)));
 
   // ------------------------------------------------------------ dados pessoais salvos no servidor e entre aparelhos
-  await ir(v, "Meu dia");
+  await ir(v, "Home");
   const nova = v.locator('input[placeholder*="precisa fazer hoje"]').first();
   await nova.fill("Tarefa de teste de persistência");
   await nova.press("Enter");
@@ -173,8 +173,10 @@ try {
   await v.locator('.account-pop button', { hasText: "Personalizar" }).click();
   await v.waitForSelector(".modal-personalize");
   const painel = v.locator(".modal-personalize");
-  await painel.getByRole("button", { name: "Escuro", exact: true }).click();
-  await painel.getByRole("button", { name: "Violeta", exact: true }).click();
+  await painel.locator(".pzx-theme button", { hasText: "Escuro" }).click();
+  await painel.locator(".pzx-tabs button", { hasText: "Cores" }).click();
+  await painel.locator(".avth", { hasText: "Ametista" }).click();
+  await painel.locator(".pzx-tabs button", { hasText: "Fundo" }).click();
   await painel.getByRole("button", { name: /^Constelação/ }).click();
   await v.waitForTimeout(1600);
   const prefsKey = [...ctx.store._dump().keys()].find((k) => k.startsWith("prefs/"));
@@ -190,7 +192,7 @@ try {
     return { prefs, papelDeParede: document.documentElement.classList.contains("has-wallpaper") };
   });
   check("a personalização aparece em outro aparelho (vem do servidor)",
-    aplicado.prefs.theme === "escuro" && aplicado.prefs.accent === "#7b4dff" && aplicado.prefs.wallpaper === "constelacao" && aplicado.papelDeParede,
+    aplicado.prefs.theme === "escuro" && aplicado.prefs.accent === "#7c3aed" && aplicado.prefs.wallpaper === "constelacao" && aplicado.papelDeParede,
     JSON.stringify(aplicado));
 
   // ------------------------------------------------------------ Usuários (administrador)

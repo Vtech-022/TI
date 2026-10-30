@@ -306,10 +306,15 @@ try {
   check("anotações voltaram visíveis (sem recolher)", await v.locator('.av-more2').count() === 0);
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
   await v.locator(".account-btn, .rail .avatar.me").first().click().catch(() => {});
-  await v.locator('[role=menuitem]:has-text("Foto de perfil")').click();
-  await v.locator('.modal input[type=file]').setInputFiles({ name: "f.png", mimeType: "image/png", buffer: png });
+  await v.locator('[role=menuitem]:has-text("Meu perfil")').click();
+  await v.locator('.modal input[type=file]').first().setInputFiles({ name: "f.png", mimeType: "image/png", buffer: png });
+  await v.waitForSelector('.modal button:has-text("Salvar esta foto")', { timeout: 10000 }).catch(() => {});
+  check("perfil mostra prévia grande da foto antes de salvar", (await v.locator('.modal img[alt="Prévia da nova foto"]').count()) === 1);
+  await v.locator('.modal button:has-text("Salvar esta foto")').click();
   await v.waitForSelector("img.av-img", { timeout: 10000 }).catch(() => {});
+  await v.waitForSelector('.avpf-ok', { timeout: 10000 }).catch(() => {});
   check("foto de perfil enviada e exibida", await v.locator("img.av-img").count() > 0, (await v.locator(".modal").innerText().catch(()=>"")).slice(0,200));
+  await v.locator('.modal button:has-text("Fechar")').last().click();
   await shot(v, "09-inicio");
 
   // ---- conversa estilo Teams
@@ -381,6 +386,9 @@ try {
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
+  await v.waitForSelector(".pzx-tabs");
+  check("Personalizar organizado em Tema, Cores, Fundo e Texto", (await v.locator(".pzx-tabs button").allInnerTexts()).join(",") === "Tema,Cores,Fundo,Texto");
+  await v.locator('.pzx-tabs button:has-text("Cores")').click();
   await v.waitForSelector(".avth");
   await v.locator('.avth:has-text("Ametista")').click();
   await v.waitForTimeout(400);
@@ -392,9 +400,71 @@ try {
   check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
   const ink = await v.evaluate(() => { const d = document.documentElement.getAttribute("data-avant-theme") === "dark"; const s = getComputedStyle(document.documentElement); return [d, s.getPropertyValue("--avink").trim(), s.getPropertyValue("--avbg").trim()]; });
   check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#eef0f4" : ink[1] === "#14161b", ink.join(" "));
+  const modo = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme") === "dark" ? "escuro" : "claro");
+  await v.locator('.pzx-areas input[aria-label^="Cartões"]').fill("#fff3d6");
+  await v.waitForTimeout(400);
+  const ar = await v.evaluate(() => { const s = getComputedStyle(document.documentElement); return [s.getPropertyValue("--avcard").trim(), s.getPropertyValue("--avink").trim()]; });
+  check("cor por área (cartões) muda só aquela parte e as letras ficam escuras", ar[0] === "#fff3d6" && ar[1] === "#14161b", modo + " " + ar.join(" "));
+  await v.locator('.pzx-areas input[aria-label^="Menu lateral"]').fill("#1b2a4a");
+  await v.waitForTimeout(400);
+  check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#eef0f4");
   await shot(v, "14-paletas");
+  await v.locator('.pzx-areas li:has-text("Cartões") button:has-text("Padrão")').click();
+  await v.locator('.pzx-areas li:has-text("Menu lateral") button:has-text("Padrão")').click();
   await v.locator('.modal button:has-text("Pronto")').click();
   await shot(v, "15-inicio-neon");
+
+  // ---- menu reorganizado
+  const labels = await v.locator(".rail-nav a:visible").evaluateAll(els => els.map(e => e.getAttribute("aria-label")));
+  check("menu na ordem combinada", labels.join(" | ") === "Home | Atividades da equipe | Aguardando Terceiros | Calendário da equipe | Projetos | Minhas tarefas | Prioridades | Relatórios | Usuários", labels.join(" | "));
+
+  // ---- assistente gratuito
+  await v.locator(".avo-assist").click();
+  await v.waitForSelector(".ava-panel textarea");
+  await v.locator(".ava-panel textarea").fill("Zênite, revisar a planilha da revista pra Ana, prioridade alta, amanhã às 15h");
+  await v.locator('.ava-panel button:has-text("Montar tarefas")').click();
+  await v.waitForSelector(".ava-list li");
+  const prevA = await v.evaluate(() => { const li = document.querySelector(".ava-list li"); const sel = li.querySelectorAll("select"); return { t: li.querySelector("input").value, who: sel[0].selectedOptions[0].textContent, imp: sel[1].value, d: li.querySelector('input[type=date]').value, h: li.querySelector('input[type=time]').value }; });
+  const amanha = new Date(Date.now() + 86400e3 - 3 * 3600e3).toISOString().slice(0, 10);
+  check("assistente entende pessoa, prioridade, prazo e horário", prevA.t === "Revisar a planilha da revista" && prevA.who === "Ana Souza" && prevA.imp === "alto" && prevA.h === "15:00" && prevA.d === amanha, JSON.stringify(prevA));
+  await v.locator('.ava-panel button:has-text("Criar 1 tarefa")').click();
+  await v.waitForSelector(".ava-done", { timeout: 10000 }).catch(() => {});
+  check("assistente cria a tarefa da equipe", (await v.locator(".ava-done").count()) === 1);
+  await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
+  await v.waitForTimeout(300);
+  check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);
+
+  // ---- chat: fecha ao clicar fora, colar foto, ver foto completa
+  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.waitForSelector(".avc-form textarea");
+  await v.evaluate(async () => {
+    const c = document.createElement("canvas"); c.width = 40; c.height = 30; const g = c.getContext("2d"); g.fillStyle = "#e11d48"; g.fillRect(0, 0, 40, 30);
+    const blob = await new Promise(r => c.toBlob(r, "image/png"));
+    const dt = new DataTransfer(); dt.items.add(new File([blob], "image.png", { type: "image/png" }));
+    document.querySelector(".avc-form textarea").dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
+  });
+  await v.waitForSelector(".avc-imgbtn", { timeout: 15000 }).catch(() => {});
+  check("colar (Ctrl+V) uma foto envia a imagem na conversa", (await v.locator(".avc-imgbtn").count()) > 0);
+  await v.locator(".avc-imgbtn").last().click();
+  await v.waitForSelector(".av-lightbox", { timeout: 5000 }).catch(() => {});
+  check("clicar na foto abre ela completa, com Baixar", (await v.locator('.av-lightbox a:has-text("Baixar")').count()) === 1);
+  await shot(v, "18-foto");
+  await v.keyboard.press("Escape");
+  await v.waitForTimeout(200);
+  check("Esc fecha a foto e mantém a conversa", (await v.locator(".av-lightbox").count()) === 0 && (await v.locator(".avc-panel").count()) === 1);
+  await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
+  await v.waitForTimeout(300);
+  check("conversa fecha sozinha ao clicar fora", (await v.locator(".avc-panel").count()) === 0);
+
+  // ---- perfil: trocar o próprio nome
+  await v.locator(".account-btn, .rail .avatar.me").first().click().catch(() => {});
+  await v.locator('[role=menuitem]:has-text("Meu perfil")').click();
+  await v.locator('.modal input[aria-label="Seu nome"]').fill("Victor H. Andrade");
+  await v.locator('.modal button:has-text("Salvar nome")').click();
+  await v.waitForSelector(".avpf-ok", { timeout: 10000 }).catch(() => {});
+  await v.waitForTimeout(2500);
+  const meNome = await v.evaluate(async () => (await (await fetch("/api/auth/me", { headers: { "x-avant": "1" } })).json()).user?.name);
+  check("cada pessoa troca o próprio nome", meNome === "Victor H. Andrade", String(meNome) + " | " + ((await v.locator(".avpf-ok, .modal .gate-error").allInnerTexts().catch(() => [])).join(" ")));
 
   // ---- celular
   const m = await novo(390, 800);

@@ -431,15 +431,15 @@ sub("(0,q.jsx)(cl,{rows:5})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[
 cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
 # foto de perfil: botão da conta, menu e janela
 sub("children:l.trim().charAt(0).toUpperCase()});return e?", "children:(0,q.jsx)(AvPhoto,{id:window.__avUid,name:l,fallback:l.trim().charAt(0).toUpperCase()})});return e?")
-sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new CustomEvent(`prumo:chat`,{detail:{}}))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Conversas`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.Notification&&Notification.requestPermission().then(p=>alert(p===`granted`?`Notificações ativadas.`:p===`denied`?`As notificações estão bloqueadas no navegador. Libere nas permissões do site (cadeado ao lado do endereço).`:`Notificações não ativadas.`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Ativar notificações`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Foto de perfil`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
-sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),(0,q.jsx)(AvChat,{}),(0,q.jsx)(AvNotifier,{}),")
+sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new CustomEvent(`prumo:chat`,{detail:{}}))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Conversas`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.Notification&&Notification.requestPermission().then(p=>alert(p===`granted`?`Notificações ativadas.`:p===`denied`?`As notificações estão bloqueadas no navegador. Libere nas permissões do site (cadeado ao lado do endereço).`:`Notificações não ativadas.`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Ativar notificações`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Meu perfil (nome e foto)`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
+sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),(0,q.jsx)(AvChat,{}),(0,q.jsx)(AvAssistant,{}),(0,q.jsx)(AvLightbox,{}),(0,q.jsx)(AvNotifier,{}),")
 
 # ---- Paletas prontas + cores secundárias vivas ----
 sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
 sub("(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "(0,q.jsx)(AvPalettes,{n,r}),(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
 sub("ba={accent:`#2f6bff`,", "ba={accent:`#2563eb`,accent2:`#f5b301`,deep:`#0b0c24`,palette:`padrao`,")
 sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "__avInk(l,b),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
-sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,l.font,l.scale,l.wallpaper]")
+sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,JSON.stringify(l.areas||{}),l.font,l.scale,l.wallpaper]")
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
@@ -504,6 +504,21 @@ s = s.replace("Central Inteligente de Gestão", "Central de Acompanhamento do Tr
 s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</title>")
 
 # título da aba
+# ---- Personalizar reorganizado ----
+_a = s.index("function ou({open:e,onClose:t}){"); _b = s.index("function ", _a + 30)
+s = s[:_a] + "function ou({open:e,onClose:t}){return(0,q.jsx)(AvPersonalize,{open:e,onClose:t})}" + s[_b:]
+# ---- Menu reorganizado (nada sai, só muda a ordem e dois nomes) ----
+_a = s.index("var uu=[{to:`/`,label:`Meu dia`"); _b = s.index("],du={to:`/usuarios`", _a)
+s = s[:_a] + ("var uu=[{to:`/`,label:`Home`,icon:ds},"
+  "{to:`/equipe`,label:`Atividades da equipe`,icon:Nc,section:`Equipe`},"
+  "{to:`/terceiros`,label:`Aguardando Terceiros`,icon:ts},"
+  "{to:`/calendario-equipe`,label:`Calendário da equipe`,icon:no},"
+  "{to:`/projetos`,label:`Projetos`,icon:Go,section:`Meu trabalho`},"
+  "{to:`/pendencias`,label:`Minhas tarefas`,icon:hs},"
+  "{to:`/foco`,label:`Prioridades`,icon:hc},"
+  "{to:`/relatorios`,label:`Relatórios`,icon:uo,section:`Registro`},"
+  "{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},"
+  "{to:`/arquivos`,label:`Arquivos e Documentos`,icon:Lo}") + s[_b:]
 import hashlib as _hl
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)

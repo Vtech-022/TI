@@ -281,6 +281,37 @@ async function handleMe(request, ctx) {
   return json(200, { user: a ? await withFirst(ctx, a.user) : null });
 }
 
+async function handleRename(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  const nErr = nameError(body.name);
+  if (nErr) throw new ApiError(400, "nome", nErr);
+  const name = normalizeName(body.name);
+  const key = nameKey(name);
+  const oldKey = user.key ?? nameKey(user.name);
+  if (key !== oldKey) {
+    const reserve = await putJSON(ctx.store, `names/${key}`, { id: user.id }, { ifNew: true });
+    if (!reserve.modified) throw new ApiError(409, "nome_em_uso", "Já existe uma conta com esse nome. Escolha outro.");
+  }
+  try {
+    await updateJSON(ctx.store, `users/${user.id}`, (cur) => {
+      if (!cur) throw new ApiError(404, "conta", "Conta não encontrada.");
+      return { ...cur, name, key };
+    });
+  } catch (e) {
+    if (key !== oldKey) await ctx.store.del(`names/${key}`).catch(() => {});
+    throw e;
+  }
+  if (key !== oldKey) await ctx.store.del(`names/${oldKey}`).catch(() => {});
+  await updateJSON(ctx.store, BOARD_KEY, (board) => {
+    if (!board?.docs?.[user.id]) return undefined;
+    board.docs[user.id].name = name;
+    board.version++;
+    return board;
+  }).catch(() => {});
+  return json(200, { user: await withFirst(ctx, { ...user, name, key }) });
+}
+
 async function handleChangePassword(request, ctx) {
   const user = await requireUser(request, ctx);
   const body = await readJson(request);
@@ -1144,6 +1175,7 @@ export async function handle(request, ctx) {
     if (method === "POST" && path === "/auth/login") return await handleLogin(request, ctx);
     if (method === "POST" && path === "/auth/logout") return await handleLogout(request, ctx);
     if (method === "GET" && path === "/auth/me") return await handleMe(request, ctx);
+    if (method === "POST" && path === "/auth/name") return await handleRename(request, ctx);
     if (method === "POST" && path === "/auth/password") return await handleChangePassword(request, ctx);
     if (method === "POST" && path === "/auth/recover") return await handleRecover(request, ctx);
     if (method === "POST" && path === "/auth/recovery-code") return await handleNewRecoveryCode(request, ctx);

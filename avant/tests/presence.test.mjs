@@ -87,3 +87,20 @@ test("sem login não vê presença nem fotos; excluir a conta apaga foto e horas
   assert.equal((await admin.c.get(`/avatar/${ana.data.user.id}`)).status, 404);
   assert.ok(!(await body(await admin.c.get("/presence"))).people.some((p) => p.id === ana.data.user.id));
 });
+
+test("cada pessoa troca o próprio nome; o login passa a usar o nome novo e não repete nomes", async () => {
+  const ctx = makeCtx();
+  const ana = await register(ctx, "Ana Souza");
+  await register(ctx, "Beto Lima");
+  assert.equal((await ana.c.post("/auth/name", { name: "Beto Lima" })).status, 409);
+  const r = await ana.c.post("/auth/name", { name: "Ana Paula Souza" });
+  assert.equal(r.status, 200);
+  assert.equal((await body(r)).user.name, "Ana Paula Souza");
+  const { makeClient } = await import("./helpers.mjs");
+  const c2 = makeClient(ctx);
+  assert.equal((await c2.post("/auth/login", { name: "Ana Paula Souza", password: "Av@2026" })).status, 200);
+  const c3 = makeClient(ctx);
+  assert.notEqual((await c3.post("/auth/login", { name: "Ana Souza", password: "Av@2026" })).status, 200);
+  // o nome antigo fica livre
+  assert.equal((await register(ctx, "Ana Souza")).res.status, 201);
+});

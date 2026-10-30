@@ -11,7 +11,7 @@ const __avToday=()=>new Intl.DateTimeFormat("sv-SE",{timeZone:"America/Sao_Paulo
 var __avDirCache=null;
 function useAvDir(){
   const[l,setL]=x.useState(__avDirCache||[]);
-  x.useEffect(()=>{let ok=!0;if(!__avDirCache)__avJson("/directory").then(d=>{__avDirCache=d;ok&&setL(d)}).catch(()=>{});return()=>{ok=!1}},[]);
+  x.useEffect(()=>{let ok=!0;if(!__avDirCache||Date.now()-(window.__avDirAt||0)>20000)__avJson("/directory").then(d=>{__avDirCache=d;window.__avDirAt=Date.now();ok&&setL(d)}).catch(()=>{});return()=>{ok=!1}},[]);
   return l;
 }
 
@@ -592,7 +592,8 @@ function AvOnline(){
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
   return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
     shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
-    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
+    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra}),
+    (0,q.jsx)("button",{className:"avo-assist",onClick:()=>window.dispatchEvent(new Event("prumo:assist")),title:"Assistente Zênite: escreva um pedido e ele monta as tarefas da equipe","aria-label":"Abrir assistente Zênite",children:(0,q.jsx)(AvIcon,{n:"spark",s:19})})]});
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
@@ -602,32 +603,42 @@ function AvNotes({children}){
 
 /* ---- Foto de perfil: escolher, reduzir e enviar ---- */
 function AvAvatarModal(){
-  const[open,setOpen]=x.useState(!1),[busy,setBusy]=x.useState(!1),[err,setErr]=x.useState("");
+  const[open,setOpen]=x.useState(!1),[busy,setBusy]=x.useState(!1),[err,setErr]=x.useState(""),[msg,setMsg]=x.useState("");
+  const[name,setName]=x.useState(""),[prev,setPrev]=x.useState(null);
   const{people,reload}=usePresence();
   const me=window.__avUid,p=people&&people.find(z=>z.id===me);
-  x.useEffect(()=>{const f=()=>{setErr("");setOpen(!0)};window.addEventListener("prumo:avatar",f);return()=>window.removeEventListener("prumo:avatar",f)},[]);
+  const curName=(p&&p.name)||Wi.userName||"";
+  x.useEffect(()=>{const f=()=>{setErr("");setMsg("");setPrev(null);setName(curName);setOpen(!0)};window.addEventListener("prumo:avatar",f);return()=>window.removeEventListener("prumo:avatar",f)},[curName]);
   const pick=async file=>{
-    setErr("");if(!file)return;
+    setErr("");setMsg("");if(!file)return;
     if(!/^image\/(jpeg|png|webp)$/.test(file.type)){setErr("Use uma foto JPG, PNG ou WEBP.");return}
-    setBusy(!0);
     try{
       const bmp=await createImageBitmap(file);
       const S=192,cv=document.createElement("canvas");cv.width=cv.height=S;
       const side=Math.min(bmp.width,bmp.height),sx=(bmp.width-side)/2,sy=(bmp.height-side)/2;
       cv.getContext("2d").drawImage(bmp,sx,sy,side,side,0,0,S,S);
       const blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.85));
-      const bytes=new Uint8Array(await blob.arrayBuffer());
-      await __avJson("/avatar",{method:"PUT",body:bytes});
-      await reload();setOpen(!1);
-    }catch(e){setErr(e?.message||"Não foi possível enviar a foto.")}finally{setBusy(!1)}
+      setPrev({blob,url:URL.createObjectURL(blob)});
+    }catch{setErr("Não foi possível ler essa imagem.")}
   };
-  const remove=async()=>{setBusy(!0);try{await __avJson("/avatar",{method:"DELETE"});await reload();setOpen(!1)}catch(e){setErr(e?.message||"Erro ao remover.")}finally{setBusy(!1)}};
-  return(0,q.jsx)(dl,{open,title:"Foto de perfil",onClose:()=>setOpen(!1),footer:(0,q.jsx)("button",{className:"btn",onClick:()=>setOpen(!1),children:"Fechar"}),
-    children:(0,q.jsxs)("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:12},children:[
-      (0,q.jsx)("div",{className:"av-big",children:(0,q.jsx)(AvPhoto,{id:me,name:Wi.userName||"?",size:120})}),
-      (0,q.jsx)("p",{className:"small muted",style:{textAlign:"center"},children:"A foto aparece para a equipe em “Equipe agora” e no seu perfil. Ela é recortada em quadrado e reduzida automaticamente."}),
-      (0,q.jsxs)("label",{className:"btn primary",style:{cursor:"pointer"},children:[busy?"Enviando…":"Escolher foto",(0,q.jsx)("input",{type:"file",accept:"image/jpeg,image/png,image/webp",hidden:!0,disabled:busy,onChange:e=>{pick(e.target.files&&e.target.files[0]);e.target.value=""}})]}),
-      p&&p.av>0&&(0,q.jsx)("button",{className:"btn ghost",disabled:busy,onClick:remove,children:"Remover foto"}),
+  const savePhoto=async()=>{if(!prev)return;setBusy(!0);setErr("");try{await __avJson("/avatar",{method:"PUT",body:new Uint8Array(await prev.blob.arrayBuffer())});await reload();setPrev(null);setMsg("Foto salva.")}catch(e){setErr(e?.message||"Não foi possível enviar a foto.")}finally{setBusy(!1)}};
+  const remove=async()=>{setBusy(!0);try{await __avJson("/avatar",{method:"DELETE"});await reload();setMsg("Foto removida.")}catch(e){setErr(e?.message||"Erro ao remover.")}finally{setBusy(!1)}};
+  const saveName=async()=>{setBusy(!0);setErr("");try{const r=await __avJson("/auth/name",{method:"POST",body:{name}});setMsg("Nome alterado para "+r.user.name+". A página vai recarregar.");setTimeout(()=>location.reload(),1200)}catch(e){setErr(e?.message||"Não foi possível trocar o nome.")}finally{setBusy(!1)}};
+  return(0,q.jsx)(dl,{open,title:"Meu perfil",onClose:()=>setOpen(!1),footer:(0,q.jsx)("button",{className:"btn",onClick:()=>setOpen(!1),children:"Fechar"}),
+    children:(0,q.jsxs)("div",{className:"avpf",children:[
+      (0,q.jsxs)("section",{className:"avpf-photo",children:[
+        (0,q.jsx)("div",{className:"av-big",children:prev?(0,q.jsx)("img",{className:"av-img",src:prev.url,alt:"Prévia da nova foto",style:{width:160,height:160}}):(0,q.jsx)(AvPhoto,{id:me,name:curName||"?",size:160})}),
+        prev?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("p",{className:"small muted",children:"Assim vai aparecer para a equipe. Ficou bom?"}),
+          (0,q.jsxs)("div",{className:"btn-row",children:[(0,q.jsx)("button",{className:"btn primary",disabled:busy,onClick:savePhoto,children:busy?"Salvando…":"Salvar esta foto"}),
+            (0,q.jsxs)("label",{className:"btn",style:{cursor:"pointer"},children:["Escolher outra",(0,q.jsx)("input",{type:"file",accept:"image/jpeg,image/png,image/webp",hidden:!0,onChange:e=>{pick(e.target.files&&e.target.files[0]);e.target.value=""}})]}),
+            (0,q.jsx)("button",{className:"btn ghost",onClick:()=>setPrev(null),children:"Cancelar"})]})]}):
+        (0,q.jsxs)("div",{className:"btn-row",children:[
+          (0,q.jsxs)("label",{className:"btn primary",style:{cursor:"pointer"},children:["Trocar foto",(0,q.jsx)("input",{type:"file",accept:"image/jpeg,image/png,image/webp",hidden:!0,onChange:e=>{pick(e.target.files&&e.target.files[0]);e.target.value=""}})]}),
+          p&&p.av>0&&(0,q.jsx)("button",{className:"btn",onClick:()=>window.dispatchEvent(new CustomEvent("prumo:lightbox",{detail:{src:"/api/avatar/"+me+"?v="+p.av,name:"Minha foto"}})),children:"Ver em tamanho grande"}),
+          p&&p.av>0&&(0,q.jsx)("button",{className:"btn ghost",disabled:busy,onClick:remove,children:"Remover foto"})]})]}),
+      (0,q.jsxs)("section",{className:"avpf-name",children:[(0,q.jsxs)("label",{className:"field",children:[(0,q.jsx)("span",{children:"Nome (é também o nome para entrar no sistema)"}),(0,q.jsx)("input",{className:"input",value:name,maxLength:60,onChange:e=>setName(e.target.value),"aria-label":"Seu nome"})]}),
+        (0,q.jsx)("button",{className:"btn",disabled:busy||name.trim().length<3||name.trim()===curName,onClick:saveName,children:"Salvar nome"})]}),
+      msg&&(0,q.jsx)("p",{className:"avpf-ok",role:"status",children:msg}),
       err&&(0,q.jsx)("p",{className:"gate-error",role:"alert",children:err})]})});
 }
 
@@ -643,7 +654,8 @@ const __avPaths={
   smile:["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z","M8 14s1.5 2 4 2 4-2 4-2","M9 9h.01","M15 9h.01"],
   mic:["M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z","M19 10v2a7 7 0 0 1-14 0v-2","M12 19v3"],
   stop:["M6 6h12v12H6z"],
-  x:["M18 6L6 18","M6 6l12 12"]
+  x:["M18 6L6 18","M6 6l12 12"],
+  spark:["M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z","M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"]
 };
 function AvIcon({n,s}){return(0,q.jsx)("svg",{width:s||16,height:s||16,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"1.9",strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:__avPaths[n].map((d,i)=>(0,q.jsx)("path",{d},i))})}
 
@@ -676,7 +688,7 @@ async function __avSendFile(peer,file,onProg){
 function AvMsgFile({f,mine}){
   const url=location.origin+"/api/chat/file/"+f.id; /* URL absoluta: o app intercepta links que começam com /api/ */
   if(/^audio\//.test(f.type))return(0,q.jsxs)("div",{className:"avc-audio",children:[(0,q.jsx)("audio",{controls:!0,preload:"metadata",src:url}),(0,q.jsx)("a",{href:url+"?download=1",download:f.name,className:"avc-dl",children:"baixar"})]});
-  if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("a",{href:url,target:"_blank",rel:"noopener",children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
+  if(/^image\/(png|jpeg|gif|webp)$/.test(f.type))return(0,q.jsx)("button",{type:"button",className:"avc-imgbtn",title:"Ver foto completa",onClick:e=>{e.preventDefault();window.dispatchEvent(new CustomEvent("prumo:lightbox",{detail:{src:url,name:f.name}}))},children:(0,q.jsx)("img",{className:"avc-img",src:url,alt:f.name})});
   return(0,q.jsxs)("a",{className:"avc-file",href:url+"?download=1",download:f.name,title:"Baixar "+f.name,children:[(0,q.jsx)("span",{className:"avc-ico","aria-hidden":!0,children:(0,q.jsx)(AvIcon,{n:"file",s:20})}),(0,q.jsxs)("span",{className:"avc-fn",children:[(0,q.jsx)("strong",{children:f.name}),(0,q.jsx)("small",{children:__avSize(f.size)+" · baixar"})]})]});
 }
 
@@ -753,7 +765,7 @@ function AvThread({peer,onBack}){
       (0,q.jsx)("button",{type:"button",className:"avc-clip",title:"Anexar arquivos de qualquer tipo e tamanho",onClick:()=>fileIn.current&&fileIn.current.click(),"aria-label":"Anexar arquivo",children:(0,q.jsx)(AvIcon,{n:"clip",s:18})}),
       (0,q.jsx)("input",{ref:fileIn,type:"file",multiple:!0,hidden:!0,onChange:e=>{const fl=[...e.target.files];e.target.value="";fl.length&&sendFiles(fl)}}),
       (0,q.jsx)(AvEmoji,{onPick:em=>{const ta=taRef.current;if(!ta){setText(s=>s+em);return}const a=ta.selectionStart??text.length,b=ta.selectionEnd??text.length;const nv=text.slice(0,a)+em+text.slice(b);setText(nv);requestAnimationFrame(()=>{ta.focus();ta.selectionStart=ta.selectionEnd=a+em.length})}}),
-      rec?(0,q.jsx)(AvRecBar,{rec,onCancel:()=>stopRec(!1),onSend:()=>stopRec(!0)}):(0,q.jsx)("textarea",{ref:taRef,value:text,rows:1,placeholder:"Escreva uma mensagem",maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
+      rec?(0,q.jsx)(AvRecBar,{rec,onCancel:()=>stopRec(!1),onSend:()=>stopRec(!0)}):(0,q.jsx)("textarea",{ref:taRef,value:text,rows:1,placeholder:"Escreva uma mensagem (Ctrl+V cola fotos)",onPaste:e=>{const fl=[...(e.clipboardData&&e.clipboardData.files||[])];if(fl.length){e.preventDefault();sendFiles(fl.map((f,i)=>f.name&&f.name!=="image.png"?f:new File([f],"Imagem colada "+new Date().toLocaleTimeString("pt-BR").replace(/:/g,"-")+(i?"-"+i:"")+"."+((f.type.split("/")[1]||"png").replace("jpeg","jpg")),{type:f.type})))}},maxLength:4000,"aria-label":"Mensagem",onChange:e=>setText(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendText()}}}),
       !rec&&(text.trim()?(0,q.jsx)("button",{type:"submit",className:"avc-send","aria-label":"Enviar",children:(0,q.jsx)(AvIcon,{n:"send",s:17})}):(0,q.jsx)("button",{type:"button",className:"avc-send avc-mic",title:"Gravar mensagem de voz","aria-label":"Gravar mensagem de voz",onClick:startRec,children:(0,q.jsx)(AvIcon,{n:"mic",s:18})}))]})]});
 }
 
@@ -762,13 +774,20 @@ function AvChat(){
   const{people}=usePresence();
   const{peers}=useChatSummary();
   const[qs,setQs]=x.useState("");
+  const panel=x.useRef(null);
   x.useEffect(()=>{const f=e=>{setPeer((e.detail&&e.detail.peer)||null);setOpen(!0)};window.addEventListener("prumo:chat",f);return()=>window.removeEventListener("prumo:chat",f)},[]);
+  /* fecha sozinho ao clicar fora da conversa (ou apertar Esc) */
+  x.useEffect(()=>{if(!open)return;
+    const f=e=>{const el=e.target;if(!panel.current||panel.current.contains(el))return;if(el.closest&&el.closest(".avo-strip,.av-lightbox,.avn-toast,[role=menu],.modal"))return;setOpen(!1)};
+    const k=e=>{if(e.key==="Escape"&&!document.querySelector(".av-lightbox"))setOpen(!1)};
+    const id=setTimeout(()=>document.addEventListener("mousedown",f),0);document.addEventListener("keydown",k);
+    return()=>{clearTimeout(id);document.removeEventListener("mousedown",f);document.removeEventListener("keydown",k)}},[open]);
   if(!open)return null;
   const me=window.__avUid;
   const list=(people||[]).filter(p=>p.id!==me&&p.name.toLowerCase().includes(qs.toLowerCase())).sort((a,b)=>{
     const la=peers[a.id]?peers[a.id].last.at:0,lb=peers[b.id]?peers[b.id].last.at:0;
     return lb-la||(b.online-a.online)||a.name.localeCompare(b.name,"pt-BR")});
-  return(0,q.jsxs)("section",{className:"avc-panel",role:"dialog","aria-label":"Conversas",children:[
+  return(0,q.jsxs)("section",{className:"avc-panel",ref:panel,role:"dialog","aria-label":"Conversas",children:[
     peer?(0,q.jsx)(AvThread,{peer,onBack:()=>setPeer(null)}):
     (0,q.jsxs)("div",{className:"avc-list",children:[
       (0,q.jsx)("header",{className:"avc-head",children:(0,q.jsx)("strong",{style:{flex:1},children:"Conversas"})}),
@@ -806,19 +825,28 @@ function __avInk(l,dark){
   let bg,card,h1,h2;
   if(dark){bg=__avMix(A,"#0a0b0e",.06);card=__avMix(A,"#16181c",.07);h1=__avMix(A,"#000000",.62);h2=__avMix(B,"#000000",.5)}
   else{bg=__avMix(A,"#f6f7fa",.05);card="#ffffff";h1=__avMix(A,"#000000",.92);h2=__avMix(__avMix(A,B,.45),"#000000",.92)}
+  const ar=((l.areas||{})[dark?"dark":"light"])||{};
+  if(__avHex(ar.bg))bg=ar.bg;if(__avHex(ar.card))card=ar.card;
+  if(__avHex(ar.hero)){h1=ar.hero;h2=__avMix(ar.hero,"#000000",.78)}
+  const rail=__avHex(ar.rail)?ar.rail:card;
+  const strip1=__avHex(ar.strip)?ar.strip:h1,strip2=__avHex(ar.strip)?__avMix(ar.strip,"#000000",.85):h2;
+  if(__avHex(ar.accent))st.setProperty("--accent",ar.accent);
+  const inkOn=c=>__avLum(c)>.4?["#14161b","#454a55","#6b717d"]:["#eef0f4","#b7bbc5","#868b96"];
+  const ri=inkOn(rail),si=Math.max(__avLum(strip1),__avLum(strip2))>.42?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"],bi=inkOn(bg);
+  [["--avrail",rail],["--avrailink",ri[0]],["--avrailink2",ri[1]],["--avstrip1",strip1],["--avstrip2",strip2],["--avstripink",si[0]],["--avstripink2",si[1]]].forEach(([k,v])=>st.setProperty(k,v));
   const heroLight=Math.max(__avLum(h1),__avLum(h2))>.42;
-  const ci=dark?["#eef0f4","#b7bbc5","#868b96"]:["#14161b","#454a55","#6b717d"];
+  const ci=inkOn(card);
   const hi=heroLight?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"];
-  [["--avbg",bg],["--avcard",card],["--avhero",h1],["--avhero1",h1],["--avhero2",h2],["--avink",ci[0]],["--avink2",ci[1]],["--avink3",ci[2]],["--avbgink",ci[0]],["--avbgink2",ci[1]],["--avheroink",hi[0]],["--avheroink2",hi[1]]].forEach(([k,v])=>st.setProperty(k,v));
+  [["--avbg",bg],["--avcard",card],["--avhero",h1],["--avhero1",h1],["--avhero2",h2],["--avink",ci[0]],["--avink2",ci[1]],["--avink3",ci[2]],["--avbgink",bi[0]],["--avbgink2",bi[1]],["--avheroink",hi[0]],["--avheroink2",hi[1]]].forEach(([k,v])=>st.setProperty(k,v));
   root.classList.add("av-themed");
-  root.classList.toggle("av-cardlight",!dark);
+  root.classList.toggle("av-cardlight",__avLum(card)>.4);
   root.classList.toggle("av-herolight",heroLight);
 }
 function AvPalettes({n,r}){
   const pick=p=>r({palette:p.key,accent:p.a,accent2:p.b});
   const A=__avHex(n.accent)?n.accent:"#2563eb",B=__avHex(n.accent2)?n.accent2:"#f5b301";
-  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Estilo de cores"}),
-    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 10px"},children:"Cada estilo é um gradiente de duas cores e funciona no modo claro e no escuro (botão de lua/sol no topo). As letras ajustam o contraste sozinhas. Vale só para você."}),
+  return(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Estilos prontos"}),
+    (0,q.jsx)("p",{className:"small muted",style:{margin:"-4px 0 10px"},children:"Gradientes de duas cores que combinam. Funcionam no modo claro e no escuro."}),
     (0,q.jsx)("div",{className:"avth-grid",children:__avThemes.map(p=>(0,q.jsxs)("button",{className:"avth"+(n.palette===p.key?" on":""),"aria-pressed":n.palette===p.key,onClick:()=>pick(p),children:[
       (0,q.jsx)("span",{className:"avth-grad",style:{background:"linear-gradient(135deg,"+p.a+","+p.b+")"}}),
       (0,q.jsxs)("span",{className:"avth-modes",children:[(0,q.jsxs)("i",{className:"lt",children:[(0,q.jsx)("b",{style:{background:"linear-gradient(135deg,"+__avMix(p.a,"#000000",.92)+","+__avMix(__avMix(p.a,p.b,.45),"#000000",.92)+")"}}),"Claro"]}),(0,q.jsxs)("i",{className:"dk",children:[(0,q.jsx)("b",{style:{background:"linear-gradient(135deg,"+__avMix(p.a,"#000000",.62)+","+__avMix(p.b,"#000000",.5)+")"}}),"Escuro"]})]}),
@@ -1000,3 +1028,167 @@ function AvAgendaToday({events,mine,today,go}){
   setTimeout(check,15000);setInterval(check,90000);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")check()});
 })();
+
+/* =====================================================================
+   ASSISTENTE ZÊNITE (gratuito, sem IA paga): entende frases simples e
+   monta tarefas da equipe com responsável, prioridade, prazo e horário.
+   ===================================================================== */
+const __avNo=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function __avIso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function __avParseOrders(text,people,base){
+  const now=base?new Date(base+"T12:00:00"):new Date();
+  const dows=["domingo","segunda","terca","quarta","quinta","sexta","sabado"];
+  const months={janeiro:1,fevereiro:2,marco:3,abril:4,maio:5,junho:6,julho:7,agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12};
+  const findDate=s=>{
+    const n=__avNo(s);let m,d=null,frag=null;
+    const add=k=>{const x=new Date(now);x.setDate(x.getDate()+k);return x};
+    if((m=n.match(/\b(?:ate |para |pra |no |na |dia )?(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/))){let y=m[3]?+m[3]:now.getFullYear();if(y<100)y+=2000;d=new Date(y,+m[2]-1,+m[1]);if(!m[3]&&d<add(-1))d.setFullYear(y+1);frag=m[0]}
+    else if((m=n.match(/\b(?:ate |para |pra |no |dia )?(\d{1,2}) de (janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b/))){d=new Date(now.getFullYear(),months[m[2]]-1,+m[1]);if(d<add(-1))d.setFullYear(d.getFullYear()+1);frag=m[0]}
+    else if((m=n.match(/\b(?:ate |para |pra )?depois de amanha\b/))){d=add(2);frag=m[0]}
+    else if((m=n.match(/\b(?:ate |para |pra )?amanha\b/))){d=add(1);frag=m[0]}
+    else if((m=n.match(/\b(?:ate |para |pra )?hoje\b/))){d=add(0);frag=m[0]}
+    else if((m=n.match(/\b(?:em|daqui a) (\d{1,2}) dias?\b/))){d=add(+m[1]);frag=m[0]}
+    else if((m=n.match(/\b(?:ate |para |pra |na |no )?(?:a |o )?(?:proxima |proximo )?(domingo|segunda|terca|quarta|quinta|sexta|sabado)(?:-feira| feira)?\b/))){const w=dows.indexOf(m[1]);let k=(w-now.getDay()+7)%7;if(k===0)k=7;d=add(k);frag=m[0]}
+    else if((m=n.match(/\b(?:ate o |ate |no )?(?:dia )(\d{1,2})\b/))){d=new Date(now.getFullYear(),now.getMonth(),+m[1]);if(d<add(-1))d.setMonth(d.getMonth()+1);frag=m[0]}
+    return d?{iso:__avIso(d),frag}:null;
+  };
+  const findTime=s=>{const n=__avNo(s);const m=n.match(/\b(?:as |a partir das |ate as )?(\d{1,2})(?::(\d{2})|h(\d{2})?)\b/);if(!m)return null;const h=+m[1],mi=+(m[2]||m[3]||0);if(h>23||mi>59)return null;return{t:String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0"),frag:m[0]}};
+  const findImpact=s=>{const n=__avNo(s);if(/\b(urgente|prioridade alta|alta prioridade|importante|critic[oa])\b/.test(n))return"alto";if(/\b(prioridade media|media prioridade)\b/.test(n))return"medio";if(/\b(prioridade baixa|baixa prioridade|sem pressa)\b/.test(n))return"baixo";return null};
+  const findPeople=s=>{const n=" "+__avNo(s)+" ";const out=[];
+    if(/\b(equipe toda|toda a equipe|todo mundo|todos)\b/.test(n))return{all:!0,list:[]};
+    for(const p of people){const parts=__avNo(p.name).split(/\s+/).filter(w=>w.length>2);const full=__avNo(p.name);
+      if(n.includes(" "+full+" ")||n.includes(" "+full+",")||parts.some((w,i)=>i===0&&new RegExp("\\b"+w+"\\b").test(n)))out.push(p)}
+    return{all:!1,list:out}};
+  const kindOf=s=>/\b(validar|valide|aprovar|aprove|revisar e aprovar)\b/.test(__avNo(s))?"validar":"fazer";
+  const lines=String(text||"").split(/\n|;|•/).map(z=>z.replace(/^\s*[-*\d.)]+\s*/,"").trim()).filter(z=>z.length>2);
+  /* linhas sem tarefa (ex.: "Zênite, para o Bernardo, prioridade alta, até sexta:") valem para as demais */
+  const global={date:null,time:null,impact:null,people:{all:!1,list:[]}};
+  const res=[];
+  const pass=(line,apply)=>{
+    const date=findDate(line)||global.date,time=findTime(line)||global.time,impact=findImpact(line)||global.impact;
+    let pp=findPeople(line);if(!pp.all&&!pp.list.length)pp=global.people;
+    let title=line;
+    const strip=re=>{title=title.replace(re," ")};
+    [date&&date.frag,time&&time.frag].filter(Boolean).forEach(f=>{const i=__avNo(title).indexOf(f);if(i>=0)title=title.slice(0,i)+" "+title.slice(i+f.length)});
+    strip(/\b(z[eê]nite)\b[,:]?/gi);
+    strip(/^\s*(por favor|favor)\b/i);
+    strip(/^\s*(coloque|coloca|crie|cria|criar|adicione|adiciona|passe|passa|mande|manda|registre|registra|agende|agenda)\b( essas?| estas?| as| a| uma| um)?( tarefas?| atividades?)?/i);
+    strip(/\b(com |de )?(prioridade|impacto) (alta|media|média|baixa)\b/gi);strip(/\b(urgente|sem pressa)\b/gi);
+    strip(/\b(no|dentro do|ao) (painel|calend[aá]rio)( da equipe| de equipe)?( e (no|dentro do) (painel|calend[aá]rio)( da equipe)?)?\b/gi);
+    strip(/\b(e )?(tem que|precisa|deve) ser entregue\b/gi);strip(/\b(com )?obriga[cç][aã]o d[aeo]s?\b/gi);
+    for(const p of pp.list){const parts=[p.name,...p.name.split(/\s+/).filter(w=>w.length>2)];for(const w of parts){title=title.replace(new RegExp("\\b(para|pra|pro|com|d[aoe]|e|a|o)?\\s*"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","gi")," ")}}
+    strip(/\b(para|pra|pro) (a |o )?(equipe toda|toda a equipe|todo mundo|todos)\b/gi);
+    for(let k=0;k<3;k++)title=title.replace(/\s+/g," ").replace(/^[\s,.:;-]+|[\s,.:;-]+$/g,"").replace(/^(e|para|pra|pro|com|de|do|da|a|o)(\s+|$)/i,"").replace(/(^|\s+)(e|para|pra|pro|com|de|do|da|ate|até|a|o)$/i,"").trim();
+    if(title.length<2||/^(as |os )?(seguintes |essas |estas )?(tarefas?|atividades?)$/i.test(title)){if(!apply){global.date=findDate(line)||global.date;global.time=findTime(line)||global.time;global.impact=findImpact(line)||global.impact;const g=findPeople(line);if(g.all||g.list.length)global.people=g}return}
+    if(!apply)return;
+    title=title.charAt(0).toUpperCase()+title.slice(1);
+    const targets=pp.all||!pp.list.length?[null]:pp.list;
+    for(const p of targets)res.push({key:Math.random().toString(36).slice(2),title,assignee:p?p.id:"",due_date:date?date.iso:"",due_time:time?time.t:"",impact:impact||"",kind:kindOf(line)});
+  };
+  if(lines.length>1)lines.forEach(l=>pass(l,!1));
+  lines.forEach(l=>pass(l,!0));
+  return res;
+}
+
+function AvAssistant(){
+  const[open,setOpen]=x.useState(!1);
+  x.useEffect(()=>{const f=()=>setOpen(!0);window.addEventListener("prumo:assist",f);return()=>window.removeEventListener("prumo:assist",f)},[]);
+  return open?(0,q.jsx)(AvAssistantPanel,{onClose:()=>setOpen(!1)}):null;
+}
+function AvAssistantPanel({onClose}){
+  const open=!0,setOpen=v=>{v||onClose()};
+  const[txt,setTxt]=x.useState(""),[items,setItems]=x.useState(null),[busy,setBusy]=x.useState(!1),[done,setDone]=x.useState(null);
+  const dir=useAvDir();const{fail}=Ea();const nav=ir();
+  const box=x.useRef(null);
+  x.useEffect(()=>{if(!open)return;const f=e=>{if(box.current&&!box.current.contains(e.target)&&!e.target.closest(".avo-assist"))setOpen(!1)};const k=e=>{e.key==="Escape"&&setOpen(!1)};setTimeout(()=>document.addEventListener("mousedown",f),0);document.addEventListener("keydown",k);return()=>{document.removeEventListener("mousedown",f);document.removeEventListener("keydown",k)}},[open]);
+  if(!open)return null;
+  const people=(dir||[]).filter(p=>p&&p.id&&p.name);
+  const understand=()=>{const r=__avParseOrders(txt,people);setItems(r);setDone(null)};
+  const upd=(k,patch)=>setItems(a=>a.map(z=>z.key===k?{...z,...patch}:z));
+  const create=async()=>{
+    setBusy(!0);let ok=0;
+    try{for(const it of items){await __avJson("/shared-tasks",{method:"POST",body:{title:it.title,assignee:it.assignee||null,visibility:"equipe",kind:it.kind||"fazer",impact:it.impact||null,due_date:it.due_date||null,due_time:it.due_time||null,origin:"tarefa"}});ok++}
+      setDone(ok);setItems(null);setTxt("");}
+    catch(e){fail(e)}finally{setBusy(!1)}
+  };
+  const imp={"":"Não informado",baixo:"Baixo",medio:"Médio",alto:"Alto"};
+  return(0,q.jsxs)("section",{className:"avc-panel ava-panel",ref:box,role:"dialog","aria-label":"Assistente Zênite",children:[
+    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("span",{className:"ava-ico",children:(0,q.jsx)(AvIcon,{n:"spark",s:18})}),(0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:"Assistente Zênite"}),(0,q.jsx)("small",{children:"Escreva o pedido e ele monta as tarefas da equipe"})]})]}),
+    (0,q.jsx)("button",{className:"avc-close",onClick:()=>setOpen(!1),"aria-label":"Fechar assistente",children:"×"}),
+    (0,q.jsxs)("div",{className:"ava-body",children:[
+      done!==null&&(0,q.jsxs)("div",{className:"ava-done",children:[(0,q.jsx)("strong",{children:done+(done===1?" tarefa criada.":" tarefas criadas.")}),(0,q.jsx)("span",{children:"Já aparecem para os responsáveis, no calendário da equipe e na agenda do dia."}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{nav("/calendario-equipe");setOpen(!1)},children:"Ver no calendário"})]}),
+      !items&&(0,q.jsxs)(q.Fragment,{children:[
+        (0,q.jsx)("textarea",{className:"input ava-in",rows:5,value:txt,"aria-label":"Pedido para o assistente",placeholder:"Ex.: Revisar as planilhas da revista pra Aysla e o Bernardo, prioridade alta, até sexta às 15h\nUma tarefa por linha também funciona.",onChange:e=>setTxt(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))understand()}}),
+        (0,q.jsx)("p",{className:"ava-tip",children:"Entende: nomes da equipe, “equipe toda”, prioridade alta/média/baixa ou urgente, hoje, amanhã, dia da semana, 05/11, “dia 5”, horário (15h, 14:30) e “validar”."}),
+        (0,q.jsx)("button",{className:"btn primary",disabled:txt.trim().length<3,onClick:understand,children:"Montar tarefas"})]}),
+      items&&(items.length===0?(0,q.jsxs)("div",{className:"ava-empty",children:["Não consegui identificar tarefas nesse texto. Tente algo como “Enviar o relatório pra Ana até amanhã”.",(0,q.jsx)("button",{className:"btn sm",onClick:()=>setItems(null),children:"Voltar"})]}):
+        (0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("p",{className:"ava-tip",children:"Confira e ajuste antes de criar:"}),
+          (0,q.jsx)("ul",{className:"ava-list",children:items.map(it=>(0,q.jsxs)("li",{children:[
+            (0,q.jsx)("input",{className:"input",value:it.title,"aria-label":"Título",onChange:e=>upd(it.key,{title:e.target.value})}),
+            (0,q.jsxs)("div",{className:"ava-row",children:[
+              (0,q.jsxs)("select",{className:"select","aria-label":"Responsável",value:it.assignee,onChange:e=>upd(it.key,{assignee:e.target.value}),children:[(0,q.jsx)("option",{value:"",children:"Equipe toda"}),people.map(p=>(0,q.jsx)("option",{value:p.id,children:p.name},p.id))]}),
+              (0,q.jsx)("select",{className:"select","aria-label":"Prioridade",value:it.impact,onChange:e=>upd(it.key,{impact:e.target.value}),children:Object.entries(imp).map(([v,l])=>(0,q.jsx)("option",{value:v,children:"Prioridade: "+l},v))}),
+              (0,q.jsx)("input",{className:"input",type:"date","aria-label":"Prazo",value:it.due_date,onChange:e=>upd(it.key,{due_date:e.target.value})}),
+              (0,q.jsx)("input",{className:"input",type:"time","aria-label":"Horário",value:it.due_time,onChange:e=>upd(it.key,{due_time:e.target.value})}),
+              (0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setItems(a=>a.filter(z=>z.key!==it.key)),"aria-label":"Remover",children:"Remover"})]})]},it.key))}),
+          (0,q.jsxs)("div",{className:"ava-actions",children:[(0,q.jsx)("button",{className:"btn",onClick:()=>setItems(null),children:"Voltar e editar"}),(0,q.jsx)("button",{className:"btn primary",disabled:busy||items.some(z=>z.title.trim().length<2),onClick:create,children:busy?"Criando…":"Criar "+items.length+(items.length===1?" tarefa":" tarefas")})]})]}))]})]});
+}
+
+
+/* ===== Foto em tela cheia (chat e onde mais for usada) ===== */
+function AvLightbox(){
+  const[img,setImg]=x.useState(null);
+  x.useEffect(()=>{const f=e=>setImg(e.detail);window.addEventListener("prumo:lightbox",f);return()=>window.removeEventListener("prumo:lightbox",f)},[]);
+  x.useEffect(()=>{if(!img)return;const k=e=>{e.key==="Escape"&&setImg(null)};document.addEventListener("keydown",k);return()=>document.removeEventListener("keydown",k)},[img]);
+  if(!img)return null;
+  return Vi.createPortal((0,q.jsxs)("div",{className:"av-lightbox",role:"dialog","aria-label":"Foto",onClick:e=>{if(e.target===e.currentTarget)setImg(null)},children:[
+    (0,q.jsx)("img",{src:img.src,alt:img.name||"Foto"}),
+    (0,q.jsxs)("div",{className:"av-lb-bar",children:[(0,q.jsx)("span",{children:img.name||""}),(0,q.jsx)("a",{className:"btn sm",href:img.src+(img.src.includes("?")?"&":"?")+"download=1",download:img.name||"foto",children:"Baixar"}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>setImg(null),children:"Fechar"})]})]}),document.body);
+}
+
+
+/* ===== PERSONALIZAR reorganizado: Tema · Cores · Fundo · Texto ===== */
+const __avAreas=[
+  ["bg","Fundo","Atrás de tudo"],
+  ["rail","Menu lateral e barra do topo","Ícones da esquerda e busca"],
+  ["card","Cartões","Meu dia, anotações, listas, janelas"],
+  ["hero","Faixa do topo e painel do dia","Saudação e números do dia"],
+  ["strip","Faixa de colegas e chat","Lateral direita e conversas"],
+  ["accent","Botões e destaques","Botão principal, itens ativos"]
+];
+function AvPersonalize({open,onClose}){
+  const{prefs:n,setPrefs:r}=Ea();
+  const[tab,setTab]=x.useState("tema");
+  const[mode,setMode]=x.useState(()=>document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light");
+  const areas=n.areas||{};const cur=areas[mode]||{};
+  const setArea=(k,v)=>{const m={...(areas[mode]||{})};if(v)m[k]=v;else delete m[k];r({areas:{...areas,[mode]:m}})};
+  const cssv=k=>{try{return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}catch{return""}};
+  const now=k=>__avHex(cur[k])?cur[k]:({bg:cssv("--avbg"),rail:cssv("--avrail"),card:cssv("--avcard"),hero:cssv("--avhero1"),strip:cssv("--avstrip1"),accent:cssv("--accent")}[k]||"#888888");
+  const tabs=[["tema","Tema"],["cores","Cores"],["fundo","Fundo"],["texto","Texto"]];
+  return(0,q.jsxs)(dl,{open,title:"Personalizar",label:"Personalizar a aparência",onClose,className:"modal-personalize",
+    footer:(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)("button",{className:"btn ghost",onClick:()=>r({...ba,theme:"sistema",areas:{}}),style:{marginRight:"auto"},children:[(0,q.jsx)(Zs,{size:15}),"  Restaurar tudo ao padrão"]}),(0,q.jsx)("button",{className:"btn primary",onClick:onClose,children:"Pronto"})]}),
+    children:[
+      (0,q.jsxs)("div",{className:"pzx-preview","aria-hidden":!0,children:[(0,q.jsx)("i",{className:"r"}),(0,q.jsxs)("div",{className:"m",children:[(0,q.jsx)("i",{className:"h"}),(0,q.jsxs)("div",{className:"g",children:[(0,q.jsx)("i",{className:"c"}),(0,q.jsx)("i",{className:"c"})]}),(0,q.jsx)("b",{})]}),(0,q.jsx)("i",{className:"s"})]}),
+      (0,q.jsx)("p",{className:"small muted",style:{margin:"4px 0 10px",textAlign:"center"},children:"Prévia ao vivo · as mudanças valem só para você"}),
+      (0,q.jsx)("div",{className:"seg pzx-tabs",role:"tablist",children:tabs.map(([k,l])=>(0,q.jsx)("button",{role:"tab","aria-selected":tab===k,"aria-pressed":tab===k,className:tab===k?"on":"",onClick:()=>setTab(k),children:l},k))}),
+      tab==="tema"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Tema"}),(0,q.jsx)("p",{className:"small muted",children:"A base de tudo: claro, escuro ou seguindo o computador."}),
+        (0,q.jsx)("div",{className:"seg pzx-theme",children:[["claro","Claro",pc],["escuro","Escuro",ks],["sistema","Automático",Ds]].map(([e,l,I])=>(0,q.jsxs)("button",{className:n.theme===e?"on":"","aria-pressed":n.theme===e,onClick:()=>r({theme:e}),children:[(0,q.jsx)(I,{size:15,"aria-hidden":!0})," ",l]},e))})]}),
+      tab==="cores"&&(0,q.jsxs)(q.Fragment,{children:[
+        (0,q.jsx)(AvPalettes,{n,r}),
+        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Personalizar por área"}),
+          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. As letras se ajustam sozinhas para continuar legíveis."}),
+          (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
+          (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
+            (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
+            (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
+            __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
+          (mode==="dark")!==(document.documentElement.getAttribute("data-avant-theme")==="dark")&&(0,q.jsx)("p",{className:"pzx-note",children:"Você está editando o "+(mode==="dark"?"modo escuro":"modo claro")+", mas o site está no outro modo. Troque o tema para ver o resultado."})]})]}),
+      tab==="fundo"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Papel de parede"}),
+        (0,q.jsx)("div",{className:"pz-walls",children:Gl.map(e=>(0,q.jsxs)("button",{className:"pz-wall"+(n.wallpaper===e.key?" on":""),onClick:()=>r({wallpaper:e.key}),"aria-pressed":n.wallpaper===e.key,children:[(0,q.jsxs)("span",{className:"pz-thumb wp-"+e.key,"aria-hidden":!0,children:[(0,q.jsx)("i",{}),(0,q.jsx)("i",{}),(0,q.jsx)("i",{})]}),(0,q.jsx)("strong",{children:e.label}),(0,q.jsx)("small",{children:e.hint})]},e.key))}),
+        n.wallpaper!=="nenhum"&&(0,q.jsxs)("div",{className:"pz-row",children:[(0,q.jsx)("span",{children:"Intensidade"}),(0,q.jsx)("div",{className:"seg compact",children:au.map(e=>(0,q.jsx)("button",{className:n.wallpaperIntensity===e.value?"on":"",onClick:()=>r({wallpaperIntensity:e.value}),children:e.label},e.value))})]}),
+        (0,q.jsxs)("label",{className:"pz-check",children:[(0,q.jsx)("input",{type:"checkbox",checked:!!n.reduceMotion,onChange:e=>r({reduceMotion:e.target.checked})}),"Deixar o fundo parado (sem animação)"]})]}),
+      tab==="texto"&&(0,q.jsxs)(q.Fragment,{children:[
+        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Fonte"}),(0,q.jsx)("div",{className:"pz-fonts",children:va.map(e=>(0,q.jsxs)("button",{className:"pz-font"+(n.font===e.key?" on":""),style:{fontFamily:e.css},onClick:()=>r({font:e.key}),"aria-pressed":n.font===e.key,children:[(0,q.jsx)("span",{className:"pz-aa",children:"Aa"}),e.label]},e.key))})]}),
+        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Tamanho do texto"}),(0,q.jsx)("div",{className:"seg",children:ya.map(e=>(0,q.jsx)("button",{className:n.scale===e.value?"on":"",onClick:()=>r({scale:e.value}),style:{fontSize:12*e.value},children:e.label},e.value))})]})]})
+    ]});
+}

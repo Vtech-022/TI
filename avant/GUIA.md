@@ -56,3 +56,10 @@
 - Para receber o aviso do **Windows/navegador** mesmo com o Zênite em outra aba: clique em "Ativar notificações" (faixa na tela inicial ou menu da conta) e permita no navegador.
 - Limite: os avisos chegam enquanto o Zênite estiver aberto em alguma aba (pode estar minimizado). Com o navegador fechado, não chegam.
 - Desempenho: a troca claro/escuro usa uma animação leve, os cartões não usam mais desfoque de fundo e o papel de parede animado roda mais leve.
+
+## Novidades de 30/10
+- **Menu na nova ordem:** Home, Atividades da equipe, Aguardando terceiros, Calendário da equipe, Projetos, Minhas tarefas, Prioridades, Relatórios e (administrador) Usuários.
+- **Assistente Zênite (gratuito):** botão com brilho no rodapé da faixa de colegas. Escreva, por exemplo, "Revisar as planilhas pra Aysla e o Bernardo, prioridade alta, até sexta às 15h" (ou uma tarefa por linha). Ele mostra as tarefas para conferir e cria como tarefas da equipe. Entende nomes da equipe, "equipe toda", prioridade/urgente, hoje, amanhã, dias da semana, datas (05/11, "dia 5", "10 de novembro"), horários (15h, 14:30) e "validar". Funciona por regras, sem IA paga.
+- **Chat:** fecha sozinho ao clicar fora (ou Esc); Ctrl+V cola fotos; clicar numa foto abre em tela cheia com "Baixar".
+- **Meu perfil** (menu da conta): trocar o próprio nome (também é o nome de login) e ver a foto grande antes de salvar.
+- **Personalizar** organizado em abas Tema · Cores · Fundo · Texto, com prévia ao vivo. Em Cores: estilos prontos, "Monte o seu gradiente" e "Personalizar por área" com cores separadas para o modo claro e o escuro (fundo, menu lateral, cartões, faixa do topo, faixa de colegas/chat, botões). As letras ajustam o contraste sozinhas.
