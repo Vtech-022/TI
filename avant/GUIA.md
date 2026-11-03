@@ -63,3 +63,9 @@
 - **Chat:** fecha sozinho ao clicar fora (ou Esc); Ctrl+V cola fotos; clicar numa foto abre em tela cheia com "Baixar".
 - **Meu perfil** (menu da conta): trocar o próprio nome (também é o nome de login) e ver a foto grande antes de salvar.
 - **Personalizar** organizado em abas Tema · Cores · Fundo · Texto, com prévia ao vivo. Em Cores: estilos prontos, "Monte o seu gradiente" e "Personalizar por área" com cores separadas para o modo claro e o escuro (fundo, menu lateral, cartões, faixa do topo, faixa de colegas/chat, botões). As letras ajustam o contraste sozinhas.
+
+## Visual v5 (03/11)
+- **Menu lateral novo:** ícone + nome de cada aba, na cor do estilo escolhido. A aba aberta fica na mesma cor da página, "encaixada" com cantos curvos. Botão « recolhe o menu só para ícones (com dica ao passar o mouse); » expande. No rodapé do menu: **Auto · Claro · Escuro**.
+- **Modo claro coeso:** fundo cinza-azulado suave, cartões brancos com sombra leve e cantos arredondados, contornos finos. Papel de parede animado agora vem desligado por padrão (dá para ligar em Personalizar → Fundo).
+- **Colegas online:** faixa escura presa na borda direita da tela.
+- Letras continuam com contraste automático pelo fundo real.

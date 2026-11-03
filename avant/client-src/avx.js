@@ -483,7 +483,7 @@ function AvCodeModal(){
   let tip=null;
   const hide=()=>{if(tip){tip.remove();tip=null}};
   document.addEventListener("mouseover",e=>{
-    const el=e.target&&e.target.closest?e.target.closest(".rail-item[data-tip]"):null;
+    const el=e.target&&e.target.closest&&(document.documentElement.classList.contains("av-side-compact")||innerWidth<=820)?e.target.closest(".rail-item[data-tip]"):null;
     if(!el){hide();return}
     hide();
     const r=el.getBoundingClientRect();
@@ -599,9 +599,12 @@ function AvOnline(){
   const shown=list.slice(0,9),extra=list.length-shown.length;
   const total=Object.values(peers).reduce((s,v)=>s+v.unread,0);
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
-  return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
+  const wide=typeof window!=="undefined"&&innerWidth>820;
+  const el=(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
     shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
     extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
+  /* na tela larga fica presa à borda direita da janela (fora das animações da página) */
+  return wide?Vi.createPortal(el,document.body):el;
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
@@ -832,11 +835,11 @@ function __avInk(l,dark){
   const A=__avHex(l.accent)?l.accent:"#2563eb",B=__avHex(l.accent2)?l.accent2:"#f5b301";
   let bg,card,h1,h2;
   if(dark){bg=__avMix(A,"#0a0b0e",.06);card=__avMix(A,"#16181c",.07);h1=__avMix(A,"#000000",.62);h2=__avMix(B,"#000000",.5)}
-  else{bg=__avMix(A,"#f6f7fa",.05);card="#ffffff";h1=__avMix(A,"#000000",.92);h2=__avMix(__avMix(A,B,.45),"#000000",.92)}
+  else{bg=__avMix(A,"#eef1f6",.035);card="#ffffff";h1=__avMix(A,"#000000",.92);h2=__avMix(__avMix(A,B,.45),"#000000",.92)}
   const ar=((l.areas||{})[dark?"dark":"light"])||{};
   if(__avHex(ar.bg))bg=ar.bg;if(__avHex(ar.card))card=ar.card;
   if(__avHex(ar.hero)){h1=ar.hero;h2=__avMix(ar.hero,"#000000",.78)}
-  const rail=__avHex(ar.rail)?ar.rail:card;
+  const rail=__avHex(ar.rail)?ar.rail:(dark?__avMix(card,"#000000",.72):__avMix(A,"#0c1029",.16));
   const strip1=__avHex(ar.strip)?ar.strip:h1,strip2=__avHex(ar.strip)?__avMix(ar.strip,"#000000",.85):h2;
   if(__avHex(ar.accent))st.setProperty("--accent",ar.accent);
   const DARK=["#14161b","#454a55","#6b717d"],LIGHT=["#f4f5f8","#c9ccd4","#9a9fa9"];
@@ -1289,7 +1292,7 @@ function AvPersonalize({open,onClose}){
         else if(m.type==="attributes"&&m.target.nodeType===1&&m.attributeName==="class")pend.add(m.target);
         else if(m.type==="characterData"&&m.target.parentElement)pend.add(m.target.parentElement);
       }
-      if(pend.size&&!tm)tm=setTimeout(flush,120);
+      if(pend.size&&!tm)tm=setTimeout(flush,320);
     });
     mo.observe(document.body,{childList:!0,subtree:!0,attributes:!0,attributeFilter:["class"],characterData:!0});
     new MutationObserver(rescanAll).observe(document.documentElement,{attributes:!0,attributeFilter:["data-avant-theme","class","style"]});
@@ -1305,3 +1308,16 @@ function AvPersonalize({open,onClose}){
   window.addEventListener("scroll",on,{passive:!0,capture:!0});window.addEventListener("wheel",on,{passive:!0});window.addEventListener("touchmove",on,{passive:!0});})();
 
 function __avAccentFor(l,dark){const ar=((l.areas||{})[dark?"dark":"light"])||{};const h=/^#[0-9a-f]{6}$/i;return h.test(ar.accent||"")?ar.accent:h.test(l.accent||"")?l.accent:"#2563eb"}
+
+
+/* ===== Menu lateral v5: rótulos, aba ativa na cor da página, recolher e tema no rodapé ===== */
+(function(){if(typeof document==="undefined")return;try{if(localStorage.getItem("av:sideCompact")==="1")document.documentElement.classList.add("av-side-compact")}catch{}})();
+function AvSideTools(){
+  const{prefs:n,setPrefs:r}=Ea();
+  const[compact,setCompact]=x.useState(()=>document.documentElement.classList.contains("av-side-compact"));
+  const toggle=()=>{const v=!compact;setCompact(v);document.documentElement.classList.toggle("av-side-compact",v);try{localStorage.setItem("av:sideCompact",v?"1":"0")}catch{}};
+  const opts=[["sistema","Auto"],["claro","Claro"],["escuro","Escuro"]];
+  return(0,q.jsxs)("div",{className:"av-side-tools",children:[
+    (0,q.jsx)("div",{className:"av-side-theme",role:"group","aria-label":"Tema",children:opts.map(([v,l])=>(0,q.jsx)("button",{type:"button",className:n.theme===v?"on":"","aria-pressed":n.theme===v,onClick:()=>r({theme:v}),title:"Tema "+l.toLowerCase(),children:l},v))}),
+    (0,q.jsx)("button",{type:"button",className:"av-side-collapse",onClick:toggle,"aria-label":compact?"Expandir menu":"Recolher menu",title:compact?"Expandir menu":"Recolher menu",children:compact?"»":"«"})]});
+}

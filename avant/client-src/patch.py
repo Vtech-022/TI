@@ -511,6 +511,9 @@ s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</
 # título da aba
 # ---- cor de "Botões e destaques" por modo (Personalizar por área) ----
 s = s.replace("let e=document.documentElement.style,t=/^#[0-9a-f]{6}$/i.test(l.accent)?l.accent:ba.accent", "let e=document.documentElement.style,t=__avAccentFor(l,b)", 1)
+# ---- Menu lateral v5: ferramentas no rodapé (tema + recolher) ----
+s = s.replace("(0,q.jsx)(`div`,{className:`rail-foot`,children:", "(0,q.jsx)(AvSideTools,{}),(0,q.jsx)(`div`,{className:`rail-foot`,children:", 1)
+s = s.replace("scale:1,wallpaper:`aurora`,wallpaperIntensity:.7}", "scale:1,wallpaper:`nenhum`,wallpaperIntensity:.7}", 1)
 # ---- Personalizar reorganizado ----
 _a = s.index("function ou({open:e,onClose:t}){"); _b = s.index("function ", _a + 30)
 s = s[:_a] + "function ou({open:e,onClose:t}){return(0,q.jsx)(AvPersonalize,{open:e,onClose:t})}" + s[_b:]

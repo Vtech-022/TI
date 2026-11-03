@@ -151,10 +151,16 @@ try {
   await v.locator('.rail a[aria-label="Usuários"]').scrollIntoViewIfNeeded();
   const vis = await v.locator('.rail a[aria-label="Usuários"]').evaluate((e) => { const r = e.getBoundingClientRect(); return r.bottom <= window.innerHeight + 1; });
   check("menu lateral rola em tela baixa e o último item fica alcançável", vis && (!rail.rola || rail.auto === "auto"), JSON.stringify(rail));
-  await v.locator('.rail a[aria-label="Calendário da equipe"]').hover();
-  await v.waitForTimeout(300);
-  const dica = await v.locator(".avtip").evaluate((e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(); return { txt: e.textContent, cor: c.color, fundo: c.backgroundColor, dentro: r.left >= 0 && r.right <= window.innerWidth && r.width > 40 }; }).catch(() => null);
-  check("dica do menu lateral legível ao passar o mouse (texto claro em fundo escuro)", !!dica && dica.txt === "Calendário da equipe" && dica.cor === "rgb(255, 255, 255)" && dica.dentro, JSON.stringify(dica));
+  const rot = await v.locator('.rail a[aria-label="Calendário da equipe"] .rail-label').evaluate((e) => ({ vis: getComputedStyle(e).display !== "none", txt: e.textContent }));
+  check("menu lateral mostra o nome de cada aba", rot.vis && rot.txt === "Calendário da equipe", JSON.stringify(rot));
+  const ativo = await v.evaluate(() => { const a = document.querySelector(".rail .rail-item.active"); const cs = getComputedStyle(a); const bg = getComputedStyle(document.documentElement).getPropertyValue("--avbg").trim(); return { aba: a.getAttribute("aria-label"), fundo: cs.backgroundColor, bg }; });
+  const hex2rgb = (h) => "rgb(" + [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16)).join(", ") + ")";
+  check("aba ativa fica na mesma cor da página", ativo.aba === "Calendário da equipe" && ativo.fundo === hex2rgb(ativo.bg), JSON.stringify(ativo));
+  await v.locator(".av-side-collapse").click(); await v.waitForTimeout(400);
+  await v.locator('.rail a[aria-label="Calendário da equipe"]').hover(); await v.waitForTimeout(300);
+  const dica = await v.locator(".avtip").evaluate((e) => ({ txt: e.textContent })).catch(() => null);
+  check("menu recolhido mostra só ícones e a dica ao passar o mouse", (await v.locator('.rail a[aria-label="Calendário da equipe"] .rail-label').evaluate(e => getComputedStyle(e).display)) === "none" && !!dica && dica.txt === "Calendário da equipe", JSON.stringify(dica));
+  await v.locator(".av-side-collapse").click(); await v.waitForTimeout(300);
   await shot(v, "11-dica-menu");
   await v.setViewportSize({ width: 1280, height: 860 });
 

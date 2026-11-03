@@ -771,3 +771,71 @@ html:root:not([data-avant-theme=dark]) .rail{border:1px solid color-mix(in srgb,
 :root:not([data-avant-theme=dark]) .tcard{box-shadow:0 1px 2px #1b233314!important}
 
 :root:not([data-avant-theme=dark]) .panel.kpi{border-top:1px solid var(--line)!important;border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}
+
+/* =====================================================================
+   DESIGN v5 — menu lateral com rótulos e aba ativa "colada" na página,
+   modo claro coeso (cinza-azulado suave + cartões brancos), colegas na borda
+   ===================================================================== */
+:root{--avside-w:236px}
+html.av-side-compact{--avside-w:92px}
+@media (min-width:821px){
+  #root .shell.shell-rail{grid-template-columns:var(--avside-w) 1fr!important;transition:grid-template-columns .25s ease}
+  #root .rail.rail{position:sticky;top:0;height:calc(100vh / var(--ui-scale,1));width:auto;align-items:stretch;gap:10px;padding:18px 0 14px 14px!important;margin:0;border:0!important;border-radius:0 26px 26px 0;background:var(--avrail)!important;box-shadow:none!important;overflow-y:auto;overflow-x:visible}
+  #root .rail .rail-brand{flex-direction:row;justify-content:flex-start;gap:10px;width:auto;height:auto;padding:6px 14px 14px 6px!important;margin:0 14px 6px 0;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--avrailink)!important}
+  #root .rail .rail-brand .brand-mark{width:38px;height:38px}
+  #root .rail .rb-word{font-size:20px;font-weight:800;letter-spacing:.01em;color:var(--avrailink)!important}
+  #root .rail .rail-nav{background:transparent!important;box-shadow:none!important;padding:0!important;gap:4px;border-radius:0}
+  #root .rail .rail-item{width:auto!important;height:46px;display:flex!important;align-items:center;gap:12px;padding:0 16px;border-radius:14px 0 0 14px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--avrailink2)!important;font-weight:600;font-size:14px;transform:none!important;position:relative;transition:none}
+  #root .rail .rail-item svg{width:20px;height:20px;flex:none}
+  #root .rail .rail-label{display:inline!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #root .rail .rail-item:hover{background:color-mix(in srgb,var(--avrailink) 9%,transparent)!important;color:var(--avrailink)!important}
+  /* aba ativa: mesma cor da página, encaixada com cantos curvos */
+  #root .rail .rail-item.active{background:var(--avbg)!important;color:var(--accent)!important;box-shadow:none!important}
+  #root .rail .rail-item.active:before,#root .rail .rail-item.active:after{content:"";position:absolute;right:0;width:20px;height:20px;pointer-events:none;display:block!important;opacity:1!important;padding:0;border-radius:0;transform:none!important}
+  #root .rail .rail-item.active:before{top:-20px;background:radial-gradient(circle at 0 0,transparent 19.5px,var(--avbg) 20px)}
+  #root .rail .rail-item.active:after{bottom:-20px;top:auto;left:auto;background:radial-gradient(circle at 0 100%,transparent 19.5px,var(--avbg) 20px)!important}
+  #root .rail .rail-item .nav-count{position:static;margin-left:auto;margin-right:10px}
+  #root .rail .rail-foot{color:var(--avrailink2);text-align:left;padding:4px 18px 0 6px}
+  /* compacto */
+  html.av-side-compact #root .rail .rail-label,html.av-side-compact #root .rail .rb-word,html.av-side-compact:root .av-side-theme{display:none!important}
+  html.av-side-compact #root .rail .rail-item{justify-content:center;padding:0 10px}
+  html.av-side-compact #root .rail .rail-item .nav-count{position:absolute;top:2px;right:12px;margin:0}
+  /* conteúdo começa colado ao menu, na cor da página */
+  #root .main{background:var(--avbg)}
+}
+.av-side-tools{margin:auto 14px 0 0;display:flex;flex-direction:column;gap:8px;padding-top:12px}
+.av-side-theme{display:flex;gap:3px;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--avrailink) 10%,transparent)}
+.av-side-theme button{flex:1;border:0;border-radius:999px;padding:6px 0;font:600 11.5px/1 var(--font,system-ui);background:transparent;color:var(--avrailink2);cursor:pointer}
+.av-side-theme button.on{background:var(--avbg);color:var(--accent);box-shadow:0 2px 6px #0003}
+.av-side-collapse{align-self:flex-end;width:30px;height:30px;border-radius:50%;border:1px solid color-mix(in srgb,var(--avrailink) 25%,transparent);background:transparent;color:var(--avrailink);cursor:pointer;font-size:14px;line-height:1}
+html.av-side-compact .av-side-collapse{align-self:center}
+@media (max-width:820px){.av-side-collapse{display:none}#root .rail.rail{background:var(--avrail)!important}#root .rail .rail-item{color:var(--avrailink2)!important;background:transparent!important}#root .rail .rail-item.active{background:var(--avbg)!important;color:var(--accent)!important}}
+
+/* barra do topo: na cor dos cartões (não do menu) */
+html:root .topbar>*{background:var(--avcard)!important;border:1px solid var(--line)!important;color:var(--avink)!important}
+html:root .topbar>* :is(button,input,svg,span){color:var(--avink)!important}
+
+/* modo claro coeso: cartões brancos, sombra suave, bordas finas, cantos de 20px */
+:root.av-themed:not([data-avant-theme=dark]){--line:#e3e7ef;--line-strong:#cfd5e1;--surface-2:#f4f6fa}
+:root.av-themed:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.notes-card,.modal,.avc-panel,.tlist,.avth,.pz-wall,.pz-font):not(.kpi):not(.avh):not(.day-hero){border:1px solid var(--line)!important;box-shadow:0 1px 2px #1b23330a,0 8px 24px #1b23330d!important;border-radius:20px}
+:root.av-themed:not([data-avant-theme=dark]) .tcard{background:#fff!important;border:1px solid var(--line)!important;box-shadow:0 1px 2px #1b23330f!important;border-radius:14px}
+:root.av-themed:not([data-avant-theme=dark]) .tlist{background:#f7f8fb!important}
+:root.av-themed:not([data-avant-theme=dark]) .notes-card{background:#fffbeb!important}
+
+/* colegas: faixa escura grudada na borda direita da tela */
+@media (min-width:821px){
+  body > .avo-strip.avo-strip{position:fixed!important;right:0!important;top:96px!important;bottom:auto!important;transform:none!important;border-radius:22px 0 0 22px!important;padding:12px 10px 12px 12px;border:0!important;background:var(--avrail)!important;box-shadow:-6px 10px 28px #0b102933!important;z-index:40}
+  body > .avo-strip .avo-face .av-img,body > .avo-strip .avo-face .av-ini{box-shadow:0 0 0 2px color-mix(in srgb,var(--avrailink) 70%,transparent)}
+  body > .avo-strip .avo-dot{border-color:var(--avrail)}
+  .myday{padding-right:64px!important}
+}
+
+#root .rail .rail-item:not(.active){border:0!important;box-shadow:none!important}
+#root .rail .rail-brand{background:transparent!important}
+@media (max-width:820px){body > .avo-strip{position:static}}
+#root .rail a.rail-item[aria-label="Tarefas da equipe"],#root .rail a.rail-item[aria-label="Arquivos e Documentos"]{display:none!important}
+html body > .avo-strip.avo-strip{background:var(--avrail)!important}
+html body > .avo-strip .avo-face .av-img,html body > .avo-strip .avo-face .av-ini{box-shadow:0 0 0 2px color-mix(in srgb,var(--avrailink) 60%,transparent)!important}
+.notes-card textarea{border:0!important;box-shadow:none!important}
+html:root body > .avo-strip.avo-strip{background:var(--avrail)!important}
+html:root:root .notes-card textarea{border:0!important;box-shadow:none!important}
