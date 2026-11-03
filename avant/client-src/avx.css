@@ -839,3 +839,31 @@ html body > .avo-strip .avo-face .av-img,html body > .avo-strip .avo-face .av-in
 .notes-card textarea{border:0!important;box-shadow:none!important}
 html:root body > .avo-strip.avo-strip{background:var(--avrail)!important}
 html:root:root .notes-card textarea{border:0!important;box-shadow:none!important}
+
+/* ===== Celular ===== */
+@media (max-width:820px){
+  html:root .myday .avo-strip.avo-strip{position:static!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap;align-items:center;gap:8px;width:fit-content;max-width:100%;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding:6px 10px!important;border-radius:999px!important;background:var(--avrail)!important;border:0!important;box-shadow:0 4px 14px #0b102926!important;transform:none!important}
+  html:root .myday .avo-strip .avo-face{width:34px;height:34px;flex:none}
+  .myday{padding-right:0!important}
+  /* menu (gaveta) no estilo novo */
+  #root .rail.rail{border-radius:0 24px 24px 0!important;padding:18px 0 14px 14px!important;background:var(--avrail)!important}
+  #root .rail .rail-brand{background:transparent!important;border:0!important;box-shadow:none!important;justify-content:flex-start;padding:4px 10px 12px!important;color:var(--avrailink)!important}
+  #root .rail .rb-word{color:var(--avrailink)!important}
+  #root .rail .rail-item{border-radius:14px 0 0 14px!important;padding:0 16px!important;height:46px}
+  #root .rail .rail-item .nav-count{position:static!important;margin-left:auto;margin-right:12px}
+  #root .rail .rail-item.active:before,#root .rail .rail-item.active:after{content:"";position:absolute;right:0;width:20px;height:20px;pointer-events:none;display:block!important}
+  #root .rail .rail-item.active:before{top:-20px;background:radial-gradient(circle at 0 0,transparent 19.5px,var(--avbg) 20px)}
+  #root .rail .rail-item.active:after{bottom:-20px;background:radial-gradient(circle at 0 100%,transparent 19.5px,var(--avbg) 20px)!important}
+  .av-side-tools{margin-right:14px}
+  /* barra inferior na cor do menu */
+  .tabbar{background:var(--avrail)!important;border-top:0!important}
+  .tabbar a,.tabbar button:not(.tab-main){color:var(--avrailink2)!important}
+  .tabbar a.active{color:var(--avrailink)!important}
+  .tabbar a.active svg{color:var(--accent2,#f5b301)!important}
+  /* botão do assistente acima da barra inferior; janelas em tela cheia */
+  .ava-fab{bottom:84px!important;right:14px!important;width:50px;height:50px}
+  .ava-panel,.avc-panel{left:8px!important;right:8px!important;bottom:76px!important;top:auto;width:auto!important;height:min(70vh,560px)!important}
+  .avn-stack{bottom:150px}
+  /* hero e números mais compactos */
+  .avh2-wrap{gap:14px}.avh2-donut,.avh2-donut>svg{width:170px!important;height:170px!important}
+}

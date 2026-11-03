@@ -514,6 +514,13 @@ s = s.replace("let e=document.documentElement.style,t=/^#[0-9a-f]{6}$/i.test(l.a
 # ---- Menu lateral v5: ferramentas no rodapé (tema + recolher) ----
 s = s.replace("(0,q.jsx)(`div`,{className:`rail-foot`,children:", "(0,q.jsx)(AvSideTools,{}),(0,q.jsx)(`div`,{className:`rail-foot`,children:", 1)
 s = s.replace("scale:1,wallpaper:`aurora`,wallpaperIntensity:.7}", "scale:1,wallpaper:`nenhum`,wallpaperIntensity:.7}", 1)
+# ---- Barra inferior do celular alinhada ao novo menu ----
+_t0 = "(0,q.jsxs)(Ai,{to:`/`,end:!0,children:[(0,q.jsx)(ds,{\"aria-hidden\":!0}),`Início`]}),(0,q.jsxs)(Ai,{to:`/pendencias`,children:[(0,q.jsx)(hs,{\"aria-hidden\":!0}),`Tarefas`]}),"
+assert s.count(_t0) == 1, "tabbar inicio"
+s = s.replace(_t0, "(0,q.jsxs)(Ai,{to:`/`,end:!0,children:[(0,q.jsx)(ds,{\"aria-hidden\":!0}),`Home`]}),(0,q.jsxs)(Ai,{to:`/equipe`,children:[(0,q.jsx)(Nc,{\"aria-hidden\":!0}),`Equipe`]}),", 1)
+_t1 = "(0,q.jsxs)(Ai,{to:`/projetos`,children:[(0,q.jsx)(Go,{\"aria-hidden\":!0}),`Frentes`]}),(0,q.jsxs)(`button`,{onClick:()=>f(!0),\"aria-label\":`Nova tarefa`,children:[(0,q.jsx)(Gs,{\"aria-hidden\":!0}),`Tarefa`]})"
+assert s.count(_t1) == 1, "tabbar frentes"
+s = s.replace(_t1, "(0,q.jsxs)(Ai,{to:`/calendario-equipe`,children:[(0,q.jsx)(no,{\"aria-hidden\":!0}),`Calendário`]}),(0,q.jsxs)(Ai,{to:`/pendencias`,children:[(0,q.jsx)(hs,{\"aria-hidden\":!0}),`Tarefas`]})", 1)
 # ---- Personalizar reorganizado ----
 _a = s.index("function ou({open:e,onClose:t}){"); _b = s.index("function ", _a + 30)
 s = s[:_a] + "function ou({open:e,onClose:t}){return(0,q.jsx)(AvPersonalize,{open:e,onClose:t})}" + s[_b:]
