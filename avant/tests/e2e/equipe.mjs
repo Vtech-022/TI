@@ -156,11 +156,7 @@ try {
   const ativo = await v.evaluate(() => { const a = document.querySelector(".rail .rail-item.active"); const cs = getComputedStyle(a); const bg = getComputedStyle(document.documentElement).getPropertyValue("--avbg").trim(); return { aba: a.getAttribute("aria-label"), fundo: cs.backgroundColor, bg }; });
   const hex2rgb = (h) => "rgb(" + [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16)).join(", ") + ")";
   check("aba ativa fica na mesma cor da página", ativo.aba === "Calendário da equipe" && ativo.fundo === hex2rgb(ativo.bg), JSON.stringify(ativo));
-  await v.locator(".av-side-collapse").click(); await v.waitForTimeout(400);
-  await v.locator('.rail a[aria-label="Calendário da equipe"]').hover(); await v.waitForTimeout(300);
-  const dica = await v.locator(".avtip").evaluate((e) => ({ txt: e.textContent })).catch(() => null);
-  check("menu recolhido mostra só ícones e a dica ao passar o mouse", (await v.locator('.rail a[aria-label="Calendário da equipe"] .rail-label').evaluate(e => getComputedStyle(e).display)) === "none" && !!dica && dica.txt === "Calendário da equipe", JSON.stringify(dica));
-  await v.locator(".av-side-collapse").click(); await v.waitForTimeout(300);
+  check("menu lateral sem o seletor de tema e sem o botão de recolher", (await v.locator(".av-side-tools, .av-side-collapse").count()) === 0);
   await shot(v, "11-dica-menu");
   await v.setViewportSize({ width: 1280, height: 860 });
 
@@ -393,21 +389,21 @@ try {
 
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
-  await v.waitForSelector(".pzx-tabs");
-  check("Personalizar organizado em Tema, Cores, Fundo e Texto", (await v.locator(".pzx-tabs button").allInnerTexts()).join(",") === "Tema,Cores,Fundo,Texto");
-  await v.locator('.pzx-tabs button:has-text("Cores")').click();
-  await v.waitForSelector(".avth");
-  await v.locator('.avth:has-text("Ametista")').click();
-  await v.waitForTimeout(400);
-  const ac = await v.evaluate(() => [getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(), getComputedStyle(document.documentElement).getPropertyValue("--accent2").trim()]);
-  check("tema pronto troca as cores de destaque", ac[0].toLowerCase() === "#7c3aed" && ac[1].toLowerCase() === "#db2777", ac.join(" "));
-  await v.locator('.avp-pick input[aria-label="Cor 1"]').fill("#12a150");
+  await v.waitForSelector(".pzy-dots");
+  check("painel Temas organizado: Auto/Claro/Escuro, cores, densidade, fonte, texto, cantos e chaves", (await v.locator(".pzy-mode button").allInnerTexts()).join(",") === "Auto,Claro,Escuro" && (await v.locator(".pzy-row").count()) === 5 && (await v.locator(".pzy-tg").count()) === 3);
+  check("estilos de cor incluem as paletas enviadas (Floresta dourada, Neon rosa, Rubi e ouro…)", (await v.locator(".pzy-dot[aria-label]").count()) >= 19 && (await v.locator('.pzy-dot[aria-label="Rubi e ouro"]').count()) === 1);
+  await v.locator('.pzy-dot[aria-label="Ametista"]').click();
+  await v.locator('.pzy-own input[aria-label="Cor 1"]').fill("#12a150");
   await v.waitForTimeout(400);
   const cc = await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
   check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
   const ink = await v.evaluate(() => { const d = document.documentElement.getAttribute("data-avant-theme") === "dark"; const s = getComputedStyle(document.documentElement); return [d, s.getPropertyValue("--avink").trim(), s.getPropertyValue("--avbg").trim()]; });
   check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#f4f5f8" : ink[1] === "#14161b", ink.join(" "));
   const modo = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme") === "dark" ? "escuro" : "claro");
+  await v.locator(".pzy-adv summary").click();
+  await v.locator('.pzy-row input[aria-label="Arredondamento"]').fill("8");
+  await v.waitForTimeout(300);
+  check("arredondamento escolhido vale para os cartões", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avradius").trim())) === "8px");
   await v.locator('.pzx-areas input[aria-label^="Cartões"]').fill("#fff3d6");
   await v.waitForTimeout(400);
   const ar = await v.evaluate(() => { const s = getComputedStyle(document.documentElement); return [s.getPropertyValue("--avcard").trim(), s.getPropertyValue("--avink").trim()]; });

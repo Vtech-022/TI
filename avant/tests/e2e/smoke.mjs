@@ -173,10 +173,10 @@ try {
   await v.locator('.account-pop button', { hasText: "Personalizar" }).click();
   await v.waitForSelector(".modal-personalize");
   const painel = v.locator(".modal-personalize");
-  await painel.locator(".pzx-theme button", { hasText: "Escuro" }).click();
-  await painel.locator(".pzx-tabs button", { hasText: "Cores" }).click();
-  await painel.locator(".avth", { hasText: "Ametista" }).click();
-  await painel.locator(".pzx-tabs button", { hasText: "Fundo" }).click();
+  await painel.locator(".pzy-mode button", { hasText: "Escuro" }).click();
+  await painel.locator('.pzy-dot[aria-label="Ametista"]').click();
+  await painel.locator(".pzy-tg", { hasText: "Fundo animado" }).click();
+  await painel.locator(".pzy-adv summary").click();
   await painel.getByRole("button", { name: /^Constelação/ }).click();
   await v.waitForTimeout(1600);
   const prefsKey = [...ctx.store._dump().keys()].find((k) => k.startsWith("prefs/"));

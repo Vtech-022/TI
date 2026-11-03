@@ -601,7 +601,7 @@ function AvOnline(){
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
   const wide=typeof window!=="undefined"&&innerWidth>820;
   const el=(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
-    shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
+    shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsxs)("span",{className:"avo-ring"+(p.online?" on":""),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]}),(0,q.jsx)("small",{className:"avo-nm",children:p.id===me?"Você":p.name.split(" ")[0]})]},p.id)}),
     extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
   /* na tela larga fica presa à borda direita da janela (fora das animações da página) */
   return wide?Vi.createPortal(el,document.body):el;
@@ -821,7 +821,19 @@ const __avThemes=[
   {key:"oceano",name:"Oceano",a:"#1d4ed8",b:"#06b6d4",tip:"Azul para ciano"},
   {key:"floresta",name:"Floresta",a:"#047857",b:"#84cc16",tip:"Esmeralda para lima"},
   {key:"ametista",name:"Ametista",a:"#7c3aed",b:"#db2777",tip:"Violeta para magenta"},
-  {key:"grafite",name:"Grafite",a:"#475569",b:"#3b82f6",tip:"Cinza com azul, discreto"}
+  {key:"grafite",name:"Grafite",a:"#475569",b:"#3b82f6",tip:"Cinza com azul, discreto"},
+  {key:"opulent",name:"Índigo profundo",a:"#4f46e5",b:"#818cf8",side:"#15164a",tip:"Menu azul-marinho, destaque índigo"},
+  {key:"workmate",name:"Preto e azul",a:"#2563eb",b:"#22c55e",side:"#ffffff",tip:"Menu branco, ativo preto"},
+  {key:"taskmaster",name:"Verde e laranja",a:"#0f9d7a",b:"#f97316",side:"#ffffff",tip:"Verde com toques laranja"},
+  {key:"coral",name:"Coral",a:"#f05a28",b:"#ffb38a",side:"#ffffff",tip:"Laranja vibrante e branco"},
+  {key:"mono",name:"Monocromático",a:"#18181b",b:"#a1a1aa",side:"#ffffff",tip:"Preto, cinza e branco"},
+  {key:"flodour",name:"Floresta dourada",a:"#518e45",b:"#f1ca30",tip:"Verde com amarelo"},
+  {key:"urbana",name:"Noite urbana",a:"#1f9c80",b:"#ebae29",tip:"Verde-água com âmbar"},
+  {key:"neon",name:"Neon rosa",a:"#da0090",b:"#f2cb30",tip:"Pink com amarelo"},
+  {key:"eletrico",name:"Elétrico",a:"#ff2801",b:"#c8e600",tip:"Vermelho com lima"},
+  {key:"rubi",name:"Rubi e ouro",a:"#ac0f2c",b:"#f5dc06",tip:"Vinho com dourado"},
+  {key:"ceu",name:"Céu aberto",a:"#02a3fe",b:"#fdd80c",tip:"Azul-céu com amarelo"},
+  {key:"ouro",name:"Ouro",a:"#c98a12",b:"#f6df75",tip:"Tons dourados"}
 ];
 const __avPalettes=__avThemes;
 const __avHex=h=>/^#[0-9a-f]{6}$/i.test(h||"");
@@ -839,7 +851,12 @@ function __avInk(l,dark){
   const ar=((l.areas||{})[dark?"dark":"light"])||{};
   if(__avHex(ar.bg))bg=ar.bg;if(__avHex(ar.card))card=ar.card;
   if(__avHex(ar.hero)){h1=ar.hero;h2=__avMix(ar.hero,"#000000",.78)}
-  const rail=__avHex(ar.rail)?ar.rail:(dark?__avMix(card,"#000000",.72):__avMix(A,"#0c1029",.16));
+  const sty=__avThemes.find(z=>z.key===l.palette);
+  const rail=__avHex(ar.rail)?ar.rail:(dark?__avMix(card,"#000000",.72):(sty&&sty.side?sty.side:__avMix(A,"#0c1029",.16)));
+  /* densidade, cantos e foco */
+  st.setProperty("--avradius",(Number(l.radius)>=4&&Number(l.radius)<=32?Number(l.radius):20)+"px");
+  root.classList.toggle("av-dense",l.density==="compacto");root.classList.toggle("av-comfy",l.density==="confortavel");
+  root.classList.toggle("av-focus",!!l.boldFocus);
   const strip1=__avHex(ar.strip)?ar.strip:h1,strip2=__avHex(ar.strip)?__avMix(ar.strip,"#000000",.85):h2;
   if(__avHex(ar.accent))st.setProperty("--accent",ar.accent);
   const DARK=["#14161b","#454a55","#6b717d"],LIGHT=["#f4f5f8","#c9ccd4","#9a9fa9"];
@@ -1178,39 +1195,43 @@ const __avAreas=[
 ];
 function AvPersonalize({open,onClose}){
   const{prefs:n,setPrefs:r}=Ea();
-  const[tab,setTab]=x.useState("tema");
   const[mode,setMode]=x.useState(()=>document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light");
   x.useEffect(()=>{if(open)setMode(document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light")},[open]);
+  const[adv,setAdv]=x.useState(!1);
   const areas=n.areas||{};const cur=areas[mode]||{};
   const setArea=(k,v)=>{const m={...(areas[mode]||{})};if(v)m[k]=v;else delete m[k];r({areas:{...areas,[mode]:m}})};
   const cssv=k=>{try{return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}catch{return""}};
   const now=k=>__avHex(cur[k])?cur[k]:({bg:cssv("--avbg"),rail:cssv("--avrail"),card:cssv("--avcard"),hero:cssv("--avhero1"),strip:cssv("--avstrip1"),accent:cssv("--accent")}[k]||"#888888");
-  const tabs=[["tema","Tema"],["cores","Cores"],["fundo","Fundo"],["texto","Texto"]];
-  return(0,q.jsxs)(dl,{open,title:"Personalizar",label:"Personalizar a aparência",onClose,className:"modal-personalize",
-    footer:(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)("button",{className:"btn ghost",onClick:()=>r({...ba,theme:"sistema",areas:{}}),style:{marginRight:"auto"},children:[(0,q.jsx)(Zs,{size:15}),"  Restaurar tudo ao padrão"]}),(0,q.jsx)("button",{className:"btn primary",onClick:onClose,children:"Pronto"})]}),
+  const A=__avHex(n.accent)?n.accent:"#2563eb",B=__avHex(n.accent2)?n.accent2:"#f5b301";
+  const sizes=ya,si=Math.max(0,sizes.findIndex(e=>e.value===n.scale));
+  const dens=["compacto","normal","confortavel"],di=Math.max(0,dens.indexOf(n.density||"normal"));
+  const rad=Number(n.radius)||20;
+  const Row=(label,hint,ctl)=>(0,q.jsxs)("div",{className:"pzy-row",children:[(0,q.jsxs)("div",{className:"pzy-l",children:[(0,q.jsx)("strong",{children:label}),hint&&(0,q.jsx)("small",{children:hint})]}),(0,q.jsx)("div",{className:"pzy-c",children:ctl})]});
+  const Toggle=(on,set,label,hint)=>(0,q.jsxs)("label",{className:"pzy-tg",children:[(0,q.jsx)("input",{type:"checkbox",checked:!!on,onChange:e=>set(e.target.checked)}),(0,q.jsx)("i",{"aria-hidden":!0}),(0,q.jsxs)("span",{children:[(0,q.jsx)("strong",{children:label}),hint&&(0,q.jsx)("small",{children:hint})]})]});
+  return(0,q.jsxs)(dl,{open,title:"Temas",label:"Personalizar a aparência",onClose,className:"modal-personalize pzy",
+    footer:(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)("button",{className:"btn ghost",onClick:()=>r({...ba,theme:"sistema",areas:{},density:"normal",radius:20,boldFocus:!1}),style:{marginRight:"auto"},children:[(0,q.jsx)(Zs,{size:15}),"  Restaurar padrão"]}),(0,q.jsx)("button",{className:"btn primary",onClick:onClose,children:"Pronto"})]}),
     children:[
-      (0,q.jsxs)("div",{className:"pzx-preview","aria-hidden":!0,children:[(0,q.jsx)("i",{className:"r"}),(0,q.jsxs)("div",{className:"m",children:[(0,q.jsx)("i",{className:"h"}),(0,q.jsxs)("div",{className:"g",children:[(0,q.jsx)("i",{className:"c"}),(0,q.jsx)("i",{className:"c"})]}),(0,q.jsx)("b",{})]}),(0,q.jsx)("i",{className:"s"})]}),
-      (0,q.jsx)("p",{className:"small muted",style:{margin:"4px 0 10px",textAlign:"center"},children:"Prévia ao vivo · as mudanças valem só para você"}),
-      (0,q.jsx)("div",{className:"seg pzx-tabs",role:"tablist",children:tabs.map(([k,l])=>(0,q.jsx)("button",{role:"tab","aria-selected":tab===k,"aria-pressed":tab===k,className:tab===k?"on":"",onClick:()=>setTab(k),children:l},k))}),
-      tab==="tema"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Tema"}),(0,q.jsx)("p",{className:"small muted",children:"A base de tudo: claro, escuro ou seguindo o computador."}),
-        (0,q.jsx)("div",{className:"seg pzx-theme",children:[["claro","Claro",pc],["escuro","Escuro",ks],["sistema","Automático",Ds]].map(([e,l,I])=>(0,q.jsxs)("button",{className:n.theme===e?"on":"","aria-pressed":n.theme===e,onClick:()=>r({theme:e}),children:[(0,q.jsx)(I,{size:15,"aria-hidden":!0})," ",l]},e))})]}),
-      tab==="cores"&&(0,q.jsxs)(q.Fragment,{children:[
-        (0,q.jsx)(AvPalettes,{n,r}),
-        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Personalizar por área"}),
-          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. As letras se corrigem sozinhas: sobre fundo claro ficam escuras, sobre fundo escuro ficam claras."}),
-          (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
-          (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
-            (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
-            (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
-            __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
-          (mode==="dark")!==(document.documentElement.getAttribute("data-avant-theme")==="dark")&&(0,q.jsx)("p",{className:"pzx-note",children:"Você está editando o "+(mode==="dark"?"modo escuro":"modo claro")+", mas o site está no outro modo. Troque o tema para ver o resultado."})]})]}),
-      tab==="fundo"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Papel de parede"}),
-        (0,q.jsx)("div",{className:"pz-walls",children:Gl.map(e=>(0,q.jsxs)("button",{className:"pz-wall"+(n.wallpaper===e.key?" on":""),onClick:()=>r({wallpaper:e.key}),"aria-pressed":n.wallpaper===e.key,children:[(0,q.jsxs)("span",{className:"pz-thumb wp-"+e.key,"aria-hidden":!0,children:[(0,q.jsx)("i",{}),(0,q.jsx)("i",{}),(0,q.jsx)("i",{})]}),(0,q.jsx)("strong",{children:e.label}),(0,q.jsx)("small",{children:e.hint})]},e.key))}),
-        n.wallpaper!=="nenhum"&&(0,q.jsxs)("div",{className:"pz-row",children:[(0,q.jsx)("span",{children:"Intensidade"}),(0,q.jsx)("div",{className:"seg compact",children:au.map(e=>(0,q.jsx)("button",{className:n.wallpaperIntensity===e.value?"on":"",onClick:()=>r({wallpaperIntensity:e.value}),children:e.label},e.value))})]}),
-        (0,q.jsxs)("label",{className:"pz-check",children:[(0,q.jsx)("input",{type:"checkbox",checked:!!n.reduceMotion,onChange:e=>r({reduceMotion:e.target.checked})}),"Deixar o fundo parado (sem animação)"]})]}),
-      tab==="texto"&&(0,q.jsxs)(q.Fragment,{children:[
-        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Fonte"}),(0,q.jsx)("div",{className:"pz-fonts",children:va.map(e=>(0,q.jsxs)("button",{className:"pz-font"+(n.font===e.key?" on":""),style:{fontFamily:e.css},onClick:()=>r({font:e.key}),"aria-pressed":n.font===e.key,children:[(0,q.jsx)("span",{className:"pz-aa",children:"Aa"}),e.label]},e.key))})]}),
-        (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Tamanho do texto"}),(0,q.jsx)("div",{className:"seg",children:ya.map(e=>(0,q.jsx)("button",{className:n.scale===e.value?"on":"",onClick:()=>r({scale:e.value}),style:{fontSize:12*e.value},children:e.label},e.value))})]})]})
+      (0,q.jsx)("p",{className:"pzy-sub",children:"Personalize o visual do seu espaço de trabalho. Vale só para você."}),
+      (0,q.jsx)("div",{className:"pzy-mode seg",role:"group","aria-label":"Tema",children:[["sistema","Auto"],["claro","Claro"],["escuro","Escuro"]].map(([v,l])=>(0,q.jsx)("button",{className:n.theme===v?"on":"","aria-pressed":n.theme===v,onClick:()=>r({theme:v}),children:l},v))}),
+      Row("Cor de destaque","Gradientes prontos; o último é o seu",(0,q.jsxs)("div",{className:"pzy-dots",children:[__avThemes.map(p=>(0,q.jsx)("button",{className:"pzy-dot"+(n.palette===p.key?" on":""),title:p.name+" · "+p.tip,"aria-label":p.name,"aria-pressed":n.palette===p.key,onClick:()=>r({palette:p.key,accent:p.a,accent2:p.b}),style:{background:"linear-gradient(135deg,"+p.a+","+p.b+")"}},p.key)),
+        (0,q.jsxs)("label",{className:"pzy-dot pzy-own"+(n.palette==="custom"?" on":""),title:"Monte o seu: cor 1 e cor 2",style:{background:"linear-gradient(135deg,"+A+","+B+")"},children:[(0,q.jsx)("input",{type:"color","aria-label":"Cor 1",value:A,onChange:e=>r({accent:e.target.value,palette:"custom"})})]}),
+        n.palette==="custom"&&(0,q.jsxs)("label",{className:"pzy-c2",children:["Cor 2 ",(0,q.jsx)("input",{type:"color","aria-label":"Cor 2",value:B,onChange:e=>r({accent2:e.target.value,palette:"custom"})})]})]})),
+      (0,q.jsx)("p",{className:"pzy-name",children:(__avThemes.find(z=>z.key===n.palette)||{name:"Personalizado"}).name}),
+      Row("Densidade","Espaço entre os elementos",(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:0,max:2,step:1,value:di,"aria-label":"Densidade",onChange:e=>r({density:dens[+e.target.value]})}),(0,q.jsxs)("div",{className:"pzy-ticks",children:[(0,q.jsx)("span",{children:"Compacto"}),(0,q.jsx)("span",{children:"Normal"}),(0,q.jsx)("span",{children:"Confortável"})]})]})),
+      Row("Fonte",null,(0,q.jsx)("select",{className:"select","aria-label":"Fonte",value:n.font,onChange:e=>r({font:e.target.value}),children:va.map(e=>(0,q.jsx)("option",{value:e.key,children:e.label},e.key))})),
+      Row("Tamanho do texto",null,(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:0,max:sizes.length-1,step:1,value:si,"aria-label":"Tamanho do texto",onChange:e=>r({scale:sizes[+e.target.value].value})}),(0,q.jsx)("div",{className:"pzy-ticks",children:sizes.map(e=>(0,q.jsx)("span",{children:e.label},e.value))})]})),
+      Row("Arredondamento","Cantos dos cartões e botões",(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:4,max:28,step:4,value:rad,"aria-label":"Arredondamento",onChange:e=>r({radius:+e.target.value})}),(0,q.jsxs)("div",{className:"pzy-ticks",children:[(0,q.jsx)("span",{children:"Reto"}),(0,q.jsx)("span",{children:rad+" px"}),(0,q.jsx)("span",{children:"Redondo"})]})]})),
+      (0,q.jsxs)("div",{className:"pzy-toggles",children:[
+        Toggle(!n.reduceMotion,v=>r({reduceMotion:!v}),"Animações suaves","Transições e movimentos da interface"),
+        Toggle(n.wallpaper&&n.wallpaper!=="nenhum",v=>r({wallpaper:v?"aurora":"nenhum"}),"Fundo animado","Luzes coloridas atrás da tela"),
+        Toggle(!!n.boldFocus,v=>r({boldFocus:v}),"Contorno de foco forte","Facilita navegar pelo teclado")]}),
+      (0,q.jsxs)("details",{className:"pzy-adv",open:adv,onToggle:e=>setAdv(e.target.open),children:[(0,q.jsx)("summary",{children:"Cores por área (avançado)"}),
+        (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
+        (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
+          (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
+          (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
+          __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
+        n.wallpaper&&n.wallpaper!=="nenhum"&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("h4",{className:"pzy-h4",children:"Papel de parede"}),(0,q.jsx)("div",{className:"pz-walls",children:Gl.filter(e=>e.key!=="nenhum").map(e=>(0,q.jsxs)("button",{className:"pz-wall"+(n.wallpaper===e.key?" on":""),onClick:()=>r({wallpaper:e.key}),"aria-pressed":n.wallpaper===e.key,children:[(0,q.jsxs)("span",{className:"pz-thumb wp-"+e.key,"aria-hidden":!0,children:[(0,q.jsx)("i",{}),(0,q.jsx)("i",{}),(0,q.jsx)("i",{})]}),(0,q.jsx)("strong",{children:e.label})]},e.key))})]})]})
     ]});
 }
 
@@ -1311,7 +1332,7 @@ function __avAccentFor(l,dark){const ar=((l.areas||{})[dark?"dark":"light"])||{}
 
 
 /* ===== Menu lateral v5: rótulos, aba ativa na cor da página, recolher e tema no rodapé ===== */
-(function(){if(typeof document==="undefined")return;try{if(localStorage.getItem("av:sideCompact")==="1")document.documentElement.classList.add("av-side-compact")}catch{}})();
+(function(){try{localStorage.removeItem("av:sideCompact")}catch{}})();
 function AvSideTools(){
   const{prefs:n,setPrefs:r}=Ea();
   const[compact,setCompact]=x.useState(()=>document.documentElement.classList.contains("av-side-compact"));

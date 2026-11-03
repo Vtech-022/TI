@@ -444,7 +444,7 @@ sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "
 sub("(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "(0,q.jsx)(AvPalettes,{n,r}),(0,q.jsxs)(`section`,{className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
 sub("ba={accent:`#2f6bff`,", "ba={accent:`#2563eb`,accent2:`#f5b301`,deep:`#0b0c24`,palette:`padrao`,")
 sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "__avInk(l,b),e.setProperty(`--accent2`,/^#[0-9a-f]{6}$/i.test(l.accent2)?l.accent2:`#ffc83d`),e.setProperty(`--deep`,/^#[0-9a-f]{6}$/i.test(l.deep)?l.deep:`#1b1250`),e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`")
-sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,JSON.stringify(l.areas||{}),l.font,l.scale,l.wallpaper]")
+sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,JSON.stringify(l.areas||{}),l.density,l.radius,l.boldFocus,l.font,l.scale,l.wallpaper]")
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
@@ -512,7 +512,6 @@ s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</
 # ---- cor de "Botões e destaques" por modo (Personalizar por área) ----
 s = s.replace("let e=document.documentElement.style,t=/^#[0-9a-f]{6}$/i.test(l.accent)?l.accent:ba.accent", "let e=document.documentElement.style,t=__avAccentFor(l,b)", 1)
 # ---- Menu lateral v5: ferramentas no rodapé (tema + recolher) ----
-s = s.replace("(0,q.jsx)(`div`,{className:`rail-foot`,children:", "(0,q.jsx)(AvSideTools,{}),(0,q.jsx)(`div`,{className:`rail-foot`,children:", 1)
 s = s.replace("scale:1,wallpaper:`aurora`,wallpaperIntensity:.7}", "scale:1,wallpaper:`nenhum`,wallpaperIntensity:.7}", 1)
 # ---- Barra inferior do celular alinhada ao novo menu ----
 _t0 = "(0,q.jsxs)(Ai,{to:`/`,end:!0,children:[(0,q.jsx)(ds,{\"aria-hidden\":!0}),`Início`]}),(0,q.jsxs)(Ai,{to:`/pendencias`,children:[(0,q.jsx)(hs,{\"aria-hidden\":!0}),`Tarefas`]}),"
