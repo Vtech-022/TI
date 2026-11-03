@@ -949,6 +949,41 @@ async function handleDeleteTeamPerson(request, ctx, uid) {
   return json(200, { ok: true });
 }
 
+/** Qualquer pessoa pode ADICIONAR cartões no quadro de alguém (atribuir trabalho); só o dono ou o
+ *  administrador alteram ou apagam cartões já existentes. */
+async function handleAddTeamCards(request, ctx, uid) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  validateCards(body.cards, "novos");
+  if (!body.cards.length || body.cards.length > 50) throw new ApiError(400, "cartoes", "Envie de 1 a 50 cartões.");
+  const now = new Date(ctx.now()).toISOString();
+  const cards = body.cards.map((c) => ({
+    id: String(c.id).slice(0, 80),
+    title: String(c.title ?? "").trim().slice(0, 200) || "Sem título",
+    status: ["a_fazer", "em_andamento", "concluida"].includes(c.status) ? c.status : "a_fazer",
+    due: /^\d{4}-\d{2}-\d{2}$/.test(c.due ?? "") ? c.due : null,
+    project: null,
+    notes: c.notes ? String(c.notes).slice(0, 2000) : null,
+    kind: null,
+    priority: ["baixo", "medio", "alto"].includes(c.priority) ? c.priority : null,
+    assigned_by: user.id === uid ? null : user.name,
+    created_at: now, updated_at: now, completed_at: null, attachments: [],
+  }));
+  await updateJSON(ctx.store, BOARD_KEY, (board) => {
+    board ??= { version: 0, docs: {} };
+    const doc = board.docs[uid];
+    if (!doc || doc.removed) throw new ApiError(404, "pessoa", "Essa pessoa não está no quadro da equipe.");
+    const ids = new Set((doc.items ?? []).map((i) => i.id));
+    const add = cards.filter((c) => !ids.has(c.id));
+    if ((doc.items ?? []).length + add.length > LIMITS.cards) throw new ApiError(413, "muitos_cartoes", "Há cartões demais.");
+    doc.items = [...(doc.items ?? []), ...add];
+    doc.updated_at = now;
+    board.version++;
+    return board;
+  });
+  return json(201, { ok: true, added: cards.length });
+}
+
 async function handlePutTeam(request, ctx, uid) {
   const user = await requireUser(request, ctx);
   if (user.id !== uid && user.role !== "admin") {
@@ -1195,6 +1230,7 @@ export async function handle(request, ctx) {
     }
 
     if (method === "GET" && path === "/team") return await handleGetTeam(request, ctx);
+    if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards$/))) return await handleAddTeamCards(request, ctx, m[1]);
     if (method === "PUT" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handlePutTeam(request, ctx, m[1]);
     if (method === "DELETE" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handleDeleteTeamPerson(request, ctx, m[1]);
 

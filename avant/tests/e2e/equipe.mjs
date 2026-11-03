@@ -137,6 +137,7 @@ try {
   await v.waitForTimeout(600);
   const borda = await v.locator(".panel.kpi", { hasText: nomeProj }).first().evaluate((e) => getComputedStyle(e).borderLeftColor);
   check("cor escolhida para o projeto aparece no cartão", borda === "rgb(225, 29, 72)", borda);
+  await v.waitForFunction(async () => { const p = (await (await fetch("/api/prefs", { headers: { "x-avant": "1" } })).json()).prefs?.projectColors; return p && Object.values(p).includes("#e11d48"); }, null, { timeout: 8000, polling: 500 }).catch(() => {});
   const salvo = await v.evaluate(async () => (await (await fetch("/api/prefs", { headers: { "x-avant": "1" } })).json()).prefs?.projectColors);
   check("a cor fica salva no servidor, na conta da pessoa", !!salvo && Object.values(salvo).includes("#e11d48"), JSON.stringify(salvo));
   await ir(v, "Calendário da equipe");
@@ -399,7 +400,7 @@ try {
   const cc = await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
   check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
   const ink = await v.evaluate(() => { const d = document.documentElement.getAttribute("data-avant-theme") === "dark"; const s = getComputedStyle(document.documentElement); return [d, s.getPropertyValue("--avink").trim(), s.getPropertyValue("--avbg").trim()]; });
-  check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#eef0f4" : ink[1] === "#14161b", ink.join(" "));
+  check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#f4f5f8" : ink[1] === "#14161b", ink.join(" "));
   const modo = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme") === "dark" ? "escuro" : "claro");
   await v.locator('.pzx-areas input[aria-label^="Cartões"]').fill("#fff3d6");
   await v.waitForTimeout(400);
@@ -407,7 +408,11 @@ try {
   check("cor por área (cartões) muda só aquela parte e as letras ficam escuras", ar[0] === "#fff3d6" && ar[1] === "#14161b", modo + " " + ar.join(" "));
   await v.locator('.pzx-areas input[aria-label^="Menu lateral"]').fill("#1b2a4a");
   await v.waitForTimeout(400);
-  check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#eef0f4");
+  check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#f4f5f8");
+  await v.locator('.pzx-areas li:has-text("Cartões") .pzx-ink button:has-text("Brancas")').click();
+  await v.waitForTimeout(300);
+  check("dá para forçar letras brancas ou pretas por área", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avink").trim())) === "#f4f5f8");
+  await v.locator('.pzx-areas li:has-text("Cartões") .pzx-ink button:has-text("Auto")').click();
   await shot(v, "14-paletas");
   await v.locator('.pzx-areas li:has-text("Cartões") button:has-text("Padrão")').click();
   await v.locator('.pzx-areas li:has-text("Menu lateral") button:has-text("Padrão")').click();
@@ -419,7 +424,8 @@ try {
   check("menu na ordem combinada", labels.join(" | ") === "Home | Atividades da equipe | Aguardando Terceiros | Calendário da equipe | Projetos | Minhas tarefas | Prioridades | Relatórios | Usuários", labels.join(" | "));
 
   // ---- assistente gratuito
-  await v.locator(".avo-assist").click();
+  check("assistente fica no canto inferior direito, fora da faixa de colegas", (await v.locator(".avo-strip .ava-fab, .avo-strip .avo-assist").count()) === 0 && (await v.locator(".ava-fab").count()) === 1);
+  await v.locator(".ava-fab").click();
   await v.waitForSelector(".ava-panel textarea");
   await v.locator(".ava-panel textarea").fill("Zênite, revisar a planilha da revista pra Ana, prioridade alta, amanhã às 15h");
   await v.locator('.ava-panel button:has-text("Montar tarefas")').click();
@@ -430,6 +436,14 @@ try {
   await v.locator('.ava-panel button:has-text("Criar 1 tarefa")').click();
   await v.waitForSelector(".ava-done", { timeout: 10000 }).catch(() => {});
   check("assistente cria a tarefa da equipe", (await v.locator(".ava-done").count()) === 1);
+  const onde = await v.evaluate(async () => {
+    const team = await (await fetch("/api/team", { headers: { "x-avant": "1" } })).json();
+    const naAna = team.people.some(p => /Ana Souza/.test(p.name) && p.items.some(i => i.title === "Revisar a planilha da revista" && i.status === "a_fazer"));
+    const st = await (await fetch("/api/shared-tasks", { headers: { "x-avant": "1" } })).json();
+    const noCal = st.tasks.some(x => x.title === "Revisar a planilha da revista");
+    return { naAna, noCal };
+  });
+  check("tarefa do assistente vai para Atividades da equipe (A fazer da Ana) e não para o calendário", onde.naAna && !onde.noCal, JSON.stringify(onde));
   await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
   await v.waitForTimeout(300);
   check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);

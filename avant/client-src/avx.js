@@ -592,8 +592,7 @@ function AvOnline(){
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
   return(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
     shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]},p.id)}),
-    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra}),
-    (0,q.jsx)("button",{className:"avo-assist",onClick:()=>window.dispatchEvent(new Event("prumo:assist")),title:"Assistente Zênite: escreva um pedido e ele monta as tarefas da equipe","aria-label":"Abrir assistente Zênite",children:(0,q.jsx)(AvIcon,{n:"spark",s:19})})]});
+    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
 }
 
 /* ---- Anotações do dia recolhidas (menos poluição na tela inicial) ---- */
@@ -831,11 +830,13 @@ function __avInk(l,dark){
   const rail=__avHex(ar.rail)?ar.rail:card;
   const strip1=__avHex(ar.strip)?ar.strip:h1,strip2=__avHex(ar.strip)?__avMix(ar.strip,"#000000",.85):h2;
   if(__avHex(ar.accent))st.setProperty("--accent",ar.accent);
-  const inkOn=c=>__avLum(c)>.4?["#14161b","#454a55","#6b717d"]:["#eef0f4","#b7bbc5","#868b96"];
-  const ri=inkOn(rail),si=Math.max(__avLum(strip1),__avLum(strip2))>.42?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"],bi=inkOn(bg);
+  const DARK=["#14161b","#454a55","#6b717d"],LIGHT=["#f4f5f8","#c9ccd4","#9a9fa9"];
+  const inkOn=(c,k)=>{const f=k&&ar[k+"Ink"];return f==="black"?DARK:f==="white"?LIGHT:(__avLum(c)>.4?DARK:LIGHT)};
+  const ri=inkOn(rail,"rail"),bi=inkOn(bg,"bg");
+  const sf=ar.stripInk,si=sf==="black"?["#14161b","#2f333b"]:sf==="white"?["#ffffff","#ffffffcc"]:(Math.max(__avLum(strip1),__avLum(strip2))>.42?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"]);
   [["--avrail",rail],["--avrailink",ri[0]],["--avrailink2",ri[1]],["--avstrip1",strip1],["--avstrip2",strip2],["--avstripink",si[0]],["--avstripink2",si[1]]].forEach(([k,v])=>st.setProperty(k,v));
-  const heroLight=Math.max(__avLum(h1),__avLum(h2))>.42;
-  const ci=inkOn(card);
+  const hf=ar.heroInk,heroLight=hf==="black"?!0:hf==="white"?!1:Math.max(__avLum(h1),__avLum(h2))>.42;
+  const ci=inkOn(card,"card");
   const hi=heroLight?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"];
   [["--avbg",bg],["--avcard",card],["--avhero",h1],["--avhero1",h1],["--avhero2",h2],["--avink",ci[0]],["--avink2",ci[1]],["--avink3",ci[2]],["--avbgink",bi[0]],["--avbgink2",bi[1]],["--avheroink",hi[0]],["--avheroink2",hi[1]]].forEach(([k,v])=>st.setProperty(k,v));
   root.classList.add("av-themed");
@@ -1093,30 +1094,42 @@ function __avParseOrders(text,people,base){
 function AvAssistant(){
   const[open,setOpen]=x.useState(!1);
   x.useEffect(()=>{const f=()=>setOpen(!0);window.addEventListener("prumo:assist",f);return()=>window.removeEventListener("prumo:assist",f)},[]);
-  return open?(0,q.jsx)(AvAssistantPanel,{onClose:()=>setOpen(!1)}):null;
+  return(0,q.jsxs)(q.Fragment,{children:[
+    (0,q.jsx)("button",{className:"ava-fab"+(open?" on":""),onClick:()=>setOpen(o=>!o),title:"Assistente Zênite: escreva um pedido e ele monta as atividades da equipe","aria-label":"Abrir assistente Zênite",children:(0,q.jsx)(AvIcon,{n:"spark",s:22})}),
+    open&&(0,q.jsx)(AvAssistantPanel,{onClose:()=>setOpen(!1)})]});
 }
 function AvAssistantPanel({onClose}){
   const open=!0,setOpen=v=>{v||onClose()};
   const[txt,setTxt]=x.useState(""),[items,setItems]=x.useState(null),[busy,setBusy]=x.useState(!1),[done,setDone]=x.useState(null);
   const dir=useAvDir();const{fail}=Ea();const nav=ir();
   const box=x.useRef(null);
-  x.useEffect(()=>{if(!open)return;const f=e=>{if(box.current&&!box.current.contains(e.target)&&!e.target.closest(".avo-assist"))setOpen(!1)};const k=e=>{e.key==="Escape"&&setOpen(!1)};setTimeout(()=>document.addEventListener("mousedown",f),0);document.addEventListener("keydown",k);return()=>{document.removeEventListener("mousedown",f);document.removeEventListener("keydown",k)}},[open]);
+  x.useEffect(()=>{if(!open)return;const f=e=>{if(box.current&&!box.current.contains(e.target)&&!e.target.closest(".ava-fab"))setOpen(!1)};const k=e=>{e.key==="Escape"&&setOpen(!1)};setTimeout(()=>document.addEventListener("mousedown",f),0);document.addEventListener("keydown",k);return()=>{document.removeEventListener("mousedown",f);document.removeEventListener("keydown",k)}},[open]);
   if(!open)return null;
   const people=(dir||[]).filter(p=>p&&p.id&&p.name);
   const understand=()=>{const r=__avParseOrders(txt,people);setItems(r);setDone(null)};
   const upd=(k,patch)=>setItems(a=>a.map(z=>z.key===k?{...z,...patch}:z));
+  const[cal,setCal]=x.useState(!1);
   const create=async()=>{
     setBusy(!0);let ok=0;
-    try{for(const it of items){await __avJson("/shared-tasks",{method:"POST",body:{title:it.title,assignee:it.assignee||null,visibility:"equipe",kind:it.kind||"fazer",impact:it.impact||null,due_date:it.due_date||null,due_time:it.due_time||null,origin:"tarefa"}});ok++}
+    const me=window.__avUid;const label={baixo:"baixa",medio:"média",alto:"alta"};
+    try{
+      for(const it of items){
+        const who=it.assignee||me;
+        const notes=[it.impact&&"Prioridade "+label[it.impact],it.due_time&&"Horário: "+it.due_time,!it.assignee&&"Para a equipe toda",it.kind==="validar"&&"Tipo: validar"].filter(Boolean).join(" · ")||null;
+        await __avJson("/team/"+who+"/cards",{method:"POST",body:{cards:[{id:"as"+Date.now().toString(36)+Math.random().toString(36).slice(2,8),title:it.title,status:"a_fazer",due:it.due_date||null,priority:it.impact||null,notes}]}});
+        if(cal)await __avJson("/shared-tasks",{method:"POST",body:{title:it.title,assignee:it.assignee||null,visibility:"equipe",kind:it.kind||"fazer",impact:it.impact||null,due_date:it.due_date||null,due_time:it.due_time||null,origin:"tarefa"}});
+        ok++;
+      }
+      try{(window.__AVP&&window.__AVP.teamCbs||[]).forEach(f=>f())}catch{}
       setDone(ok);setItems(null);setTxt("");}
     catch(e){fail(e)}finally{setBusy(!1)}
   };
   const imp={"":"Não informado",baixo:"Baixo",medio:"Médio",alto:"Alto"};
   return(0,q.jsxs)("section",{className:"avc-panel ava-panel",ref:box,role:"dialog","aria-label":"Assistente Zênite",children:[
-    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("span",{className:"ava-ico",children:(0,q.jsx)(AvIcon,{n:"spark",s:18})}),(0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:"Assistente Zênite"}),(0,q.jsx)("small",{children:"Escreva o pedido e ele monta as tarefas da equipe"})]})]}),
+    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("span",{className:"ava-ico",children:(0,q.jsx)(AvIcon,{n:"spark",s:18})}),(0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:"Assistente Zênite"}),(0,q.jsx)("small",{children:"Escreva o pedido e ele monta as atividades da equipe"})]})]}),
     (0,q.jsx)("button",{className:"avc-close",onClick:()=>setOpen(!1),"aria-label":"Fechar assistente",children:"×"}),
     (0,q.jsxs)("div",{className:"ava-body",children:[
-      done!==null&&(0,q.jsxs)("div",{className:"ava-done",children:[(0,q.jsx)("strong",{children:done+(done===1?" tarefa criada.":" tarefas criadas.")}),(0,q.jsx)("span",{children:"Já aparecem para os responsáveis, no calendário da equipe e na agenda do dia."}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{nav("/calendario-equipe");setOpen(!1)},children:"Ver no calendário"})]}),
+      done!==null&&(0,q.jsxs)("div",{className:"ava-done",children:[(0,q.jsx)("strong",{children:done+(done===1?" tarefa criada.":" tarefas criadas.")}),(0,q.jsx)("span",{children:"Já aparecem em Atividades da equipe, na coluna “A fazer” de cada responsável."}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{nav("/equipe");setOpen(!1)},children:"Ver em Atividades da equipe"})]}),
       !items&&(0,q.jsxs)(q.Fragment,{children:[
         (0,q.jsx)("textarea",{className:"input ava-in",rows:5,value:txt,"aria-label":"Pedido para o assistente",placeholder:"Ex.: Revisar as planilhas da revista pra Aysla e o Bernardo, prioridade alta, até sexta às 15h\nUma tarefa por linha também funciona.",onChange:e=>setTxt(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))understand()}}),
         (0,q.jsx)("p",{className:"ava-tip",children:"Entende: nomes da equipe, “equipe toda”, prioridade alta/média/baixa ou urgente, hoje, amanhã, dia da semana, 05/11, “dia 5”, horário (15h, 14:30) e “validar”."}),
@@ -1131,6 +1144,7 @@ function AvAssistantPanel({onClose}){
               (0,q.jsx)("input",{className:"input",type:"date","aria-label":"Prazo",value:it.due_date,onChange:e=>upd(it.key,{due_date:e.target.value})}),
               (0,q.jsx)("input",{className:"input",type:"time","aria-label":"Horário",value:it.due_time,onChange:e=>upd(it.key,{due_time:e.target.value})}),
               (0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setItems(a=>a.filter(z=>z.key!==it.key)),"aria-label":"Remover",children:"Remover"})]})]},it.key))}),
+          (0,q.jsxs)("label",{className:"pz-check ava-cal",children:[(0,q.jsx)("input",{type:"checkbox",checked:cal,onChange:e=>setCal(e.target.checked)}),"Também colocar no calendário da equipe"]}),
           (0,q.jsxs)("div",{className:"ava-actions",children:[(0,q.jsx)("button",{className:"btn",onClick:()=>setItems(null),children:"Voltar e editar"}),(0,q.jsx)("button",{className:"btn primary",disabled:busy||items.some(z=>z.title.trim().length<2),onClick:create,children:busy?"Criando…":"Criar "+items.length+(items.length===1?" tarefa":" tarefas")})]})]}))]})]});
 }
 
@@ -1176,11 +1190,12 @@ function AvPersonalize({open,onClose}){
       tab==="cores"&&(0,q.jsxs)(q.Fragment,{children:[
         (0,q.jsx)(AvPalettes,{n,r}),
         (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Personalizar por área"}),
-          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. As letras se ajustam sozinhas para continuar legíveis."}),
+          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. Em cada área, as letras podem ficar no automático ou sempre pretas ou brancas."}),
           (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
           (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
             (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
             (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
+            k!=="accent"&&(0,q.jsx)("div",{className:"seg compact pzx-ink",role:"group","aria-label":"Cor das letras em "+l,children:[["auto","Auto"],["black","Pretas"],["white","Brancas"]].map(([v,lb])=>(0,q.jsx)("button",{className:(cur[k+"Ink"]||"auto")===v?"on":"","aria-pressed":(cur[k+"Ink"]||"auto")===v,title:"Letras "+lb.toLowerCase()+" em "+l,onClick:()=>setArea(k+"Ink",v==="auto"?null:v),children:lb},v))}),
             __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
           (mode==="dark")!==(document.documentElement.getAttribute("data-avant-theme")==="dark")&&(0,q.jsx)("p",{className:"pzx-note",children:"Você está editando o "+(mode==="dark"?"modo escuro":"modo claro")+", mas o site está no outro modo. Troque o tema para ver o resultado."})]})]}),
       tab==="fundo"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Papel de parede"}),

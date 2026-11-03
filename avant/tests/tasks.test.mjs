@@ -212,3 +212,22 @@ test("administrador remove do quadro/ranking os cartões de conta excluída (e s
   assert.ok(ids.includes(ana.data.user.id));
   assert.equal((await admin.c.del(`/team/${bid}`)).status, 404);
 });
+
+test("assistente: qualquer pessoa adiciona cartões no quadro de um colega, mas não altera os existentes", async () => {
+  const { makeCtx: mk, register: reg, body: bd } = await import("./helpers.mjs");
+  const ctx = mk();
+  await reg(ctx, "Chefe Admin");
+  const ana = await reg(ctx, "Ana Souza");
+  const beto = await reg(ctx, "Beto Lima");
+  const B = beto.data.user.id;
+  const r = await ana.c.post(`/team/${B}/cards`, { cards: [{ id: "c1", title: "Revisar planilha", due: "2026-11-06", priority: "alto", notes: "15:00" }] });
+  assert.equal(r.status, 201);
+  const team = await bd(await beto.c.get("/team"));
+  const card = team.people.find((p) => p.id === B).items.find((i) => i.id === "c1");
+  assert.equal(card.title, "Revisar planilha");
+  assert.equal(card.status, "a_fazer");
+  assert.equal(card.assigned_by, "Ana Souza");
+  assert.equal(card.priority, "alto");
+  // Ana não pode reescrever o quadro do Beto
+  assert.equal((await ana.c.put(`/team/${B}`, { items: [] })).status, 403);
+});

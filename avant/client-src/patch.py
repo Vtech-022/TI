@@ -224,7 +224,7 @@ async function __avLoadPrefs(){
 cut("var cz=null,lz=null;", "async function bz(e){let t=await crypto.subtle.digest", STORAGE.strip() + "\n")
 sub("await oz(`file:${o}`)?!0:await sz(", "await __avHas(`file:${o}`)?!0:await sz(")
 sub("storage_path:d?`navegador:${o}`:`indisponivel`", "storage_path:d?`servidor:${o}`:`indisponivel`")
-sub("localStorage.setItem(Ca(),JSON.stringify(n))", "localStorage.setItem(Ca(),JSON.stringify(n)),window.__avSavePrefs&&window.__avSavePrefs(n)")
+sub("try{localStorage.setItem(Ca(),JSON.stringify(n))}catch{}", "try{localStorage.setItem(Ca(),JSON.stringify(n))}catch{}try{window.__avSavePrefs&&window.__avSavePrefs(n)}catch{}")
 
 # ---------------------------------------------------------------------------------------
 # 2. Atividades da equipe: quadro compartilhado no servidor
