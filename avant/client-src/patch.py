@@ -218,7 +218,12 @@ async function __avLoadPrefs(){
     }
   }catch{}
   let t=null;
-  window.__avSavePrefs=p=>{clearTimeout(t);t=setTimeout(()=>__avJson("/prefs",{method:"PUT",body:p}).catch(()=>{}),800)};
+  let pendP=null;
+  const flushP=keep=>{if(!pendP)return;const body=pendP;pendP=null;clearTimeout(t);
+    if(keep){try{fetch("/api/prefs",{method:"PUT",keepalive:!0,credentials:"same-origin",headers:{"x-avant":"1","content-type":"application/json"},body:JSON.stringify(body)})}catch{}return}
+    __avJson("/prefs",{method:"PUT",body}).catch(()=>{pendP=pendP||body;clearTimeout(t);t=setTimeout(()=>flushP(!1),3000)})};
+  window.__avSavePrefs=p=>{pendP=p;clearTimeout(t);t=setTimeout(()=>flushP(!1),400)};
+  addEventListener("pagehide",()=>flushP(!0));document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushP(!0)});
 }
 '''
 cut("var cz=null,lz=null;", "async function bz(e){let t=await crypto.subtle.digest", STORAGE.strip() + "\n")
@@ -443,7 +448,7 @@ sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.c
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
 sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
-sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnimationFrame(g)}", "g=e=>{p=requestAnimationFrame(g);if(e-(g.l||0)<32)return;g.l=e;let t=Math.min(.1,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t)}")
+sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnimationFrame(g)}", "g=e=>{p=requestAnimationFrame(g);if(e-(g.l||0)<40||window.__avScrolling)return;g.l=e;let t=Math.min(.1,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t)}")
 
 # ---- Agenda de hoje: compromissos + tarefas com prazo hoje (minhas e da equipe) ----
 sub('children:h.length?(0,q.jsx)(`ul`,{className:`today-events`,children:h.map(e=>(0,q.jsxs)(`li`,{className:`clickable`,onClick:()=>i(`/agenda?evento=${e.id}`),children:[(0,q.jsx)(`span`,{className:`te-time`,children:e.all_day?`Dia todo`:fa(e.start_at)}),(0,q.jsxs)(`span`,{children:[(0,q.jsx)(`strong`,{children:e.title}),e.location&&(0,q.jsxs)(`small`,{className:`muted`,children:[` · `,e.location]})]})]},e.id))}):(0,q.jsx)(`p`,{className:`small muted`,style:{padding:`4px 20px 16px`},children:`Nenhum compromisso na agenda hoje.`})', 'children:(0,q.jsx)(AvAgendaToday,{events:h,mine:u.dueToday,today:c,go:i})')

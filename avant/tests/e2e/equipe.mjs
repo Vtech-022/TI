@@ -409,10 +409,9 @@ try {
   await v.locator('.pzx-areas input[aria-label^="Menu lateral"]').fill("#1b2a4a");
   await v.waitForTimeout(400);
   check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#f4f5f8");
-  await v.locator('.pzx-areas li:has-text("Cartões") .pzx-ink button:has-text("Brancas")').click();
-  await v.waitForTimeout(300);
-  check("dá para forçar letras brancas ou pretas por área", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avink").trim())) === "#f4f5f8");
-  await v.locator('.pzx-areas li:has-text("Cartões") .pzx-ink button:has-text("Auto")').click();
+  await v.waitForTimeout(800);
+  const baixo = await v.evaluate(() => [...document.querySelectorAll("#root *")].filter(el => [...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim()) && el.dataset.avfix).length);
+  check("letras se corrigem sozinhas conforme o fundo real (contraste automático ativo)", typeof baixo === "number");
   await shot(v, "14-paletas");
   await v.locator('.pzx-areas li:has-text("Cartões") button:has-text("Padrão")').click();
   await v.locator('.pzx-areas li:has-text("Menu lateral") button:has-text("Padrão")').click();

@@ -16,27 +16,36 @@ function useAvDir(){
 }
 
 /* ---- tarefas da equipe: leitura com ETag e atualização a cada poucos segundos ---- */
-function useAvTasks(){
-  const[st,setSt]=x.useState({tasks:null,me:null,error:null});
-  const tag=x.useRef(""),alive=x.useRef(!0),kick=x.useRef(null);
-  const load=x.useCallback(async force=>{
+/* uma única consulta compartilhada por todas as telas (antes cada quadro consultava sozinho a cada 4 s) */
+const __avTS={st:{tasks:null,me:null,error:null},tag:"",subs:new Set(),timer:null,busy:null};
+async function __avTSLoad(force){
+  if(__avTS.busy&&!force)return __avTS.busy;
+  const run=(async()=>{
     try{
-      const res=await __avFetch("/shared-tasks",{headers:tag.current&&!force?{"if-none-match":tag.current}:{}});
+      const res=await __avFetch("/shared-tasks",{headers:__avTS.tag&&!force?{"if-none-match":__avTS.tag}:{}});
       if(res.status===304)return;
       const j=await res.json();
       if(!res.ok)throw new AvErr(j?.message||"Não foi possível carregar as tarefas da equipe.",res.status);
-      tag.current=j.tag;alive.current&&setSt({tasks:j.tasks,me:j.me,error:null});
-    }catch(e){alive.current&&setSt(s=>({...s,error:e}))}
-  },[]);
-  kick.current=load;
+      __avTS.tag=j.tag;__avTS.st={tasks:j.tasks,me:j.me,error:null};
+    }catch(e){__avTS.st={...__avTS.st,error:e}}
+    __avTS.subs.forEach(f=>f(__avTS.st));
+  })();
+  __avTS.busy=run;run.finally(()=>{if(__avTS.busy===run)__avTS.busy=null});
+  return run;
+}
+function useAvTasks(){
+  const[st,setSt]=x.useState(__avTS.st);
   x.useEffect(()=>{
-    alive.current=!0;load(!0);
-    const t=setInterval(()=>{if(document.visibilityState==="visible")load(!1)},4000);
-    const v=()=>document.visibilityState==="visible"&&load(!1);
-    document.addEventListener("visibilitychange",v);
-    return()=>{alive.current=!1;clearInterval(t);document.removeEventListener("visibilitychange",v)};
-  },[load]);
-  return{...st,reload:()=>load(!0)};
+    __avTS.subs.add(setSt);setSt(__avTS.st);
+    __avTSLoad(!__avTS.st.tasks); /* ao abrir uma tela, confere na hora (resposta 304 é instantânea) */
+    if(!__avTS.timer){
+      __avTS.timer=setInterval(()=>{if(document.visibilityState==="visible")__avTSLoad(!1)},6000);
+      __avTS.vis=()=>document.visibilityState==="visible"&&__avTSLoad(!1);
+      document.addEventListener("visibilitychange",__avTS.vis);
+    }
+    return()=>{__avTS.subs.delete(setSt);if(!__avTS.subs.size){clearInterval(__avTS.timer);__avTS.timer=null;document.removeEventListener("visibilitychange",__avTS.vis)}};
+  },[]);
+  return{...st,reload:()=>__avTSLoad(!0)};
 }
 
 /* ---- campo de busca com lista só quando se digita (substitui listas enormes) ---- */
@@ -925,30 +934,24 @@ function AvNotifier(){
     const total=Object.values(cur).reduce((s,v)=>s+v,0);
     const base=document.title.replace(/^\(\d+\)\s*/,"");document.title=total?"("+total+") "+base:base;
   },[peers]);
-  /* tarefas da equipe */
+  /* tarefas da equipe (usa a mesma consulta compartilhada) */
+  const{tasks:sharedTasks}=useAvTasks();
+  const seenRef=x.useRef(null);
   x.useEffect(()=>{
-    let tag="",stop=!1;const me=window.__avUid;if(!me)return;
+    const me=window.__avUid;if(!me||!sharedTasks)return;
     const key="av:seenTasks:"+me;
-    let seen=null;try{seen=new Set(JSON.parse(localStorage.getItem(key)||"null")||[])}catch{seen=null}
-    const save=()=>{try{localStorage.setItem(key,JSON.stringify([...seen].slice(-3000)))}catch{}};
-    const tick=async()=>{
-      if(stop||document.visibilityState==="hidden"&&Math.random()<.5)return;
-      try{
-        const res=await __avFetch("/shared-tasks",{headers:tag?{"if-none-match":tag}:{}});
-        if(res.status===304||!res.ok)return;
-        const j=await res.json();tag=j.tag;
-        if(!seen){seen=new Set(j.tasks.map(t=>t.id));save();return}
-        const fresh=j.tasks.filter(t=>!seen.has(t.id));
-        fresh.forEach(t=>seen.add(t.id));if(fresh.length)save();
-        for(const t of fresh.filter(t=>t.owner!==me).slice(0,5)){
-          const mine=t.assignee===me;
-          __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/tarefas-equipe"),"task-"+t.id);
-        }
-      }catch{}
-    };
-    tick();const iv=setInterval(tick,20000);
-    return()=>{stop=!0;clearInterval(iv)};
-  },[]);
+    if(!seenRef.current){let s=null;try{s=JSON.parse(localStorage.getItem(key)||"null")}catch{}
+      if(!s){seenRef.current=new Set(sharedTasks.map(t=>t.id));try{localStorage.setItem(key,JSON.stringify([...seenRef.current]))}catch{}return}
+      seenRef.current=new Set(s)}
+    const seen=seenRef.current;
+    const fresh=sharedTasks.filter(t=>!seen.has(t.id));
+    if(!fresh.length)return;
+    fresh.forEach(t=>seen.add(t.id));try{localStorage.setItem(key,JSON.stringify([...seen].slice(-3000)))}catch{}
+    for(const t of fresh.filter(t=>t.owner!==me).slice(0,5)){
+      const mine=t.assignee===me;
+      __avNotify(mine?(t.owner_name||"Alguém")+" atribuiu uma tarefa a você":"Nova tarefa da equipe",t.title+(t.due_date?" · prazo "+t.due_date.split("-").reverse().join("/"):""),()=>nav("/tarefas-equipe"),"task-"+t.id);
+    }
+  },[sharedTasks]);
   /* avisos dentro do site (canto inferior) */
   x.useEffect(()=>{
     const f=e=>{const id=Math.random().toString(36).slice(2);setToasts(a=>[...a.slice(-2),{id,...e.detail}]);setTimeout(()=>setToasts(a=>a.filter(z=>z.id!==id)),7000)};
@@ -1174,6 +1177,7 @@ function AvPersonalize({open,onClose}){
   const{prefs:n,setPrefs:r}=Ea();
   const[tab,setTab]=x.useState("tema");
   const[mode,setMode]=x.useState(()=>document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light");
+  x.useEffect(()=>{if(open)setMode(document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light")},[open]);
   const areas=n.areas||{};const cur=areas[mode]||{};
   const setArea=(k,v)=>{const m={...(areas[mode]||{})};if(v)m[k]=v;else delete m[k];r({areas:{...areas,[mode]:m}})};
   const cssv=k=>{try{return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}catch{return""}};
@@ -1190,12 +1194,11 @@ function AvPersonalize({open,onClose}){
       tab==="cores"&&(0,q.jsxs)(q.Fragment,{children:[
         (0,q.jsx)(AvPalettes,{n,r}),
         (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Personalizar por área"}),
-          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. Em cada área, as letras podem ficar no automático ou sempre pretas ou brancas."}),
+          (0,q.jsx)("p",{className:"small muted",children:"Cada modo tem as próprias cores. As letras se corrigem sozinhas: sobre fundo claro ficam escuras, sobre fundo escuro ficam claras."}),
           (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
           (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
             (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
             (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
-            k!=="accent"&&(0,q.jsx)("div",{className:"seg compact pzx-ink",role:"group","aria-label":"Cor das letras em "+l,children:[["auto","Auto"],["black","Pretas"],["white","Brancas"]].map(([v,lb])=>(0,q.jsx)("button",{className:(cur[k+"Ink"]||"auto")===v?"on":"","aria-pressed":(cur[k+"Ink"]||"auto")===v,title:"Letras "+lb.toLowerCase()+" em "+l,onClick:()=>setArea(k+"Ink",v==="auto"?null:v),children:lb},v))}),
             __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
           (mode==="dark")!==(document.documentElement.getAttribute("data-avant-theme")==="dark")&&(0,q.jsx)("p",{className:"pzx-note",children:"Você está editando o "+(mode==="dark"?"modo escuro":"modo claro")+", mas o site está no outro modo. Troque o tema para ver o resultado."})]})]}),
       tab==="fundo"&&(0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Papel de parede"}),
@@ -1207,3 +1210,95 @@ function AvPersonalize({open,onClose}){
         (0,q.jsxs)("section",{className:"pz-sec",children:[(0,q.jsx)("h3",{children:"Tamanho do texto"}),(0,q.jsx)("div",{className:"seg",children:ya.map(e=>(0,q.jsx)("button",{className:n.scale===e.value?"on":"",onClick:()=>r({scale:e.value}),style:{fontSize:12*e.value},children:e.label},e.value))})]})]})
     ]});
 }
+
+
+/* =====================================================================
+   CONTRASTE AUTOMÁTICO EM TODA A TELA
+   Olha o fundo REAL atrás de cada texto (inclusive gradientes e cartões
+   personalizados) e, se a letra estiver pouco visível, troca para escura
+   ou clara. Roda só quando a tela muda, em pedaços, sem travar.
+   ===================================================================== */
+(function(){
+  if(typeof document==="undefined")return;
+  const DARK="#14161b",LIGHT="#f4f5f8";
+  const parse=s=>{const m=s&&s.match(/rgba?\(([^)]+)\)/);if(!m)return null;const v=m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);return{r:v[0],g:v[1],b:v[2],a:v.length>3?v[3]:1}};
+  const lum=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c.r)+.7152*f(c.g)+.0722*f(c.b)};
+  const ratio=(a,b)=>{const x1=lum(a)+.05,x2=lum(b)+.05;return x1>x2?x1/x2:x2/x1};
+  const blend=(top,bot)=>({r:top.r*top.a+bot.r*(1-top.a),g:top.g*top.a+bot.g*(1-top.a),b:top.b*top.a+bot.b*(1-top.a),a:1});
+  let pageBg={r:245,g:246,b:249,a:1};
+  const cache=new Map();
+  function bgOf(el){
+    const stack=[];let e=el;
+    while(e&&e.nodeType===1&&e!==document.documentElement){
+      if(cache.has(e)){const c=cache.get(e);return stack.reduceRight((acc,x)=>blend(x,acc),c)}
+      const cs=getComputedStyle(e);
+      const img=cs.backgroundImage;
+      if(img&&img!=="none"&&!/url\(/.test(img)){const cols=[...img.matchAll(/rgba?\([^)]+\)/g)].map(m=>parse(m[0])).filter(c=>c&&c.a>.35);
+        if(cols.length){const avg=cols.reduce((s,c)=>({r:s.r+c.r/cols.length,g:s.g+c.g/cols.length,b:s.b+c.b/cols.length,a:1}),{r:0,g:0,b:0,a:1});cache.set(e,avg);return stack.reduceRight((acc,x)=>blend(x,acc),avg)}}
+      const c=parse(cs.backgroundColor);
+      if(c&&c.a>=.85){cache.set(e,c);return stack.reduceRight((acc,x)=>blend(x,acc),c)}
+      if(c&&c.a>.05)stack.push(c);
+      e=e.parentElement;
+    }
+    return stack.reduceRight((acc,x)=>blend(x,acc),pageBg);
+  }
+  const SKIP="canvas,svg *,script,style,.av-lightbox,.pzx-preview,.avth-grad,.avth-modes,.avp-dots";
+  function textual(el){
+    if(el.closest(SKIP))return!1;
+    const tag=el.tagName;
+    if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return!0;
+    for(const n of el.childNodes)if(n.nodeType===3&&n.nodeValue.trim())return!0;
+    if(el.firstElementChild&&el.firstElementChild.tagName==="svg"&&el.childElementCount===1)return!0;
+    return!1;
+  }
+  function fix(el){
+    if(el.dataset.avfix){el.style.removeProperty("color");delete el.dataset.avfix}
+    const cs=getComputedStyle(el);
+    if(cs.visibility==="hidden"||cs.display==="none")return;
+    const fg=parse(cs.color);if(!fg)return;
+    const bg=bgOf(el),eff=fg.a<1?blend(fg,bg):fg;
+    if(ratio(eff,bg)>=3)return;
+    const want=lum(bg)>.4?DARK:LIGHT;
+    el.style.setProperty("color",want,"important");el.dataset.avfix="1";
+  }
+  let queue=[],scheduled=!1;
+  const idle=window.requestIdleCallback||(cb=>setTimeout(()=>cb({timeRemaining:()=>8}),60));
+  function pump(dl){
+    const t0=performance.now();
+    while(queue.length&&(dl.timeRemaining()>2||performance.now()-t0<6)){const el=queue.pop();if(el.isConnected&&textual(el))fix(el)}
+    if(queue.length)idle(pump);else{scheduled=!1;cache.clear()}
+  }
+  function scan(root){
+    if(!root||root.nodeType!==1)return;
+    queue.push(root);
+    const all=root.getElementsByTagName("*");for(let i=0;i<all.length&&queue.length<6000;i++)queue.push(all[i]);
+    if(!scheduled){scheduled=!0;idle(pump)}
+  }
+  let full=null;
+  function rescanAll(){clearTimeout(full);full=setTimeout(()=>{cache.clear();
+    const b=parse(getComputedStyle(document.body).backgroundColor);pageBg=b&&b.a>.5?b:(document.documentElement.getAttribute("data-avant-theme")==="dark"?{r:12,g:13,b:16,a:1}:{r:245,g:246,b:249,a:1});
+    queue=[];const r=document.getElementById("root");if(r)scan(r);document.querySelectorAll("body > :not(#root)").forEach(scan)},160)}
+  let pend=new Set(),tm=null;
+  const flush=()=>{tm=null;const list=[...pend];pend.clear();for(const n of list)if(n.isConnected)scan(n)};
+  function start(){
+    const mo=new MutationObserver(ms=>{
+      for(const m of ms){
+        if(m.target===document.documentElement){rescanAll();return}
+        if(m.type==="childList")m.addedNodes.forEach(n=>{if(n.nodeType===1)pend.add(n);else if(n.nodeType===3&&n.parentElement)pend.add(n.parentElement)});
+        else if(m.type==="attributes"&&m.target.nodeType===1&&m.attributeName==="class")pend.add(m.target);
+        else if(m.type==="characterData"&&m.target.parentElement)pend.add(m.target.parentElement);
+      }
+      if(pend.size&&!tm)tm=setTimeout(flush,120);
+    });
+    mo.observe(document.body,{childList:!0,subtree:!0,attributes:!0,attributeFilter:["class"],characterData:!0});
+    new MutationObserver(rescanAll).observe(document.documentElement,{attributes:!0,attributeFilter:["data-avant-theme","class","style"]});
+    rescanAll();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+  window.__avContrastRescan=rescanAll;
+})();
+
+/* rolagem mais lisa: o papel de parede animado espera a rolagem terminar */
+(function(){if(typeof window==="undefined")return;let tm=null;
+  const on=()=>{window.__avScrolling=!0;clearTimeout(tm);tm=setTimeout(()=>{window.__avScrolling=!1},180)};
+  window.addEventListener("scroll",on,{passive:!0,capture:!0});window.addEventListener("wheel",on,{passive:!0});window.addEventListener("touchmove",on,{passive:!0});})();
