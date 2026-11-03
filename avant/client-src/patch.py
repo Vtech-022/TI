@@ -509,6 +509,8 @@ s = s.replace("Central Inteligente de Gestão", "Central de Acompanhamento do Tr
 s = s.replace("<title>Zênite</title>", "<title>Zênite · Central de Trabalho</title>")
 
 # título da aba
+# ---- cor de "Botões e destaques" por modo (Personalizar por área) ----
+s = s.replace("let e=document.documentElement.style,t=/^#[0-9a-f]{6}$/i.test(l.accent)?l.accent:ba.accent", "let e=document.documentElement.style,t=__avAccentFor(l,b)", 1)
 # ---- Personalizar reorganizado ----
 _a = s.index("function ou({open:e,onClose:t}){"); _b = s.index("function ", _a + 30)
 s = s[:_a] + "function ou({open:e,onClose:t}){return(0,q.jsx)(AvPersonalize,{open:e,onClose:t})}" + s[_b:]

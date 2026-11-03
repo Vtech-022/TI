@@ -1221,7 +1221,8 @@ function AvPersonalize({open,onClose}){
 (function(){
   if(typeof document==="undefined")return;
   const DARK="#14161b",LIGHT="#f4f5f8";
-  const parse=s=>{const m=s&&s.match(/rgba?\(([^)]+)\)/);if(!m)return null;const v=m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);return{r:v[0],g:v[1],b:v[2],a:v.length>3?v[3]:1}};
+  const parse=s=>{if(!s)return null;let m=s.match(/rgba?\(([^)]+)\)/);if(m){const v=m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);return{r:v[0],g:v[1],b:v[2],a:v.length>3?v[3]:1}}
+    m=s.match(/color\(srgb ([^)]+)\)/);if(m){const v=m[1].split(/[\s\/]+/).filter(Boolean).map(Number);return{r:v[0]*255,g:v[1]*255,b:v[2]*255,a:v.length>3?v[3]:1}}return null};
   const lum=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c.r)+.7152*f(c.g)+.0722*f(c.b)};
   const ratio=(a,b)=>{const x1=lum(a)+.05,x2=lum(b)+.05;return x1>x2?x1/x2:x2/x1};
   const blend=(top,bot)=>({r:top.r*top.a+bot.r*(1-top.a),g:top.g*top.a+bot.g*(1-top.a),b:top.b*top.a+bot.b*(1-top.a),a:1});
@@ -1233,7 +1234,7 @@ function AvPersonalize({open,onClose}){
       if(cache.has(e)){const c=cache.get(e);return stack.reduceRight((acc,x)=>blend(x,acc),c)}
       const cs=getComputedStyle(e);
       const img=cs.backgroundImage;
-      if(img&&img!=="none"&&!/url\(/.test(img)){const cols=[...img.matchAll(/rgba?\([^)]+\)/g)].map(m=>parse(m[0])).filter(c=>c&&c.a>.35);
+      if(img&&img!=="none"&&!/url\(/.test(img)){const cols=[...img.matchAll(/rgba?\([^)]+\)|color\(srgb [^)]+\)/g)].map(m=>parse(m[0])).filter(c=>c&&c.a>.35);
         if(cols.length){const avg=cols.reduce((s,c)=>({r:s.r+c.r/cols.length,g:s.g+c.g/cols.length,b:s.b+c.b/cols.length,a:1}),{r:0,g:0,b:0,a:1});cache.set(e,avg);return stack.reduceRight((acc,x)=>blend(x,acc),avg)}}
       const c=parse(cs.backgroundColor);
       if(c&&c.a>=.85){cache.set(e,c);return stack.reduceRight((acc,x)=>blend(x,acc),c)}
@@ -1302,3 +1303,5 @@ function AvPersonalize({open,onClose}){
 (function(){if(typeof window==="undefined")return;let tm=null;
   const on=()=>{window.__avScrolling=!0;clearTimeout(tm);tm=setTimeout(()=>{window.__avScrolling=!1},180)};
   window.addEventListener("scroll",on,{passive:!0,capture:!0});window.addEventListener("wheel",on,{passive:!0});window.addEventListener("touchmove",on,{passive:!0});})();
+
+function __avAccentFor(l,dark){const ar=((l.areas||{})[dark?"dark":"light"])||{};const h=/^#[0-9a-f]{6}$/i;return h.test(ar.accent||"")?ar.accent:h.test(l.accent||"")?l.accent:"#2563eb"}

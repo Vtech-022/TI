@@ -757,3 +757,17 @@ html:root .avc-head small{color:var(--avstripink2)!important}
 /* letras sempre visíveis no modo claro: textos fracos ganham mais contraste */
 :root:not([data-avant-theme=dark]){--text-3:var(--avink3,#5f6570)}
 :root:not([data-avant-theme=dark]) .muted,:root:not([data-avant-theme=dark]) .small.muted{color:var(--avink2,#454a55)}
+
+/* ===== Modo claro: contornos visíveis (cartões, campos, menu, botões) ===== */
+:root:not([data-avant-theme=dark]){--line:color-mix(in srgb,var(--avcard,#fff) 80%,#1b2333 16%);--line-strong:color-mix(in srgb,var(--avcard,#fff) 66%,#1b2333 30%)}
+:root:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.notes-card,.modal,.avc-panel,.kanban-col,.tcol,.avt-card,.avth,.pz-wall,.pz-font):not(.kpi){border:1px solid var(--line)!important;box-shadow:0 1px 2px #1b23330f,0 4px 14px #1b23330d!important}
+:root:not([data-avant-theme=dark]) :is(input.input,.select,textarea.input,textarea,.quick-add,input[type=date],input[type=time],input[type=search]){border:1px solid var(--line-strong)!important}
+html:root:not([data-avant-theme=dark]) .rail .rail-item:not(.active){border:1px solid color-mix(in srgb,var(--avrail) 78%,#1b2333 22%)!important;box-shadow:0 1px 2px #1b233314}
+html:root:not([data-avant-theme=dark]) .rail{border:1px solid color-mix(in srgb,var(--avrail) 80%,#1b2333 18%)!important}
+:root:not([data-avant-theme=dark]) .btn:not(.primary):not(.ghost){border:1px solid var(--line-strong)!important}
+:root:not([data-avant-theme=dark]) .seg{border:1px solid var(--line-strong)!important}
+:root:not([data-avant-theme=dark]) .chip,:root:not([data-avant-theme=dark]) .avatar-chip,:root:not([data-avant-theme=dark]) .member-chip{border:1px solid var(--line-strong)!important}
+:root:not([data-avant-theme=dark]) :is(.tlist,.tcard,.person-chip,.avc2-cell,.avc2-day,.avcal-cell){border:1px solid var(--line)!important}
+:root:not([data-avant-theme=dark]) .tcard{box-shadow:0 1px 2px #1b233314!important}
+
+:root:not([data-avant-theme=dark]) .panel.kpi{border-top:1px solid var(--line)!important;border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}
