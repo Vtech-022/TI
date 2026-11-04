@@ -394,7 +394,7 @@ try {
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
   await v.waitForSelector(".pzy-dots");
-  check("painel Temas organizado: Auto/Claro/Escuro, cores, densidade, fonte, texto, cantos e chaves", (await v.locator(".pzy-mode button").allInnerTexts()).join(",") === "Auto,Claro,Escuro" && (await v.locator(".pzy-row").count()) === 6 && (await v.locator(".pzy-tg").count()) === 3);
+  check("painel Temas organizado: Auto/Claro/Escuro, cores, densidade, fonte, texto, cantos e chaves", (await v.locator(".pzy-mode button").allInnerTexts()).join(",") === "Auto,Claro,Escuro" && (await v.locator(".pzy-row").count()) === 6 && (await v.locator(".pzy-tg").count()) === 2 && (await v.locator(".pzw-it").count()) === 16);
   await v.locator('button[aria-label="Barra de colegas: Azul-marinho"]').click();
   await v.waitForTimeout(400);
   check("cor da barra de colegas pode ser trocada", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avfriends").trim())) === "#14306f");

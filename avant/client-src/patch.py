@@ -555,6 +555,12 @@ sub("children:[(0,q.jsxs)(`div`,{className:`tlabels`,",
 sub("(0,q.jsx)(md,{m:t,size:24})]})]},`${t.id}-${e.id}`)",
     "(0,q.jsx)(md,{m:t,size:24})]}),(0,q.jsx)(AvCardAttend,{it:e,m:t,me:c,own:i,busy:T,go:AT})]},`${t.id}-${e.id}`)")
 
+
+# Papéis de parede: novos estilos no seletor e no desenho
+sub("l={palette:[c,Jl(c,45),Jl(c,-40),Jl(c,160)],dark:n,alpha:r,mouse:", "l={palette:[c,Jl(c,45),Jl(c,-40),Jl(c,160)],dark:n,alpha:Math.min(1.7,r*(n?1.2:1.9)),mouse:")
+sub("{key:`formas`,label:`Formas flutuantes`,hint:`Figuras geométricas girando`}]", "{key:`formas`,label:`Formas flutuantes`,hint:`Figuras geométricas girando`},...__avWallNew().map(({key,label,hint})=>({key,label,hint}))]")
+sub("var nu={aurora:Xl,constelacao:Zl,bolhas:Ql,ondas:$l,estrelas:eu,formas:tu};", "var nu={aurora:Xl,constelacao:Zl,bolhas:Ql,ondas:$l,estrelas:eu,formas:tu,...Object.fromEntries(__avWallNew().map(w=>[w.key,w.fn]))};")
+
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)
 OUT.parent.mkdir(parents=True, exist_ok=True)

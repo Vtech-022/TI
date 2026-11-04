@@ -1228,15 +1228,15 @@ function AvPersonalize({open,onClose}){
       Row("Arredondamento","Cantos dos cartões e botões",(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:4,max:28,step:4,value:rad,"aria-label":"Arredondamento",onChange:e=>r({radius:+e.target.value})}),(0,q.jsxs)("div",{className:"pzy-ticks",children:[(0,q.jsx)("span",{children:"Reto"}),(0,q.jsx)("span",{children:rad+" px"}),(0,q.jsx)("span",{children:"Redondo"})]})]})),
       (0,q.jsxs)("div",{className:"pzy-toggles",children:[
         Toggle(!n.reduceMotion,v=>r({reduceMotion:!v}),"Animações suaves","Transições e movimentos da interface"),
-        Toggle(n.wallpaper&&n.wallpaper!=="nenhum",v=>r({wallpaper:v?"aurora":"nenhum"}),"Fundo animado","Luzes coloridas atrás da tela"),
         Toggle(!!n.boldFocus,v=>r({boldFocus:v}),"Contorno de foco forte","Facilita navegar pelo teclado")]}),
+      (0,q.jsx)("h4",{className:"pzy-h4 pzw-h",children:"Papel de parede"}),
+      (0,q.jsx)(AvWallPicker,{prefs:n,set:r,accent:A,dark:document.documentElement.getAttribute("data-avant-theme")==="dark"}),
       (0,q.jsxs)("details",{className:"pzy-adv",open:adv,onToggle:e=>setAdv(e.target.open),children:[(0,q.jsx)("summary",{children:"Cores por área (avançado)"}),
         (0,q.jsx)("div",{className:"seg compact pzx-mode",children:[["light","Modo claro"],["dark","Modo escuro"]].map(([k,l])=>(0,q.jsx)("button",{className:mode===k?"on":"","aria-pressed":mode===k,onClick:()=>setMode(k),children:l},k))}),
         (0,q.jsx)("ul",{className:"pzx-areas",children:__avAreas.map(([k,l,h])=>(0,q.jsxs)("li",{children:[
           (0,q.jsx)("input",{type:"color","aria-label":l+" ("+(mode==="dark"?"modo escuro":"modo claro")+")",value:now(k),onChange:e=>setArea(k,e.target.value)}),
           (0,q.jsxs)("span",{className:"pzx-al",children:[(0,q.jsx)("strong",{children:l}),(0,q.jsx)("small",{children:__avHex(cur[k])?"Personalizado · "+h:"Padrão do estilo · "+h})]}),
-          __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))}),
-        n.wallpaper&&n.wallpaper!=="nenhum"&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("h4",{className:"pzy-h4",children:"Papel de parede"}),(0,q.jsx)("div",{className:"pz-walls",children:Gl.filter(e=>e.key!=="nenhum").map(e=>(0,q.jsxs)("button",{className:"pz-wall"+(n.wallpaper===e.key?" on":""),onClick:()=>r({wallpaper:e.key}),"aria-pressed":n.wallpaper===e.key,children:[(0,q.jsxs)("span",{className:"pz-thumb wp-"+e.key,"aria-hidden":!0,children:[(0,q.jsx)("i",{}),(0,q.jsx)("i",{}),(0,q.jsx)("i",{})]}),(0,q.jsx)("strong",{children:e.label})]},e.key))})]})]})
+          __avHex(cur[k])&&(0,q.jsx)("button",{className:"btn sm ghost",onClick:()=>setArea(k,null),children:"Padrão"})]},k))})]})
     ]});
 }
 
@@ -1380,4 +1380,79 @@ function AvCardAttend({it,m,me,own,busy,go}){
   if(!tk)actions=[btn(`Atender`,`em_andamento`,`primary`)];
   else if(mine)actions=[btn(`Concluir`,`concluida`,`primary`),btn(`Devolver`,`a_fazer`,`ghost`)];
   return (0,q.jsxs)(q.Fragment,{children:[tag,actions?(0,q.jsx)(`div`,{className:`tattend`,children:actions}):null]});
+}
+
+/* =====================================================================
+   PAPÉIS DE PAREDE NOVOS (mesmo formato dos originais: {resize, draw(ctx,t,dt)})
+   e.palette = cores do tema em [r,g,b]; e.alpha = intensidade; e.dark = modo escuro
+   ===================================================================== */
+const __wpTau=Math.PI*2;
+function __wpGradiente(e){let W=0,H=0;const P=e.palette,bl=[0,1,2,3,0,2].map((c,i)=>({c:P[c%P.length],ph:i*1.3,sp:.05+i*.012,r:.32+((i*37)%10)/40}));
+  return{resize:(w,h)=>{W=w;H=h},draw(x,t){x.clearRect(0,0,W,H);const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,ql(P[0],.28*e.alpha));g.addColorStop(1,ql(P[3]||P[1],.22*e.alpha));x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.globalCompositeOperation=e.dark?"lighter":"source-over";
+    for(const b of bl){const cx=W*(.5+.45*Math.sin(t*b.sp+b.ph)),cy=H*(.5+.42*Math.cos(t*b.sp*1.2+b.ph*1.7)),r=Math.max(W,H)*b.r,gr=x.createRadialGradient(cx,cy,0,cx,cy,r);gr.addColorStop(0,ql(b.c,.55*e.alpha));gr.addColorStop(.6,ql(b.c,.12*e.alpha));gr.addColorStop(1,ql(b.c,0));x.fillStyle=gr;x.fillRect(0,0,W,H)}
+    x.globalCompositeOperation="source-over"}}}
+function __wpVagalumes(e){let W=0,H=0,f=[];const warm=[255,214,102];
+  return{resize(w,h){W=w;H=h;const n=Math.min(70,Math.round(w*h/22e3));f=Array.from({length:n},(_,i)=>({x:Yl(0,w),y:Yl(0,h),a:Yl(0,__wpTau),s:Yl(.15,.5),ph:Yl(0,__wpTau),r:Yl(2,4.5),c:i%3===0?warm:e.palette[i%e.palette.length]}))},
+    draw(x,t,dt){x.clearRect(0,0,W,H);x.globalCompositeOperation=e.dark?"lighter":"source-over";
+      for(const p of f){p.a+=Yl(-.4,.4)*dt;p.x+=Math.cos(p.a)*p.s*dt*60;p.y+=Math.sin(p.a)*p.s*dt*60;if(p.x<-30)p.x=W+30;if(p.x>W+30)p.x=-30;if(p.y<-30)p.y=H+30;if(p.y>H+30)p.y=-30;
+        const pulse=.45+.55*Math.max(0,Math.sin(t*1.6+p.ph)),R=p.r*7,g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,R);g.addColorStop(0,ql(p.c,.9*e.alpha*pulse));g.addColorStop(.25,ql(p.c,.35*e.alpha*pulse));g.addColorStop(1,ql(p.c,0));x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,R,0,__wpTau);x.fill()}
+      x.globalCompositeOperation="source-over"}}}
+function __wpGalaxia(e){let W=0,H=0,s=[];
+  return{resize(w,h){W=w;H=h;const n=Math.min(700,Math.round(w*h/2600));s=Array.from({length:n},(_,i)=>{const arm=i%3,d=Math.pow(Math.random(),.6);return{d,ang:arm*__wpTau/3+d*5.2+Yl(-.35,.35),z:Yl(.6,1.6),c:e.palette[(arm+(d>.6?1:0))%e.palette.length],tw:Yl(0,__wpTau)}})},
+    draw(x,t){x.clearRect(0,0,W,H);const cx=W*.62,cy=H*.48,R=Math.max(W,H)*.55,rot=t*.03;
+      const core=x.createRadialGradient(cx,cy,0,cx,cy,R*.35);core.addColorStop(0,ql(e.palette[0],.45*e.alpha));core.addColorStop(1,ql(e.palette[0],0));x.fillStyle=core;x.fillRect(0,0,W,H);
+      for(const p of s){const a=p.ang+rot*(1.4-p.d),r=p.d*R,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r*.55;x.fillStyle=ql(p.c,e.alpha*(.35+.5*Math.abs(Math.sin(t*1.3+p.tw))));x.fillRect(px,py,p.z*1.6,p.z*1.6)}}}}
+function __wpGrade(e){let W=0,H=0;
+  return{resize:(w,h)=>{W=w;H=h},draw(x,t){x.clearRect(0,0,W,H);const hz=H*.58,c0=e.palette[0],c1=e.palette[3]||e.palette[1];
+      const sky=x.createLinearGradient(0,0,0,hz);sky.addColorStop(0,ql(c1,0));sky.addColorStop(1,ql(c1,.28*e.alpha));x.fillStyle=sky;x.fillRect(0,0,W,hz);
+      const sr=Math.min(W,H)*.2,sx=W*.5,sy=hz-sr*.15,sun=x.createLinearGradient(0,sy-sr,0,sy+sr);sun.addColorStop(0,ql([255,200,90],.75*e.alpha));sun.addColorStop(1,ql(c1,.6*e.alpha));
+      x.save();x.beginPath();x.arc(sx,sy,sr,Math.PI,0);x.clip();x.fillStyle=sun;x.fillRect(sx-sr,sy-sr,sr*2,sr);x.restore();
+      x.strokeStyle=ql(c0,.6*e.alpha);x.lineWidth=1.2;
+      for(let i=-24;i<=24;i++){x.beginPath();x.moveTo(sx+i*20,hz);x.lineTo(sx+i*W*.18,H);x.stroke()}
+      const off=(t*.35)%1;for(let k=0;k<14;k++){const z=(k+off)/14,y=hz+(H-hz)*z*z;x.globalAlpha=Math.min(1,z*1.6);x.beginPath();x.moveTo(0,y);x.lineTo(W,y);x.stroke()}x.globalAlpha=1}}}
+function __wpFavo(e){let W=0,H=0;const S=34;
+  return{resize:(w,h)=>{W=w;H=h},draw(x,t){x.clearRect(0,0,W,H);const hw=S*Math.sqrt(3),mx=W*(.5+.4*Math.sin(t*.13)),my=H*(.5+.4*Math.cos(t*.11));x.lineWidth=1.2;
+      for(let row=-1;row*S*1.5<H+S;row++)for(let col=-1;col*hw<W+hw;col++){const cx=col*hw+(row%2?hw/2:0),cy=row*S*1.5,d=Math.hypot(cx-mx,cy-my),w=.5+.5*Math.sin(d/60-t*1.4),near=Math.max(0,1-d/(Math.max(W,H)*.6)),a=e.alpha*(.08+.55*w*near),c=e.palette[(row+col+99)%e.palette.length];
+        x.beginPath();for(let k=0;k<6;k++){const an=__wpTau/6*k+Math.PI/6,px=cx+Math.cos(an)*S*.92,py=cy+Math.sin(an)*S*.92;k?x.lineTo(px,py):x.moveTo(px,py)}x.closePath();x.strokeStyle=ql(c,a);x.stroke();if(w*near>.75){x.fillStyle=ql(c,a*.25);x.fill()}}}}}
+function __wpFeixes(e){let W=0,H=0,b=[];const mk=(w,h,i)=>({x:Yl(-w*.5,w),y:Yl(-h*.3,h),len:Yl(160,420),sp:Yl(1.2,3.2),th:Yl(1.2,3.2),c:e.palette[i%e.palette.length]});
+  return{resize(w,h){W=w;H=h;b=Array.from({length:22},(_,i)=>mk(w,h,i))},draw(x,t,dt){x.clearRect(0,0,W,H);x.globalCompositeOperation=e.dark?"lighter":"source-over";const ang=-.5,ca=Math.cos(ang),sa=Math.sin(ang);
+      b.forEach((p,i)=>{p.x+=ca*p.sp*dt*60;p.y+=sa*p.sp*dt*60;if(p.x>W+p.len||p.y<-p.len){Object.assign(p,mk(W,H,i));p.x=Yl(-W*.4,W*.6);p.y=H+Yl(20,200)}
+        const x2=p.x-ca*p.len,y2=p.y-sa*p.len,g=x.createLinearGradient(p.x,p.y,x2,y2);g.addColorStop(0,ql(p.c,.85*e.alpha));g.addColorStop(1,ql(p.c,0));x.strokeStyle=g;x.lineWidth=p.th;x.lineCap="round";x.beginPath();x.moveTo(p.x,p.y);x.lineTo(x2,y2);x.stroke()});
+      x.globalCompositeOperation="source-over"}}}
+function __wpNevoa(e){let W=0,H=0,c=[];
+  return{resize(w,h){W=w;H=h;c=Array.from({length:9},(_,i)=>({x:Yl(0,w),y:Yl(0,h),rx:Yl(.25,.5)*w,ry:Yl(.12,.25)*h,sp:Yl(.08,.25)*(i%2?1:-1),c:e.palette[i%e.palette.length]}))},
+    draw(x,t,dt){x.clearRect(0,0,W,H);for(const p of c){p.x+=p.sp*dt*60;if(p.x-p.rx>W)p.x=-p.rx;if(p.x+p.rx<0)p.x=W+p.rx;x.save();x.translate(p.x,p.y+Math.sin(t*.2+p.rx)*20);x.scale(1,p.ry/p.rx);const g=x.createRadialGradient(0,0,0,0,0,p.rx);g.addColorStop(0,ql(p.c,.4*e.alpha));g.addColorStop(1,ql(p.c,0));x.fillStyle=g;x.beginPath();x.arc(0,0,p.rx,0,__wpTau);x.fill();x.restore()}}}}
+function __wpConfete(e){let W=0,H=0,f=[];const cols=()=>e.palette.concat([[255,200,61],[255,99,146]]);const mk=(w,i,top)=>({x:Yl(0,w),y:top?Yl(-H,0):Yl(0,H),vy:Yl(.4,1.1),sw:Yl(0,__wpTau),r:Yl(0,__wpTau),vr:Yl(-2,2),w:Yl(6,11),h:Yl(3,6),c:cols()[i%cols().length],k:i%3});
+  return{resize(w,h){W=w;H=h;const n=Math.min(90,Math.round(w*h/16e3));f=Array.from({length:n},(_,i)=>mk(w,i,!1))},draw(x,t,dt){x.clearRect(0,0,W,H);
+      f.forEach((p,i)=>{p.y+=p.vy*dt*60;p.sw+=dt;p.r+=p.vr*dt;if(p.y>H+20)Object.assign(p,mk(W,i,!0));const px=p.x+Math.sin(p.sw)*18;x.save();x.translate(px,p.y);x.rotate(p.r);x.scale(1,Math.abs(Math.cos(p.sw*2))+.2);x.fillStyle=ql(p.c,.8*e.alpha);
+        if(p.k===0)x.fillRect(-p.w/2,-p.h/2,p.w,p.h);else if(p.k===1){x.beginPath();x.arc(0,0,p.h*.8,0,__wpTau);x.fill()}else{x.beginPath();x.moveTo(0,-p.w/2);x.lineTo(p.w/2,p.w/2);x.lineTo(-p.w/2,p.w/2);x.fill()}x.restore()})}}}
+function __wpPrisma(e){let W=0,H=0;
+  return{resize:(w,h)=>{W=w;H=h},draw(x,t){x.clearRect(0,0,W,H);const n=7;for(let i=0;i<n;i++){const c=e.palette[i%e.palette.length],y0=H*(i/n)+Math.sin(t*.3+i)*40;x.beginPath();x.moveTo(0,y0);
+      for(let px=0;px<=W;px+=24)x.lineTo(px,y0+Math.sin(px/180+t*.5+i*.9)*50+Math.sin(px/70-t*.8+i)*14);x.lineTo(W,H);x.lineTo(0,H);x.closePath();
+      const g=x.createLinearGradient(0,y0-60,0,y0+H/n+60);g.addColorStop(0,ql(c,.22*e.alpha));g.addColorStop(1,ql(c,.02*e.alpha));x.fillStyle=g;x.fill();x.strokeStyle=ql(c,.5*e.alpha);x.lineWidth=1.5;x.stroke()}}}}
+function __avWallNew(){return[
+  {key:"gradiente",label:"Gradiente vivo",hint:"Cores do tema se misturando",fn:__wpGradiente},
+  {key:"vagalumes",label:"Vaga-lumes",hint:"Luzes que piscam e passeiam",fn:__wpVagalumes},
+  {key:"galaxia",label:"Galáxia",hint:"Espiral de estrelas girando",fn:__wpGalaxia},
+  {key:"grade",label:"Retrô neon",hint:"Sol e grade estilo anos 80",fn:__wpGrade},
+  {key:"favo",label:"Colmeia",hint:"Hexágonos acendendo em ondas",fn:__wpFavo},
+  {key:"feixes",label:"Feixes de luz",hint:"Riscos de luz cruzando a tela",fn:__wpFeixes},
+  {key:"nevoa",label:"Névoa",hint:"Nuvens coloridas e suaves",fn:__wpNevoa},
+  {key:"prisma",label:"Camadas",hint:"Faixas de cor ondulando",fn:__wpPrisma},
+  {key:"confete",label:"Confete",hint:"Comemoração discreta",fn:__wpConfete}]}
+
+/* miniatura viva do papel de parede (desenha alguns quadros parados) */
+function AvWallThumb({k,accent,dark}){
+  const ref=x.useRef(null);
+  x.useEffect(()=>{const cv=ref.current;if(!cv||k==="nenhum"||!nu[k])return;const c=cv.getContext("2d");cv.width=360;cv.height=220;c.setTransform(.5,0,0,.5,0,0);const w=720,h=440;const base=Kl(__avHex(accent)?accent:"#2563eb");
+    const g=nu[k]({palette:[base,Jl(base,45),Jl(base,-40),Jl(base,160)],dark,alpha:dark?1.2:1.9,mouse:{x:0,y:0,active:!1}});g.resize(w,h);for(let i=1;i<=10;i++)g.draw(c,i*1.7,.4)},[k,accent,dark]);
+  return k==="nenhum"?(0,q.jsx)("span",{className:"pzw-none",children:"Liso"}):(0,q.jsx)("canvas",{ref,className:"pzw-cv","aria-hidden":!0});
+}
+function AvWallPicker({prefs:n,set:r,accent,dark}){
+  const cur=n.wallpaper||"nenhum";
+  return (0,q.jsxs)("div",{className:"pzw",children:[
+    (0,q.jsx)("div",{className:"pzw-grid",children:Gl.map(e=>(0,q.jsxs)("button",{type:"button",className:"pzw-it"+(cur===e.key?" on":""),"aria-pressed":cur===e.key,"aria-label":"Papel de parede: "+e.label,title:e.hint,onClick:()=>r({wallpaper:e.key}),children:[
+      (0,q.jsx)("span",{className:"pzw-th",style:{background:dark?"#0d0f14":"#eef1f6"},children:(0,q.jsx)(AvWallThumb,{k:e.key,accent,dark})}),(0,q.jsx)("strong",{children:e.label})]},e.key))}),
+    cur!=="nenhum"&&(0,q.jsxs)("div",{className:"pzw-int",children:[(0,q.jsx)("span",{children:"Intensidade"}),(0,q.jsx)("div",{className:"seg compact",children:au.map(e=>(0,q.jsx)("button",{type:"button",className:Math.abs((n.wallpaperIntensity??.7)-e.value)<.01?"on":"","aria-pressed":Math.abs((n.wallpaperIntensity??.7)-e.value)<.01,onClick:()=>r({wallpaperIntensity:e.value}),children:e.label},e.value))})]})]});
 }

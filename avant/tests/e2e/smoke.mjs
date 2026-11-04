@@ -175,9 +175,7 @@ try {
   const painel = v.locator(".modal-personalize");
   await painel.locator(".pzy-mode button", { hasText: "Escuro" }).click();
   await painel.locator('.pzy-dot[aria-label="Ametista"]').click();
-  await painel.locator(".pzy-tg", { hasText: "Fundo animado" }).click();
-  await painel.locator(".pzy-adv summary").click();
-  await painel.getByRole("button", { name: /^Constelação/ }).click();
+  await painel.locator('.pzw-it[aria-label="Papel de parede: Constelação"]').click();
   await v.waitForTimeout(1600);
   const prefsKey = [...ctx.store._dump().keys()].find((k) => k.startsWith("prefs/"));
   const prefsSalvas = prefsKey ? JSON.parse(new TextDecoder().decode(ctx.store._dump().get(prefsKey).bytes)) : {};

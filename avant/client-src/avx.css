@@ -984,3 +984,21 @@ html:root:not([data-avant-theme=dark]) .tcard{border:1px solid color-mix(in srgb
   html.av-side-compact #root .rail .rail-item .nav-count{top:4px;right:16px;min-width:17px;height:17px;font-size:10px;padding:0 4px}
 }
 .avtip{z-index:9999}
+
+/* ===== Papel de parede: visível de verdade + seletor com miniaturas ===== */
+html.has-wallpaper:root:root #root,html.has-wallpaper #root .main,html.has-wallpaper #root .shell,html.has-wallpaper #root .content{background:transparent!important}
+html.has-wallpaper body{background:var(--avbg)!important}
+html:root canvas.wallpaper{display:block!important;opacity:1!important}
+html:root:not([data-avant-theme=dark]) canvas.wallpaper{opacity:.85!important}
+/* cartões levemente translúcidos para o fundo aparecer nas bordas */
+html.has-wallpaper:root:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.tlist):not(.kpi):not(.avh):not(.day-hero){background:linear-gradient(118deg,#fffffff2 0%,#ffffffeb 40%,#f6f8fce6 100%)!important;backdrop-filter:blur(6px)}
+.pzw-h{margin:14px 0 8px}
+.pzw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.pzw-it{display:flex;flex-direction:column;gap:5px;padding:5px;border-radius:12px;border:1.5px solid var(--line);background:transparent;cursor:pointer;color:inherit;font:inherit;text-align:left}
+.pzw-it strong{font-size:11.5px;font-weight:600;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pzw-it:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.pzw-it.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.pzw-th{display:block;height:58px;border-radius:8px;overflow:hidden;position:relative}
+.pzw-cv{width:100%;height:100%;display:block}
+.pzw-none{display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;opacity:.6}
+.pzw-int{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;font-weight:600}
