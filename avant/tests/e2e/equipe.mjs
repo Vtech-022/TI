@@ -390,7 +390,11 @@ try {
   // ---- paletas prontas
   await v.locator('.topbar button[aria-label*="ersonaliz"], button[aria-label*="ersonaliz"]').first().click();
   await v.waitForSelector(".pzy-dots");
-  check("painel Temas organizado: Auto/Claro/Escuro, cores, densidade, fonte, texto, cantos e chaves", (await v.locator(".pzy-mode button").allInnerTexts()).join(",") === "Auto,Claro,Escuro" && (await v.locator(".pzy-row").count()) === 5 && (await v.locator(".pzy-tg").count()) === 3);
+  check("painel Temas organizado: Auto/Claro/Escuro, cores, densidade, fonte, texto, cantos e chaves", (await v.locator(".pzy-mode button").allInnerTexts()).join(",") === "Auto,Claro,Escuro" && (await v.locator(".pzy-row").count()) === 6 && (await v.locator(".pzy-tg").count()) === 3);
+  await v.locator('button[aria-label="Barra de colegas: Azul-marinho"]').click();
+  await v.waitForTimeout(400);
+  check("cor da barra de colegas pode ser trocada", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avfriends").trim())) === "#14306f");
+  await v.locator('button[aria-label="Barra de colegas: Preto"]').click();
   check("estilos de cor incluem as paletas enviadas (Floresta dourada, Neon rosa, Rubi e ouro…)", (await v.locator(".pzy-dot[aria-label]").count()) >= 19 && (await v.locator('.pzy-dot[aria-label="Rubi e ouro"]').count()) === 1);
   await v.locator('.pzy-dot[aria-label="Ametista"]').click();
   await v.locator('.pzy-own input[aria-label="Cor 1"]').fill("#12a150");

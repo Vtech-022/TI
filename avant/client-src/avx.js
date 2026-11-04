@@ -863,6 +863,9 @@ function __avInk(l,dark){
   const inkOn=(c,k)=>{const f=k&&ar[k+"Ink"];return f==="black"?DARK:f==="white"?LIGHT:(__avLum(c)>.4?DARK:LIGHT)};
   const ri=inkOn(rail,"rail"),bi=inkOn(bg,"bg");
   const sf=ar.stripInk,si=sf==="black"?["#14161b","#2f333b"]:sf==="white"?["#ffffff","#ffffffcc"]:(Math.max(__avLum(strip1),__avLum(strip2))>.42?["#14161b","#2f333b"]:["#ffffff","#ffffffcc"]);
+  /* barra de colegas (borda direita): preto por padrão, cor do tema ou cor livre */
+  const fr=__avHex(ar.strip)?ar.strip:__avHex(l.friends)?l.friends:l.friends==="tema"?__avMix(A,"#000000",.5):"#101114";
+  st.setProperty("--avfriends",fr);st.setProperty("--avfriendsink",__avLum(fr)>.4?"#1b1d22":"#e4e6eb");st.setProperty("--avfriendsedge",__avLum(fr)>.4?"#00000022":"#ffffff14");
   [["--avrail",rail],["--avrailink",ri[0]],["--avrailink2",ri[1]],["--avstrip1",strip1],["--avstrip2",strip2],["--avstripink",si[0]],["--avstripink2",si[1]]].forEach(([k,v])=>st.setProperty(k,v));
   const hf=ar.heroInk,heroLight=hf==="black"?!0:hf==="white"?!1:Math.max(__avLum(h1),__avLum(h2))>.42;
   const ci=inkOn(card,"card");
@@ -1220,6 +1223,8 @@ function AvPersonalize({open,onClose}){
       Row("Densidade","Espaço entre os elementos",(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:0,max:2,step:1,value:di,"aria-label":"Densidade",onChange:e=>r({density:dens[+e.target.value]})}),(0,q.jsxs)("div",{className:"pzy-ticks",children:[(0,q.jsx)("span",{children:"Compacto"}),(0,q.jsx)("span",{children:"Normal"}),(0,q.jsx)("span",{children:"Confortável"})]})]})),
       Row("Fonte",null,(0,q.jsx)("select",{className:"select","aria-label":"Fonte",value:n.font,onChange:e=>r({font:e.target.value}),children:va.map(e=>(0,q.jsx)("option",{value:e.key,children:e.label},e.key))})),
       Row("Tamanho do texto",null,(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:0,max:sizes.length-1,step:1,value:si,"aria-label":"Tamanho do texto",onChange:e=>r({scale:sizes[+e.target.value].value})}),(0,q.jsx)("div",{className:"pzy-ticks",children:sizes.map(e=>(0,q.jsx)("span",{children:e.label},e.value))})]})),
+      Row("Barra de colegas","Cor da aba de amigos na lateral",(0,q.jsxs)("div",{className:"pzy-dots",children:[[["#101114","Preto"],["tema","Cor do tema"],["#14306f","Azul-marinho"],["#2b2f38","Grafite"],["#ffffff","Branca"]].map(([v,nm])=>(0,q.jsx)("button",{className:"pzy-dot pzy-fr"+(((n.friends||"#101114")===v)?" on":""),"aria-label":"Barra de colegas: "+nm,title:nm,"aria-pressed":(n.friends||"#101114")===v,onClick:()=>r({friends:v}),style:{background:v==="tema"?"linear-gradient(135deg,"+A+","+__avMix(A,"#000000",.5)+")":v}},v)),
+        (0,q.jsx)("label",{className:"pzy-dot pzy-own"+(__avHex(n.friends)&&!["#101114","#14306f","#2b2f38","#ffffff"].includes(n.friends)?" on":""),title:"Escolher outra cor",style:{background:__avHex(n.friends)?n.friends:"conic-gradient(#f43f5e,#f59e0b,#22c55e,#06b6d4,#6366f1,#f43f5e)"},children:(0,q.jsx)("input",{type:"color","aria-label":"Cor da barra de colegas",value:__avHex(n.friends)?n.friends:"#101114",onChange:e=>r({friends:e.target.value})})})]})),
       Row("Arredondamento","Cantos dos cartões e botões",(0,q.jsxs)("div",{className:"pzy-range",children:[(0,q.jsx)("input",{type:"range",min:4,max:28,step:4,value:rad,"aria-label":"Arredondamento",onChange:e=>r({radius:+e.target.value})}),(0,q.jsxs)("div",{className:"pzy-ticks",children:[(0,q.jsx)("span",{children:"Reto"}),(0,q.jsx)("span",{children:rad+" px"}),(0,q.jsx)("span",{children:"Redondo"})]})]})),
       (0,q.jsxs)("div",{className:"pzy-toggles",children:[
         Toggle(!n.reduceMotion,v=>r({reduceMotion:!v}),"Animações suaves","Transições e movimentos da interface"),
