@@ -931,3 +931,16 @@ button.day-sec.avfold:hover{background:color-mix(in srgb,currentColor 8%,transpa
 .avfold-ar{transition:transform .18s ease;flex:none}
 .avfold.is-open .avfold-ar{transform:rotate(90deg)}
 .avfold-n{margin-left:auto;font-size:11px;font-weight:700;min-width:22px;height:20px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,currentColor 14%,transparent)}
+
+/* Quadro (Atividades da equipe): colunas e cartões com o mesmo acabamento metálico dos outros painéis */
+html:root[data-avant-theme=dark] .tlist{
+  background:linear-gradient(118deg,#ffffff17 0%,#ffffff05 20%,#ffffff00 36%,#ffffff08 54%,#ffffff00 70%,#ffffff0e 100%),
+    linear-gradient(160deg,color-mix(in srgb,var(--avcard) 100%,#fff 7%),var(--avcard) 45%,color-mix(in srgb,var(--avcard) 72%,#000))!important;
+  border:1px solid #ffffff17!important;border-top-color:#ffffff33!important;border-left-color:#ffffff22!important;
+  box-shadow:0 14px 34px #00000080,inset 0 1px 0 #ffffff26!important}
+html:root[data-avant-theme=dark] .tlist.over{border-color:var(--accent)!important}
+html:root[data-avant-theme=dark] .tcard{
+  background:linear-gradient(160deg,color-mix(in srgb,var(--avcard) 100%,#fff 10%),color-mix(in srgb,var(--avcard) 92%,#fff 3%))!important;
+  border:1px solid #ffffff1c!important;border-top-color:#ffffff30!important;
+  box-shadow:0 6px 16px #00000066,inset 0 1px 0 #ffffff1a!important}
+html:root[data-avant-theme=dark] .tcard:hover{border-color:color-mix(in srgb,var(--accent) 70%,#fff)!important}
