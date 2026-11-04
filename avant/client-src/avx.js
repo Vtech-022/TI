@@ -1355,3 +1355,23 @@ function AvFold({title,count,k,children}){
       (0,q.jsx)(`span`,{className:`avfold-n`,children:count})]}),
     open?children:null]});
 }
+
+/* Cartão do quadro: quem criou (em cima) e quem está atendendo */
+function AvCardWho({it,m}){
+  const by=it.assigned_by||it.created_by||m.name;
+  return (0,q.jsxs)(`div`,{className:`tcreator`,children:[
+    (0,q.jsx)(`span`,{className:`tcreator-dot`,style:{background:zc(it.created_by_id||m.id)}}),
+    (0,q.jsx)(`span`,{className:`tcreator-n`,children:by}),
+    by!==m.name?(0,q.jsxs)(`span`,{className:`tcreator-to`,children:[`para `,m.name.split(` `)[0]]}):null]});
+}
+function AvCardAttend({it,m,me,own,busy,go}){
+  const stop=e=>e.stopPropagation();
+  const tk=it.taken_by, mine=tk&&tk.id===me?.id, done=it.status===`concluida`;
+  const tag=tk&&tk.id!==m.id?(0,q.jsx)(`div`,{className:`tattend-tag`+(done?` done`:``),children:done?`✓ Concluída por ${it.done_by||tk.name}`:mine?`Você está atendendo`:`Em atendimento por ${tk.name}`}):null;
+  if(!me?.canWrite||done||(own&&!mine))return tag;
+  const btn=(label,st,cls)=>(0,q.jsx)(`button`,{type:`button`,className:`btn sm `+cls,disabled:busy,onClick:e=>{stop(e);go(m,it,st)},onKeyDown:stop,children:label});
+  let actions=null;
+  if(!tk)actions=[btn(`Atender`,`em_andamento`,`primary`)];
+  else if(mine)actions=[btn(`Concluir`,`concluida`,`primary`),btn(`Devolver`,`a_fazer`,`ghost`)];
+  return (0,q.jsxs)(q.Fragment,{children:[tag,actions?(0,q.jsx)(`div`,{className:`tattend`,children:actions}):null]});
+}

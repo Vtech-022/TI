@@ -231,3 +231,40 @@ test("assistente: qualquer pessoa adiciona cartões no quadro de um colega, mas 
   // Ana não pode reescrever o quadro do Beto
   assert.equal((await ana.c.put(`/team/${B}`, { items: [] })).status, 403);
 });
+
+test("atender: colega assume e conclui a solicitação de outro; autoria registrada", async () => {
+  const { makeCtx: mk, register: reg, body: bd } = await import("./helpers.mjs");
+  const ctx = mk();
+  await reg(ctx, "Chefe Admin");
+  const ana = await reg(ctx, "Ana Souza");
+  const beto = await reg(ctx, "Beto Lima");
+  const caio = await reg(ctx, "Caio Reis");
+  const B = beto.data.user.id;
+  // Beto cria um cartão no próprio quadro: o servidor registra quem criou
+  assert.equal((await beto.c.put(`/team/${B}`, { base: [], items: [{ id: "s1", title: "Preciso de ajuda com o Forms", status: "a_fazer" }] })).status, 200);
+  const card = async () => (await bd(await beto.c.get("/team"))).people.find((p) => p.id === B).items.find((i) => i.id === "s1");
+  assert.equal((await card()).created_by, "Beto Lima");
+  // Ana atende
+  const r = await ana.c.post(`/team/${B}/cards/s1/atender`, { status: "em_andamento" });
+  assert.equal(r.status, 200);
+  let c = await card();
+  assert.equal(c.status, "em_andamento");
+  assert.equal(c.taken_by.name, "Ana Souza");
+  // Caio não pode tomar nem concluir o que a Ana já está atendendo
+  assert.equal((await caio.c.post(`/team/${B}/cards/s1/atender`, { status: "concluida" })).status, 409);
+  // Ana conclui
+  assert.equal((await ana.c.post(`/team/${B}/cards/s1/atender`, { status: "concluida" })).status, 200);
+  c = await card();
+  assert.equal(c.status, "concluida");
+  assert.equal(c.done_by, "Ana Souza");
+  assert.ok(c.completed_at);
+  // o dono não consegue apagar a autoria ao salvar o quadro
+  const items = (await bd(await beto.c.get("/team"))).people.find((p) => p.id === B).items;
+  await beto.c.put(`/team/${B}`, { base: items, items: items.map((i) => ({ ...i, title: "Forms ok", created_by: "X", taken_by: null })) });
+  c = await card();
+  assert.equal(c.title, "Forms ok");
+  assert.equal(c.created_by, "Beto Lima");
+  assert.equal(c.taken_by.name, "Ana Souza");
+  // status inválido
+  assert.equal((await ana.c.post(`/team/${B}/cards/s1/atender`, { status: "x" })).status, 400);
+});

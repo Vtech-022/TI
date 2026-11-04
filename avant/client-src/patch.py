@@ -270,6 +270,7 @@ TEAM = r'''function Mz(me){
     async removePerson(id){await __avJson(`/team/${id}`,{method:"DELETE"});await load(!0)},
     saveMine:items=>save(me.id,items),
     saveFor:(id,items)=>save(id,items),
+    async attend(uid,cid,st){await __avJson(`/team/${uid}/cards/${encodeURIComponent(cid)}/atender`,{method:"POST",body:{status:st}});await load(!0)},
     async upload(f){
       const ext=(f.name.split(".").pop()??"").toLowerCase();
       if(["doc","docx","xls","xlsx","ppt","pptx"].includes(ext))throw Error(`"${f.name}": arquivos do Office não são aceitos como anexo. Salve como PDF e envie novamente.`);
@@ -540,6 +541,19 @@ import hashlib as _hl
 # "Feito hoje" recolhível (seta)
 sub("u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`,children:`Feito hoje`}),(0,q.jsx)(`ul`,{className:`day-items`,children:u.doneToday.map(e=>(0,q.jsx)(Iu,{t:e,today:c},e.id))})]})",
     "u.doneToday.length>0&&(0,q.jsx)(AvFold,{title:`Feito hoje`,count:u.doneToday.length,k:`done`,children:(0,q.jsx)(`ul`,{className:`day-items`,children:u.doneToday.map(e=>(0,q.jsx)(Iu,{t:e,today:c},e.id))})})")
+
+
+# Atividades da equipe: nome de quem criou em cima do cartão e "Atender" a solicitação de um colega
+sub("let M=e=>!!c?.canWrite&&(e.isMe||e.id===c?.id||!!c?.isOwner),",
+    "let M=e=>!!c?.canWrite&&(e.isMe||e.id===c?.id||!!c?.isOwner),AT=(m,it,st)=>{E(!0);return Wi.team.attend(m.id,it.id,st).then(()=>t(st===`concluida`?`\"${it.title}\" concluída.`:st===`em_andamento`?`Você está atendendo \"${it.title}\".`:`\"${it.title}\" voltou para A fazer.`)).catch(n).finally(()=>E(!1))},")
+sub("t&&n&&n.status!==e&&P(f,t=>vd(t,e),`\"${n.title}\" → ${pd.find(t=>t.key===e).label}`)",
+    "t&&n&&n.status!==e&&(M(t)?P(f,t=>vd(t,e),`\"${n.title}\" → ${pd.find(t=>t.key===e).label}`):AT(t,n,e))")
+sub("className:`tcard${f?.itemId===e.id?` dragging`:``}`,draggable:i,",
+    "className:`tcard${f?.itemId===e.id?` dragging`:``}${e.taken_by?` taken`:``}`,draggable:!!c?.canWrite&&(i||!e.taken_by||e.taken_by.id===c?.id),")
+sub("children:[(0,q.jsxs)(`div`,{className:`tlabels`,",
+    "children:[(0,q.jsx)(AvCardWho,{it:e,m:t}),(0,q.jsxs)(`div`,{className:`tlabels`,")
+sub("(0,q.jsx)(md,{m:t,size:24})]})]},`${t.id}-${e.id}`)",
+    "(0,q.jsx)(md,{m:t,size:24})]}),(0,q.jsx)(AvCardAttend,{it:e,m:t,me:c,own:i,busy:T,go:AT})]},`${t.id}-${e.id}`)")
 
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)

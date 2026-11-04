@@ -445,6 +445,27 @@ try {
     return { naAna, noCal };
   });
   check("tarefa do assistente vai para Atividades da equipe (A fazer da Ana) e não para o calendário", onde.naAna && !onde.noCal, JSON.stringify(onde));
+  // ---- quadro: nome de quem criou em cima e colega atende a solicitação
+  await v.evaluate(async () => {
+    const me = await (await fetch("/api/auth/me", { headers: { "x-avant": "1" } })).json().catch(() => null);
+    const team = await (await fetch("/api/team", { headers: { "x-avant": "1" } })).json();
+    const mine = team.people.find(p => /Victor Andrade/.test(p.name));
+    await fetch(`/api/team/${mine.id}`, { method: "PUT", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ base: mine.items, items: [...mine.items, { id: "sol1", title: "Ajuda com o Forms", status: "a_fazer" }] }) });
+  });
+  await ir(a, "Atividades da equipe");
+  const cardA = a.locator('.tcard:has-text("Ajuda com o Forms")');
+  await cardA.waitFor({ timeout: 8000 }).catch(() => {});
+  check("cartão mostra em cima o nome de quem criou", /Victor Andrade/.test(await cardA.locator(".tcreator").innerText().catch(() => "")));
+  check("colega vê o botão Atender no cartão de outra pessoa", (await cardA.locator('button:has-text("Atender")').count()) === 1);
+  await cardA.locator('button:has-text("Atender")').click();
+  await a.waitForTimeout(1500);
+  const emAnd = a.locator('section.tlist[aria-label="Em andamento"] .tcard:has-text("Ajuda com o Forms")');
+  check("ao atender, o cartão vai para Em andamento com 'Você está atendendo'", (await emAnd.count()) === 1 && /Você está atendendo/.test(await emAnd.innerText()));
+  await emAnd.locator('button:has-text("Concluir")').click();
+  await a.waitForTimeout(1500);
+  const conc = a.locator('section.tlist[aria-label="Concluída"] .tcard:has-text("Ajuda com o Forms")');
+  check("colega conclui e aparece 'Concluída por'", (await conc.count()) === 1 && /Concluída por Ana Souza/.test(await conc.innerText()));
+  await shot(a, "quadro-atender");
   await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
   await v.waitForTimeout(300);
   check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);

@@ -967,6 +967,7 @@ async function handleAddTeamCards(request, ctx, uid) {
     kind: null,
     priority: ["baixo", "medio", "alto"].includes(c.priority) ? c.priority : null,
     assigned_by: user.id === uid ? null : user.name,
+    created_by: user.name, created_by_id: user.id,
     created_at: now, updated_at: now, completed_at: null, attachments: [],
   }));
   await updateJSON(ctx.store, BOARD_KEY, (board) => {
@@ -982,6 +983,45 @@ async function handleAddTeamCards(request, ctx, uid) {
     return board;
   });
   return json(201, { ok: true, added: cards.length });
+}
+
+/** Qualquer pessoa da equipe pode ATENDER a solicitação de outra: assumir (em andamento),
+ *  concluir ou devolver para "A fazer". Quem já assumiu tem a vez; dono e admin sempre podem. */
+async function handleAttendCard(request, ctx, uid, cid) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  const status = body.status;
+  if (!["a_fazer", "em_andamento", "concluida"].includes(status)) throw new ApiError(400, "status", "Situação inválida.");
+  const now = new Date(ctx.now()).toISOString();
+  let card;
+  await updateJSON(ctx.store, BOARD_KEY, (board) => {
+    const doc = board?.docs[uid];
+    if (!doc || doc.removed) throw new ApiError(404, "pessoa", "Essa pessoa não está no quadro da equipe.");
+    const i = (doc.items ?? []).findIndex((c) => c.id === cid);
+    if (i < 0) throw new ApiError(404, "cartao", "Cartão não encontrado.");
+    const c = { ...doc.items[i] };
+    const boss = user.id === uid || user.role === "admin";
+    if (c.taken_by && c.taken_by.id !== user.id && !boss) {
+      throw new ApiError(409, "ja_atendida", `${c.taken_by.name} já está atendendo esta solicitação.`);
+    }
+    if (status === "a_fazer") {
+      c.taken_by = null; c.done_by = null; c.completed_at = null;
+    } else {
+      if (!c.taken_by || (status === "em_andamento" && !boss)) c.taken_by = { id: user.id, name: user.name, at: now };
+      if (status === "concluida") {
+        c.done_by = user.name;
+        c.completed_at = c.status === "concluida" ? c.completed_at : now;
+      } else { c.done_by = null; c.completed_at = null; }
+    }
+    c.status = status;
+    c.updated_at = now;
+    doc.items = doc.items.map((x, j) => (j === i ? c : x));
+    doc.updated_at = now;
+    board.version++;
+    card = c;
+    return board;
+  });
+  return json(200, { ok: true, card });
 }
 
 async function handlePutTeam(request, ctx, uid) {
@@ -1000,7 +1040,16 @@ async function handlePutTeam(request, ctx, uid) {
     const doc = board.docs[uid];
     if (!doc) throw new ApiError(404, "pessoa", "Essa pessoa não está no quadro.");
     if (doc.removed && user.role !== "admin") throw new ApiError(403, "sem_permissao", "Conta removida.");
+    const before = new Map((doc.items ?? []).map((c) => [c.id, c]));
     merged = hasBase ? mergeCards(doc.items ?? [], body.base, body.items) : body.items;
+    merged = merged.map((c) => {
+      const old = before.get(c.id);
+      if (!old) return c.created_by ? c : { ...c, created_by: user.name, created_by_id: user.id };
+      // campos de autoria e atendimento não são forjados pelo cliente
+      const keep = {};
+      for (const k of ["created_by", "created_by_id", "taken_by", "done_by"]) if (old[k] !== undefined) keep[k] = old[k];
+      return { ...c, ...keep };
+    });
     if (merged.length > LIMITS.cards) throw new ApiError(413, "muitos_cartoes", "Há cartões demais.");
     doc.items = merged;
     doc.updated_at = new Date(ctx.now()).toISOString();
@@ -1231,6 +1280,7 @@ export async function handle(request, ctx) {
 
     if (method === "GET" && path === "/team") return await handleGetTeam(request, ctx);
     if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards$/))) return await handleAddTeamCards(request, ctx, m[1]);
+    if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards\/([^/]{1,80})\/atender$/))) return await handleAttendCard(request, ctx, m[1], decodeURIComponent(m[2]));
     if (method === "PUT" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handlePutTeam(request, ctx, m[1]);
     if (method === "DELETE" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handleDeleteTeamPerson(request, ctx, m[1]);
 
