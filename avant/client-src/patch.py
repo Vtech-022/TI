@@ -536,6 +536,11 @@ s = s[:_a] + ("var uu=[{to:`/`,label:`Home`,icon:ds},"
   "{to:`/tarefas-equipe`,label:`Tarefas da equipe`,icon:hs},"
   "{to:`/arquivos`,label:`Arquivos e Documentos`,icon:Lo}") + s[_b:]
 import hashlib as _hl
+
+# "Feito hoje" recolhível (seta)
+sub("u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`,children:`Feito hoje`}),(0,q.jsx)(`ul`,{className:`day-items`,children:u.doneToday.map(e=>(0,q.jsx)(Iu,{t:e,today:c},e.id))})]})",
+    "u.doneToday.length>0&&(0,q.jsx)(AvFold,{title:`Feito hoje`,count:u.doneToday.length,k:`done`,children:(0,q.jsx)(`ul`,{className:`day-items`,children:u.doneToday.map(e=>(0,q.jsx)(Iu,{t:e,today:c},e.id))})})")
+
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)
 OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -924,3 +924,10 @@ html.av-dense .content{padding-top:10px!important}
 html.av-comfy .day-grid,html.av-comfy .day-side,html.av-comfy .av-col{gap:22px!important}
 html.av-comfy :is(.day-list-card,.notes-card){padding:26px 28px!important}
 html.av-focus :focus-visible{outline:3px solid var(--accent)!important;outline-offset:3px!important}
+
+/* Seção recolhível "Feito hoje" */
+button.day-sec.avfold{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:6px 2px;cursor:pointer;text-align:left;font:inherit;color:inherit;border-radius:8px}
+button.day-sec.avfold:hover{background:color-mix(in srgb,currentColor 8%,transparent)}
+.avfold-ar{transition:transform .18s ease;flex:none}
+.avfold.is-open .avfold-ar{transform:rotate(90deg)}
+.avfold-n{margin-left:auto;font-size:11px;font-weight:700;min-width:22px;height:20px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,currentColor 14%,transparent)}

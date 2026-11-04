@@ -1342,3 +1342,16 @@ function AvSideTools(){
     (0,q.jsx)("div",{className:"av-side-theme",role:"group","aria-label":"Tema",children:opts.map(([v,l])=>(0,q.jsx)("button",{type:"button",className:n.theme===v?"on":"","aria-pressed":n.theme===v,onClick:()=>r({theme:v}),title:"Tema "+l.toLowerCase(),children:l},v))}),
     (0,q.jsx)("button",{type:"button",className:"av-side-collapse",onClick:toggle,"aria-label":compact?"Expandir menu":"Recolher menu",title:compact?"Expandir menu":"Recolher menu",children:compact?"»":"«"})]});
 }
+
+/* Seção recolhível (ex.: "Feito hoje") — começa recolhida e lembra a escolha */
+function AvFold({title,count,k,children}){
+  const key='av-fold-'+k;
+  const [open,setOpen]=x.useState(()=>{try{return localStorage.getItem(key)==='1'}catch{return false}});
+  const flip=()=>setOpen(v=>{const n=!v;try{localStorage.setItem(key,n?'1':'0')}catch{}return n});
+  return (0,q.jsxs)(q.Fragment,{children:[
+    (0,q.jsxs)(`button`,{type:`button`,className:`day-sec done avfold`+(open?` is-open`:``),'aria-expanded':open,onClick:flip,children:[
+      (0,q.jsx)(`svg`,{className:`avfold-ar`,viewBox:`0 0 24 24`,width:14,height:14,'aria-hidden':!0,children:(0,q.jsx)(`path`,{d:`M9 6l6 6-6 6`,fill:`none`,stroke:`currentColor`,strokeWidth:2.4,strokeLinecap:`round`,strokeLinejoin:`round`})}),
+      (0,q.jsx)(`span`,{children:title}),
+      (0,q.jsx)(`span`,{className:`avfold-n`,children:count})]}),
+    open?children:null]});
+}
