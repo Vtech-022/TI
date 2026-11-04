@@ -152,7 +152,11 @@ try {
   const vis = await v.locator('.rail a[aria-label="Usuários"]').evaluate((e) => { const r = e.getBoundingClientRect(); return r.bottom <= window.innerHeight + 1; });
   check("menu lateral rola em tela baixa e o último item fica alcançável", vis && (!rail.rola || rail.auto === "auto"), JSON.stringify(rail));
   const rot = await v.locator('.rail a[aria-label="Calendário da equipe"] .rail-label').evaluate((e) => ({ vis: getComputedStyle(e).display !== "none", txt: e.textContent }));
-  check("menu lateral mostra o nome de cada aba", rot.vis && rot.txt === "Calendário da equipe", JSON.stringify(rot));
+  check("menu lateral só com ícones (nomes escondidos)", !rot.vis && rot.txt === "Calendário da equipe", JSON.stringify(rot));
+  await v.locator('.rail a[aria-label="Calendário da equipe"]').hover();
+  await v.waitForTimeout(400);
+  check("ao passar o mouse aparece o nome da aba", /Calendário da equipe/.test(await v.locator(".avtip").innerText().catch(() => "")));
+  await v.mouse.move(700, 400);
   const ativo = await v.evaluate(() => { const a = document.querySelector(".rail .rail-item.active"); const cs = getComputedStyle(a); const bg = getComputedStyle(document.documentElement).getPropertyValue("--avbg").trim(); return { aba: a.getAttribute("aria-label"), fundo: cs.backgroundColor, bg }; });
   const hex2rgb = (h) => "rgb(" + [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16)).join(", ") + ")";
   check("aba ativa fica na mesma cor da página", ativo.aba === "Calendário da equipe" && ativo.fundo === hex2rgb(ativo.bg), JSON.stringify(ativo));

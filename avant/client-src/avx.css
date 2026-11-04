@@ -971,3 +971,16 @@ html:root:not([data-avant-theme=dark]) .tcard{border:1px solid color-mix(in srgb
 /* aba ativa do menu: ícone e texto na cor de destaque */
 #root .rail a.rail-item.active{font-weight:700}
 #root .rail a.rail-item.active svg{color:var(--accent)!important}
+
+/* Menu lateral só com ícones — visual "escondido"; o nome aparece num balão ao passar o mouse */
+@media (min-width:821px){
+  html.av-side-compact{--avside-w:84px}
+  html.av-side-compact #root .rail.rail{padding:18px 0 14px 12px!important}
+  html.av-side-compact #root .rail .rail-brand{justify-content:center;padding:6px 12px 14px 0!important;margin:0 0 6px 0}
+  html.av-side-compact #root .rail .rail-item{justify-content:center;padding:0 12px 0 0!important;height:48px}
+  html.av-side-compact #root .rail .rail-item svg{width:21px;height:21px}
+  html.av-side-compact #root .rail .rail-foot{padding:4px 12px 0 0;text-align:center;font-size:0}
+  html.av-side-compact #root .rail .rail-foot *{font-size:0}
+  html.av-side-compact #root .rail .rail-item .nav-count{top:4px;right:16px;min-width:17px;height:17px;font-size:10px;padding:0 4px}
+}
+.avtip{z-index:9999}

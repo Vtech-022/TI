@@ -1337,7 +1337,8 @@ function __avAccentFor(l,dark){const ar=((l.areas||{})[dark?"dark":"light"])||{}
 
 
 /* ===== Menu lateral v5: rótulos, aba ativa na cor da página, recolher e tema no rodapé ===== */
-(function(){try{localStorage.removeItem("av:sideCompact")}catch{}})();
+/* menu lateral só com ícones (nomes aparecem ao passar o mouse) */
+(function(){try{localStorage.removeItem("av:sideCompact")}catch{}document.documentElement.classList.add("av-side-compact")})();
 function AvSideTools(){
   const{prefs:n,setPrefs:r}=Ea();
   const[compact,setCompact]=x.useState(()=>document.documentElement.classList.contains("av-side-compact"));
