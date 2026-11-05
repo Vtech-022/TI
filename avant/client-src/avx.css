@@ -1002,3 +1002,97 @@ html.has-wallpaper:root:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.
 .pzw-cv{width:100%;height:100%;display:block}
 .pzw-none{display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;opacity:.6}
 .pzw-int{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;font-weight:600}
+
+/* =====================================================================
+   ZÊNITE DS — camada final de cores (vem por último e vale para tudo).
+   Tokens definidos em __avDS (avx.js). Não use cores fixas abaixo desta linha.
+   ===================================================================== */
+html.av-ds:root body,html.av-ds:root:root #root{background:var(--bg)!important;color:var(--text)}
+html.av-ds.has-wallpaper:root:root #root{background:transparent!important}
+html.av-ds:root body:before{background:radial-gradient(900px 600px at 92% 105%,color-mix(in srgb,var(--accent) 9%,transparent),#0000 60%),radial-gradient(700px 500px at 0% -10%,color-mix(in srgb,var(--accent2) 6%,transparent),#0000 60%)!important}
+
+/* superfícies: cartões, painéis, modais, colunas */
+html.av-ds:root .panel.kpi{background:var(--surface)!important;color:var(--text)!important}
+html.av-ds:root :is(.panel,.day-list-card,.avc-panel,.modal,.avn-toast,.tlist,.archive-panel):not(.avh):not(.day-hero):not(.kpi){
+  background:var(--surface)!important;color:var(--text)!important;
+  border:1px solid var(--line)!important;
+  box-shadow:var(--shadow-1),0 10px 28px color-mix(in srgb,var(--text) 6%,transparent)!important;backdrop-filter:none!important}
+html.av-ds[data-avant-theme=dark]:root :is(.panel,.day-list-card,.avc-panel,.modal,.avn-toast,.tlist,.archive-panel):not(.avh):not(.day-hero):not(.kpi){
+  background:linear-gradient(180deg,#ffffff08,#ffffff00 38%),var(--surface)!important;border-top-color:color-mix(in srgb,#fff 14%,var(--surface))!important;
+  box-shadow:0 1px 0 #ffffff0a inset,0 14px 34px #00000073!important}
+html.av-ds:root .tlist{background:var(--surface-2)!important}
+html.av-ds[data-avant-theme=dark]:root .tlist{background:linear-gradient(180deg,#ffffff06,#ffffff00 38%),var(--surface-2)!important}
+html.av-ds:root .tcard{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:0 1px 2px color-mix(in srgb,var(--text) 8%,transparent)!important}
+html.av-ds[data-avant-theme=dark]:root .tcard{background:color-mix(in srgb,#fff 4%,var(--surface))!important;box-shadow:0 6px 16px #00000059!important}
+html.av-ds:root .tcard:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))!important}
+html.av-ds:root .tcard.taken{border-left:3px solid var(--accent)!important}
+html.av-ds:root :is(.panel,.day-list-card,.tlist,.tcard,.modal) :is(h1,h2,.ttitle,.panel-head h2,.task-title){color:var(--heading)}
+
+/* bloco de anotações: papel quente no claro, neutro no escuro */
+html.av-ds:root:not([data-avant-theme=dark]) .notes-card{background:#fffbeb!important;border:1px solid #f1e3b3!important;color:#3d3420!important;box-shadow:var(--shadow-1),0 10px 28px #b4891714!important}
+html.av-ds[data-avant-theme=dark]:root .notes-card{background:linear-gradient(180deg,#ffffff08,#ffffff00 38%),var(--surface)!important;border:1px solid var(--line)!important;color:var(--text)!important}
+
+/* faixa de boas-vindas: só a cor do tema, em tons profundos (sem misturas barrentas) */
+html.av-ds:root .day-hero{
+  background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent2) 26%,transparent),#0000 55%),linear-gradient(120deg,var(--avhero1),var(--avhero2))!important;
+  color:#fff!important;border:1px solid color-mix(in srgb,#fff 14%,var(--avhero1))!important;box-shadow:0 18px 40px color-mix(in srgb,var(--avhero1) 30%,transparent)!important}
+html.av-ds:root .day-hero *{color:inherit}
+html.av-ds:root .day-hero :is(small,.muted,p){color:#ffffffc7!important}
+
+/* "Seu dia em números": cartão escuro neutro (mesma família da moldura) — o colorido fica no gráfico */
+html.av-ds:root .avh{background:radial-gradient(90% 120% at 0% 100%,color-mix(in srgb,var(--accent) 22%,transparent),#0000 60%),linear-gradient(160deg,color-mix(in srgb,#fff 6%,var(--avframe)),var(--avframe))!important;
+  color:#eef0f4!important;border:1px solid color-mix(in srgb,#fff 10%,var(--avframe))!important;box-shadow:0 18px 40px #0000002e!important}
+html.av-ds:root .avh *{color:inherit}
+html.av-ds:root .avh :is(small,.muted,p,.avh2-legend span){color:#c3c7d0!important}
+
+/* moldura: menu lateral e barra de colegas */
+html.av-ds:root:root #root .rail.rail{background:var(--avframe)!important}
+html.av-ds:root:root #root .rail .rail-item{color:var(--avrailink2)!important}
+html.av-ds:root:root #root .rail .rail-item:hover{color:var(--avrailink)!important}
+html.av-ds:root:root #root .rail .rail-item.active{background:var(--bg)!important;color:var(--accent)!important}
+
+/* barra superior, campos e botões */
+html.av-ds:root:root .topbar>*{background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--text)!important;box-shadow:var(--shadow-1)!important}
+html.av-ds:root :is(.input,.select,.quick-add,.tadd-form textarea,.modal input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.modal select,.modal textarea){
+  background:var(--surface-2)!important;color:var(--text)!important;border:1px solid var(--line-strong)!important}
+html.av-ds:root :is(.input,.select,.quick-add,.modal input,.modal select,.modal textarea):focus-within{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)!important;outline:none}
+html.av-ds:root .quick-add input{background:transparent!important;color:var(--text)!important}
+html.av-ds:root ::placeholder{color:var(--text-3)!important;opacity:1}
+html.av-ds:root .btn{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line-strong)!important}
+html.av-ds:root .btn:hover{background:var(--surface-2)!important}
+html.av-ds:root .btn.primary{background:var(--accent)!important;color:var(--avaccentink)!important;border-color:transparent!important}
+html.av-ds:root .btn.primary:hover{background:var(--accent-strong)!important}
+html.av-ds:root .btn.ghost{background:transparent!important;border-color:transparent!important}
+html.av-ds:root :is(.person-chip,.chip){background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line)!important}
+html.av-ds:root :is(.person-chip.on,.chip.on){background:var(--avaccentsoft)!important;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))!important;color:var(--heading)!important}
+html.av-ds:root .seg{background:var(--surface-2)!important;border:1px solid var(--line)!important}
+html.av-ds:root .seg button{color:var(--text-2)!important;background:transparent!important}
+html.av-ds:root .seg button:is([aria-pressed=true],.on){background:var(--surface)!important;color:var(--heading)!important;box-shadow:var(--shadow-1)!important}
+html.av-ds:root .modal .pzy-mode button:is([aria-pressed=true],.on){background:var(--accent)!important;color:var(--avaccentink)!important}
+
+/* papel de parede: desfocado e calmo (luzes muito borradas; partículas levemente) */
+html.av-ds:root canvas.wallpaper{filter:blur(24px) saturate(.9);transform:scale(1.08);opacity:.62!important}
+html.av-ds:root:is(.avwp-constelacao,.avwp-estrelas,.avwp-vagalumes,.avwp-galaxia,.avwp-confete,.avwp-bolhas,.avwp-formas,.avwp-feixes,.avwp-favo,.avwp-grade) canvas.wallpaper{filter:blur(3px) saturate(.9);transform:none;opacity:.6!important}
+html.av-ds:root:not([data-avant-theme=dark]) canvas.wallpaper{opacity:.6!important}
+html.av-ds.has-wallpaper:root:not([data-avant-theme=dark]) :is(.panel,.day-list-card,.tlist):not(.avh):not(.day-hero){background:color-mix(in srgb,var(--surface) 90%,transparent)!important;backdrop-filter:blur(10px)!important}
+/* DS: componentes que tinham azul fixo passam a seguir o tema */
+html.av-ds:root .avc2-round{background:var(--accent)!important;color:var(--avaccentink)!important;box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 30%,transparent)!important}
+html.av-ds:root .avc2-round:hover{background:var(--accent-strong)!important}
+html.av-ds:root .avc2-cell:hover{border-color:color-mix(in srgb,var(--accent) 60%,var(--line))!important;box-shadow:0 6px 16px color-mix(in srgb,var(--text) 10%,transparent)!important}
+html.av-ds:root .avc2-cell.today{background:linear-gradient(160deg,var(--avhero1),var(--avhero2))!important;border-color:transparent!important;color:#fff!important}
+html.av-ds:root .avc2-cell.sel{outline:3px solid color-mix(in srgb,var(--accent2) 85%,#fff)!important}
+html.av-ds:root .avc-cell.today{border-color:var(--accent)!important;box-shadow:inset 0 0 0 1px var(--accent)!important}
+html.av-ds:root .avc-cell.sel{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--avaccentink)!important}
+html.av-ds:root .avp-new{color:var(--accent)!important}
+html.av-ds:root :is(.input,.select,.btn,.fb-btn select):focus-visible{outline:2px solid var(--accent)!important}
+html.av-ds:root .gate-card .btn.primary,html.av-ds:root .gate-card .seg button.on{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--avaccentink)!important}
+/* grupos por dia na coluna Concluída */
+.avdg{display:flex;flex-direction:column;gap:8px}
+.avdg+.avdg{margin-top:2px}
+.avdg-h{display:flex;align-items:center;gap:7px;width:100%;border:0;cursor:pointer;font:700 11.5px/1 var(--font,system-ui);text-transform:uppercase;letter-spacing:.05em;padding:8px 8px;border-radius:8px;
+  background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--text-2)}
+.avdg-h:hover{background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--text)}
+.avdg-h .avfold-ar{transition:transform .18s ease}
+.avdg.is-open .avdg-h .avfold-ar{transform:rotate(90deg)}
+.avdg-n{margin-left:auto;font-size:10.5px;min-width:20px;height:18px;padding:0 6px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--text) 10%,transparent)}
+.avdg-items{display:flex;flex-direction:column;gap:8px}

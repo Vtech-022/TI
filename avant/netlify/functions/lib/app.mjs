@@ -207,12 +207,15 @@ async function handleRegister(request, ctx) {
       recovery: recovery.rec,
     };
     await putJSON(ctx.store, `users/${id}`, user, { ifNew: true });
+    // cartões trazidos do site antigo esperando esta pessoa criar a conta
+    const pending = (await getJSON(ctx.store, `import/pending/${key}`))?.value;
     await updateJSON(ctx.store, BOARD_KEY, (board) => {
       board ??= { version: 0, docs: {} };
-      board.docs[id] = { name, items: [], updated_at: user.created_at };
+      board.docs[id] = { name, items: pending?.items ?? [], updated_at: user.created_at };
       board.version++;
       return board;
     });
+    if (pending) await ctx.store.del(`import/pending/${key}`).catch(() => {});
     const token = await createSession(ctx, user);
     return json(201, { user: await withFirst(ctx, user), firstAccount: role === "admin", recoveryCode: recovery.code }, {
       "set-cookie": cookieFor(request, token),
@@ -1024,6 +1027,62 @@ async function handleAttendCard(request, ctx, uid, cid) {
   return json(200, { ok: true, card });
 }
 
+/** Administrador traz as atividades da equipe do site antigo. Cada pessoa é encontrada pelo nome;
+ *  quem ainda não tem conta aqui recebe os cartões quando criar a conta com o mesmo nome. */
+async function handleImportTeam(request, ctx) {
+  const user = await requireUser(request, ctx);
+  if (user.role !== "admin") throw new ApiError(403, "sem_permissao", "Somente o administrador pode importar.");
+  const body = await readJson(request);
+  if (!Array.isArray(body.people) || body.people.length > 200) throw new ApiError(400, "pessoas", "Lista de pessoas inválida.");
+  const clean = (list) => {
+    validateCards(list, "importados");
+    return list.map((c) => ({ ...c, id: String(c.id).slice(0, 80), title: String(c.title ?? "").slice(0, 200) || "Sem título" }));
+  };
+  const out = { merged: [], pending: [], cards: 0, skipped: 0 };
+  const byUid = new Map();
+  for (const p of body.people) {
+    const name = normalizeName(String(p?.name ?? "").replace(/ \(conta removida\)$/, ""));
+    if (!name) continue;
+    const items = clean(Array.isArray(p.items) ? p.items : []);
+    if (!items.length) continue;
+    const key = nameKey(name);
+    const idRec = await getJSON(ctx.store, `names/${key}`);
+    if (idRec?.value?.id) {
+      const prev = byUid.get(idRec.value.id) ?? { name, items: [] };
+      prev.items.push(...items);
+      byUid.set(idRec.value.id, prev);
+    } else {
+      await updateJSON(ctx.store, `import/pending/${key}`, (cur) => {
+        cur ??= { name, items: [] };
+        const ids = new Set(cur.items.map((i) => i.id));
+        const add = items.filter((i) => !ids.has(i.id));
+        out.cards += add.length; out.skipped += items.length - add.length;
+        cur.items = [...cur.items, ...add].slice(0, LIMITS.cards);
+        return cur;
+      });
+      out.pending.push(name);
+    }
+  }
+  if (byUid.size) {
+    await updateJSON(ctx.store, BOARD_KEY, (board) => {
+      board ??= { version: 0, docs: {} };
+      for (const [uid, p] of byUid) {
+        const doc = board.docs[uid];
+        if (!doc) continue;
+        const ids = new Set((doc.items ?? []).map((i) => i.id));
+        const add = p.items.filter((i) => !ids.has(i.id));
+        out.cards += add.length; out.skipped += p.items.length - add.length;
+        doc.items = [...(doc.items ?? []), ...add].slice(0, LIMITS.cards);
+        doc.updated_at = new Date(ctx.now()).toISOString();
+        out.merged.push(p.name);
+      }
+      board.version++;
+      return board;
+    });
+  }
+  return json(200, out);
+}
+
 async function handlePutTeam(request, ctx, uid) {
   const user = await requireUser(request, ctx);
   if (user.id !== uid && user.role !== "admin") {
@@ -1279,6 +1338,7 @@ export async function handle(request, ctx) {
     }
 
     if (method === "GET" && path === "/team") return await handleGetTeam(request, ctx);
+    if (method === "POST" && path === "/admin/import-team") return await handleImportTeam(request, ctx);
     if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards$/))) return await handleAddTeamCards(request, ctx, m[1]);
     if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards\/([^/]{1,80})\/atender$/))) return await handleAttendCard(request, ctx, m[1], decodeURIComponent(m[2]));
     if (method === "PUT" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handlePutTeam(request, ctx, m[1]);

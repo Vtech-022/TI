@@ -406,7 +406,7 @@ try {
   const cc = await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
   check("cor personalizada escolhida livremente", cc.toLowerCase() === "#12a150", cc);
   const ink = await v.evaluate(() => { const d = document.documentElement.getAttribute("data-avant-theme") === "dark"; const s = getComputedStyle(document.documentElement); return [d, s.getPropertyValue("--avink").trim(), s.getPropertyValue("--avbg").trim()]; });
-  check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#f4f5f8" : ink[1] === "#14161b", ink.join(" "));
+  check("letras contrastam com o fundo do modo atual", ink[0] ? ink[1] === "#eceef3" : ink[1] === "#151821", ink.join(" "));
   const modo = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme") === "dark" ? "escuro" : "claro");
   await v.locator(".pzy-adv summary").click();
   await v.locator('.pzy-row input[aria-label="Arredondamento"]').fill("8");
@@ -415,10 +415,10 @@ try {
   await v.locator('.pzx-areas input[aria-label^="Cartões"]').fill("#fff3d6");
   await v.waitForTimeout(400);
   const ar = await v.evaluate(() => { const s = getComputedStyle(document.documentElement); return [s.getPropertyValue("--avcard").trim(), s.getPropertyValue("--avink").trim()]; });
-  check("cor por área (cartões) muda só aquela parte e as letras ficam escuras", ar[0] === "#fff3d6" && ar[1] === "#14161b", modo + " " + ar.join(" "));
+  check("cor por área (cartões) muda só aquela parte e as letras ficam escuras", ar[0] === "#fff3d6" && ar[1] === "#151821", modo + " " + ar.join(" "));
   await v.locator('.pzx-areas input[aria-label^="Menu lateral"]').fill("#1b2a4a");
   await v.waitForTimeout(400);
-  check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#f4f5f8");
+  check("menu lateral com cor própria e ícones claros", (await v.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--avrailink").trim())) === "#f1f2f5");
   await v.waitForTimeout(800);
   const baixo = await v.evaluate(() => [...document.querySelectorAll("#root *")].filter(el => [...el.childNodes].some(n => n.nodeType === 3 && n.nodeValue.trim()) && el.dataset.avfix).length);
   check("letras se corrigem sozinhas conforme o fundo real (contraste automático ativo)", typeof baixo === "number");

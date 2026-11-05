@@ -268,3 +268,32 @@ test("atender: colega assume e conclui a solicitação de outro; autoria registr
   // status inválido
   assert.equal((await ana.c.post(`/team/${B}/cards/s1/atender`, { status: "x" })).status, 400);
 });
+
+test("importar do site antigo: junta no quadro de quem já tem conta e guarda para quem ainda vai criar", async () => {
+  const { makeCtx: mk, register: reg, body: bd } = await import("./helpers.mjs");
+  const ctx = mk();
+  const admin = await reg(ctx, "Victor Andrade");
+  const ana = await reg(ctx, "Ana Souza");
+  const people = [
+    { name: "Victor Andrade", items: [{ id: "o1", title: "Lista de presença", status: "concluida", completed_at: "2026-11-03T12:00:00Z" }] },
+    { name: "Ana Souza", items: [{ id: "o2", title: "Revisão da revista", status: "a_fazer" }] },
+    { name: "Ayla Santos", items: [{ id: "o3", title: "Atualizar painel", status: "em_andamento" }] },
+  ];
+  // membro comum não pode
+  assert.equal((await ana.c.post("/admin/import-team", { people })).status, 403);
+  const r = await bd(await admin.c.post("/admin/import-team", { people }));
+  assert.deepEqual(r.merged.sort(), ["Ana Souza", "Victor Andrade"]);
+  assert.deepEqual(r.pending, ["Ayla Santos"]);
+  assert.equal(r.cards, 3);
+  // repetir não duplica
+  const r2 = await bd(await admin.c.post("/admin/import-team", { people }));
+  assert.equal(r2.cards, 0);
+  let team = await bd(await admin.c.get("/team"));
+  assert.ok(team.people.find((p) => p.name === "Ana Souza").items.some((i) => i.id === "o2"));
+  // Ayla cria a conta e já encontra os cartões dela
+  await reg(ctx, "Ayla Santos");
+  team = await bd(await admin.c.get("/team"));
+  const ayla = team.people.find((p) => p.name === "Ayla Santos");
+  assert.equal(ayla.items.length, 1);
+  assert.equal(ayla.items[0].title, "Atualizar painel");
+});

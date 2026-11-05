@@ -557,10 +557,16 @@ sub("(0,q.jsx)(md,{m:t,size:24})]})]},`${t.id}-${e.id}`)",
 
 
 # Papéis de parede: novos estilos no seletor e no desenho
-sub("l={palette:[c,Jl(c,45),Jl(c,-40),Jl(c,160)],dark:n,alpha:r,mouse:", "l={palette:[c,Jl(c,45),Jl(c,-40),Jl(c,160)],dark:n,alpha:Math.min(1.7,r*(n?1.2:1.9)),mouse:")
+sub("l={palette:[c,Jl(c,45),Jl(c,-40),Jl(c,160)],dark:n,alpha:r,mouse:", "l={palette:__avWallPal(c),dark:n,alpha:Math.min(1.2,r*(n?.95:1.05)),mouse:")
 sub("{key:`formas`,label:`Formas flutuantes`,hint:`Figuras geométricas girando`}]", "{key:`formas`,label:`Formas flutuantes`,hint:`Figuras geométricas girando`},...__avWallNew().map(({key,label,hint})=>({key,label,hint}))]")
 sub("var nu={aurora:Xl,constelacao:Zl,bolhas:Ql,ondas:$l,estrelas:eu,formas:tu};", "var nu={aurora:Xl,constelacao:Zl,bolhas:Ql,ondas:$l,estrelas:eu,formas:tu,...Object.fromEntries(__avWallNew().map(w=>[w.key,w.fn]))};")
 
+
+# Zênite DS: tokens aplicados por último no efeito de tema (ganha das definições antigas)
+sub("document.documentElement.classList.toggle(`has-wallpaper`,l.wallpaper!==`nenhum`),document.documentElement.style.colorScheme=b?`dark`:`light`},", "document.documentElement.classList.toggle(`has-wallpaper`,l.wallpaper!==`nenhum`),document.documentElement.style.colorScheme=b?`dark`:`light`,__avDS(l,b)},")
+
+# Quadro: coluna Concluída separada por dia (Hoje, Ontem, Terça-feira, Semana passada…)
+sub("t.map(({it:e,m:t})=>{let n=e.due&&r", "__avDayGroups(e.key,t,({it:e,m:t})=>{let n=e.due&&r")
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)
 OUT.parent.mkdir(parents=True, exist_ok=True)
