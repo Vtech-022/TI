@@ -1179,3 +1179,8 @@ html.av-ds:root:root .avh .avh2-legend b{color:var(--heading)!important}
 html.av-ds:root .ava-fab{width:52px;height:52px;border-radius:16px;background:var(--accent)!important;color:var(--avaccentink)!important;border:0!important;box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 32%,transparent),0 2px 6px #0000001f!important}
 html.av-ds:root .ava-fab:hover{background:var(--accent-strong)!important;transform:translateY(-2px)}
 html.av-ds:root .ava-fab.on{transform:none}
+/* modo claro: colunas do quadro em cinza leve com divisória no título; cartões brancos por cima */
+html.av-ds:root:root:not([data-avant-theme=dark]) .tlist{background:var(--surface-2)!important;border:1px solid var(--line-strong)!important}
+html.av-ds.has-wallpaper:root:root:not([data-avant-theme=dark]) .tlist{background:color-mix(in srgb,var(--surface-2) 94%,transparent)!important}
+html.av-ds:root .tlist>header{border-bottom:1px solid var(--line);margin:0 -10px 10px;padding:4px 16px 10px!important}
+html.av-ds:root:root:not([data-avant-theme=dark]) .tcard{border-color:var(--line-strong)!important}

@@ -157,9 +157,9 @@ try {
   await v.waitForTimeout(400);
   check("ao passar o mouse aparece o nome da aba", /Calendário da equipe/.test(await v.locator(".avtip").innerText().catch(() => "")));
   await v.mouse.move(700, 400);
-  const ativo = await v.evaluate(() => { const a = document.querySelector(".rail .rail-item.active"); const cs = getComputedStyle(a); const bg = getComputedStyle(document.documentElement).getPropertyValue("--avbg").trim(); return { aba: a.getAttribute("aria-label"), fundo: cs.backgroundColor, bg }; });
+  const ativo = await v.evaluate(() => { const a = document.querySelector(".rail .rail-item.active"); const cs = getComputedStyle(a); const bg = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(); return { aba: a.getAttribute("aria-label"), fundo: cs.backgroundColor, bg }; });
   const hex2rgb = (h) => "rgb(" + [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16)).join(", ") + ")";
-  check("aba ativa fica na mesma cor da página", ativo.aba === "Calendário da equipe" && ativo.fundo === hex2rgb(ativo.bg), JSON.stringify(ativo));
+  check("aba ativa fica na cor de destaque", ativo.aba === "Calendário da equipe" && ativo.fundo === hex2rgb(ativo.bg), JSON.stringify(ativo));
   check("menu lateral sem o seletor de tema e sem o botão de recolher", (await v.locator(".av-side-tools, .av-side-collapse").count()) === 0);
   await shot(v, "11-dica-menu");
   await v.setViewportSize({ width: 1280, height: 860 });
@@ -298,7 +298,7 @@ try {
   check("'Tarefas da equipe' saiu do menu", !(await v.locator('.rail a[aria-label="Tarefas da equipe"]').isVisible()));
   await a.locator(".rail-brand").click(); await a.waitForTimeout(1500);
   const home = await texto(v);
-  check("faixa lateral mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);
+  check("cartão Equipe online mostra a Ana online", await v.locator('.avf-row.on[title*="Ana Souza"]').count() === 1);
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
   check("painel do dia: rosca segmentada com legenda", await v.locator(".avh2-seg").count() >= 1 && (await v.locator(".avh2-legend li").count()) === 4);
@@ -325,7 +325,7 @@ try {
   await shot(v, "09-inicio");
 
   // ---- conversa estilo Teams
-  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.locator('.avf-row[title*="Ana Souza"]').click();
   await v.waitForSelector(".avc-panel .avc-form textarea");
   check("clicar no colega abre a conversa com ele", /Ana Souza/.test(await v.locator(".avc-head").innerText()));
   await v.locator(".avc-form textarea").fill("Oi Ana, tudo bem?");
@@ -335,9 +335,9 @@ try {
   await v.waitForSelector('.avc-file strong:has-text("contrato final.docx")', { timeout: 30000 });
   check("arquivo de 5 MB (mais de um pedaço) enviado na conversa", true);
   await shot(v, "13-chat");
-  await a.waitForSelector('.avo-strip .avo-face[title^="Victor"] .avc-badge', { timeout: 15000 });
+  await a.waitForSelector('.avf-row[title*="Victor"] .avf-u', { timeout: 15000 });
   check("Ana vê o aviso de mensagem não lida", true);
-  await a.locator('.avo-strip .avo-face[title^="Victor"]').click();
+  await a.locator('.avf-row[title*="Victor"]').click();
   await a.waitForSelector('.avc-file strong:has-text("contrato final.docx")', { timeout: 15000 });
   check("Ana recebe texto e arquivo", /Oi Ana, tudo bem\?/.test(await a.locator(".avc-msgs").innerText()));
   const [dl] = await Promise.all([a.waitForEvent("download", { timeout: 15000 }), a.locator(".avc-file").click()]);
@@ -362,7 +362,7 @@ try {
   await v.locator(".avc-close").click();
 
   // ---- chat: emoji e áudio
-  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.locator('.avf-row[title*="Ana Souza"]').click();
   await v.waitForSelector(".avc-form");
   check("botão de microfone aparece com a caixa vazia", (await v.locator('.avc-mic').count()) === 1);
   await v.locator('button[aria-label="Inserir emoji"]').click();
@@ -479,7 +479,7 @@ try {
   check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);
 
   // ---- chat: fecha ao clicar fora, colar foto, ver foto completa
-  await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
+  await v.locator('.avf-row[title*="Ana Souza"]').click();
   await v.waitForSelector(".avc-form textarea");
   await v.evaluate(async () => {
     const c = document.createElement("canvas"); c.width = 40; c.height = 30; const g = c.getContext("2d"); g.fillStyle = "#e11d48"; g.fillRect(0, 0, 40, 30);
