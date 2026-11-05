@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta name="av-build" content="9738046cf988">
+<head><meta name="av-build" content="e2c6187e6e5a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.4%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237aa2f7%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%232563eb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2314317e%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22h%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.55%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2218%22%20fill%3D%22url%28%23b%29%22%2F%3E%3Cpath%20d%3D%22M4%2020C4%2010%2010%204%2020%204H44C54%204%2060%2010%2060%2020V24C46%2030%2018%2030%204%2024Z%22%20fill%3D%22url%28%23h%29%22%2F%3E%3Cpath%20d%3D%22M12%2036H20L24.5%2026L31%2044L36.5%2031L40.5%2037L52%2023%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%2223%22%20r%3D%223.6%22%20fill%3D%22%23f5b301%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.4%22%2F%3E%3C%2Fsvg%3E">
@@ -1362,6 +1362,11 @@ html.av-ds.av-fr-custom:root:root .avo-v2 .avo-ring>.av-img,html.av-ds.av-fr-cus
 .avib-t{display:flex;flex-direction:column;gap:2px;flex:1;min-width:220px}
 .avib-t strong{color:var(--heading);font-size:14px}
 .avib-t span{color:var(--text-2);font-size:12.5px}
+/* fundo contínuo: a página inteira (html e body) na mesma cor, sem faixa embaixo */
+html.av-ds:root:root{background:var(--bg)!important}
+html.av-ds:root:root body{min-height:100vh;background:var(--bg)!important}
+html.av-ds.has-wallpaper:root:root body{background:var(--bg)!important}
+html.av-ds:root:root canvas.wallpaper{inset:0!important;width:100vw!important;height:100vh!important;position:fixed!important}
 
 </style>
 </head>

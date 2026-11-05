@@ -1348,3 +1348,8 @@ html.av-ds.av-fr-custom:root:root .avo-v2 .avo-ring>.av-img,html.av-ds.av-fr-cus
 .avib-t{display:flex;flex-direction:column;gap:2px;flex:1;min-width:220px}
 .avib-t strong{color:var(--heading);font-size:14px}
 .avib-t span{color:var(--text-2);font-size:12.5px}
+/* fundo contínuo: a página inteira (html e body) na mesma cor, sem faixa embaixo */
+html.av-ds:root:root{background:var(--bg)!important}
+html.av-ds:root:root body{min-height:100vh;background:var(--bg)!important}
+html.av-ds.has-wallpaper:root:root body{background:var(--bg)!important}
+html.av-ds:root:root canvas.wallpaper{inset:0!important;width:100vw!important;height:100vh!important;position:fixed!important}
