@@ -1365,3 +1365,10 @@ html.av-ds:root:root .topbar>*:not(.greet){min-height:48px;border-radius:16px!im
 html.av-ds:root:root .topbar :is(.search,.search-btn,[role=search],button[aria-label*="usca"]){min-width:340px}
 html.av-ds:root:root .topbar button svg{width:20px;height:20px}
 html.av-ds:root:root .topbar .account-btn :is(.av-img,.av-ini,.avatar){width:38px!important;height:38px!important}
+/* faixa de colegas fixa em todas as páginas; só o conteúdo abre espaço para ela (o topo continua no canto) */
+@media (min-width:821px){
+  html.av-ds.av-has-strip:root:root .myday{padding-right:0!important}
+  html.av-ds.av-has-strip:root:root #root .main>:not(.topbar){padding-right:96px!important}
+}
+/* topo com o mesmo formato de antes (cápsulas arredondadas) */
+html.av-ds:root:root .topbar>*:not(.greet){border-radius:999px!important}
