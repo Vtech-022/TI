@@ -594,7 +594,7 @@ function AvOnline(){
   const{people}=usePresence();
   const{peers}=useChatSummary();
   const[,re]=x.useState(0);
-  x.useEffect(()=>{const f=()=>re(n=>n+1);addEventListener("resize",f);return()=>removeEventListener("resize",f)},[]);
+  x.useEffect(()=>{const f=()=>re(n=>n+1);addEventListener("resize",f);document.documentElement.classList.add("av-has-strip");return()=>{removeEventListener("resize",f);document.documentElement.classList.remove("av-has-strip")}},[]);
   if(!people)return null;
   const me=window.__avUid;
   const list=[...people].sort((a,b)=>(b.online?1:0)-(a.online?1:0)||(a.id===me?-1:b.id===me?1:0)||a.name.localeCompare(b.name,"pt-BR"));
