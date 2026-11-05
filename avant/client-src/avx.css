@@ -1377,3 +1377,12 @@ html.av-ds:root:not(.av-on-home) .topbar .action-pill{display:none!important}
 /* sem a linha à esquerda da busca */
 html.av-ds:root:root .topbar .greet{border:0!important;background:none!important;box-shadow:none!important;min-height:0!important}
 html.av-ds:root:root .topbar .greet:empty:before,html.av-ds:root:root .topbar .greet:empty:after{display:none!important}
+/* arredondamento escolhido em Temas vale também para o menu lateral e a faixa de colegas */
+@media (min-width:821px){
+  html.av-ds:root:root #root .rail .rail-nav{border-radius:var(--avradius,20px)!important}
+  html.av-ds:root:root #root .rail .rail-item{border-radius:calc(var(--avradius,20px) * .6)!important}
+  html.av-ds:root:root #root .rail .rail-brand .brand-mark{border-radius:calc(var(--avradius,20px) * .6)}
+  html.av-ds:root:root body>.avo-strip.avo-v2{border-radius:var(--avradius,24px)!important}
+}
+html.av-ds:root:root .avo-v2 .avo-count{border-radius:calc(var(--avradius,20px) * .6)}
+html.av-ds:root:root .avo-v2 .avo-ring,html.av-ds:root:root .avo-v2 .avo-ring>.av-img,html.av-ds:root:root .avo-v2 .avo-ring>.av-ini{border-radius:calc(var(--avradius,20px) * 2.2)!important}
