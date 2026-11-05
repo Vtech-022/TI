@@ -1372,3 +1372,8 @@ html.av-ds:root:root .topbar .account-btn :is(.av-img,.av-ini,.avatar){width:38p
 }
 /* topo com o mesmo formato de antes (cápsulas arredondadas) */
 html.av-ds:root:root .topbar>*:not(.greet){border-radius:999px!important}
+/* topo: nas outras páginas só a busca; o grupo de configurações (raio, +, temas, avisos, tema, perfil) fica só na Home */
+html.av-ds:root:not(.av-on-home) .topbar .action-pill{display:none!important}
+/* sem a linha à esquerda da busca */
+html.av-ds:root:root .topbar .greet{border:0!important;background:none!important;box-shadow:none!important;min-height:0!important}
+html.av-ds:root:root .topbar .greet:empty:before,html.av-ds:root:root .topbar .greet:empty:after{display:none!important}

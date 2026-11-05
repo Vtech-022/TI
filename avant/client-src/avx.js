@@ -1656,3 +1656,6 @@ function AvImportBanner(){
     (0,q.jsx)("button",{className:"btn primary",onClick:()=>window.dispatchEvent(new Event("av:import")),children:"Importar agora"}),
     (0,q.jsx)("button",{className:"btn ghost",onClick:close,children:"Agora não"})]});
 }
+
+/* marca quando a Home está aberta (o grupo de configurações do topo só aparece nela) */
+function AvHomeFlag(){x.useEffect(()=>{const r=document.documentElement;r.classList.add("av-on-home");return()=>r.classList.remove("av-on-home")},[]);return null}

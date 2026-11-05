@@ -432,7 +432,7 @@ sub("e.name]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`", "e.name,Wi.auth?.m
 # ---- Tela inicial enxuta: só o dia, números, horas e quem está online ----
 cut("(0,q.jsxs)(`div`,{className:`dh-chips`", "]}),(0,q.jsx)(Fu,{done:u.doneToday.length,total:m})", "")
 cut("p.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)(`h3`,{className:`day-sec suggest`", "u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`", "")
-sub("(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`", "(0,q.jsx)(AvImportBanner,{}),(0,q.jsx)(AvNotifyAsk,{}),(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`div`,{className:`av-col`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`")
+sub("(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`", "(0,q.jsx)(AvHomeFlag,{}),(0,q.jsx)(AvImportBanner,{}),(0,q.jsx)(AvNotifyAsk,{}),(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`div`,{className:`av-col`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`")
 sub("(0,q.jsx)(cl,{rows:5})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[", "(0,q.jsx)(cl,{rows:5})]}),(0,q.jsx)(AvHomeDash,{lists:{done:u.doneToday.map(t=>t.title),todo:[...u.dueToday,...u.doing].filter((t,i,a)=>a.findIndex(z=>z.id===t.id)===i).map(t=>t.title),late:u.late.map(t=>t.title)},waiting:u.waiting})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[")
 cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
 # foto de perfil: botão da conta, menu e janela
