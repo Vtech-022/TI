@@ -1328,3 +1328,23 @@ html.av-ds:root .ava-ico .av-orb{display:block}
   html.av-ds:root:root #root .rail .rail-item.active:before{display:block!important;content:""!important;position:absolute!important;left:-9px!important;top:12px!important;bottom:12px!important;right:auto!important;width:3px!important;height:auto!important;border-radius:3px!important;background:var(--accent)!important}
   html.av-ds:root:root #root .rail .rail-item.active:after{display:none!important}
 }
+/* ===== v9: desempenho, linhas no bloco de anotações (escuro), cor da faixa de colegas ===== */
+/* papel de parede sem filtro de desfoque (o desfoque vem da resolução baixa) */
+html.av-ds:root:root canvas.wallpaper{filter:none!important;transform:none!important}
+/* nada de desfoque de fundo nos cartões (pesava ao rolar) */
+html.av-ds:root:root :is(.panel,.day-list-card,.tlist,.avh-rows li,.avo-strip,.topbar>*){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.av-orb-swirl-static{opacity:1}
+/* anotações no escuro: mesmas linhas do modo claro */
+html.av-ds[data-avant-theme=dark]:root:root .notes-card textarea{background:repeating-linear-gradient(#0000 0 27px,color-mix(in srgb,#fff 10%,transparent) 27px 28px)!important;line-height:28px!important;color:var(--text)!important}
+/* faixa de colegas com a cor escolhida em Temas › Barra de colegas */
+@media (min-width:821px){
+  html.av-ds.av-fr-custom:root:root body>.avo-strip.avo-v2{background:linear-gradient(180deg,color-mix(in srgb,#fff 8%,var(--avfriends)),var(--avfriends) 45%,color-mix(in srgb,#000 18%,var(--avfriends)))!important;border-color:var(--avfriendsedge)!important}
+}
+html.av-ds.av-fr-custom:root:root .avo-v2 .avo-nm{color:var(--avfriendsink)!important;opacity:.85}
+html.av-ds.av-fr-custom:root:root .avo-v2 .avo-face.is-on .avo-nm{opacity:1}
+html.av-ds.av-fr-custom:root:root .avo-v2 .avo-count{color:var(--avfriendsink)}
+html.av-ds.av-fr-custom:root:root .avo-v2 .avo-ring>.av-img,html.av-ds.av-fr-custom:root:root .avo-v2 .avo-ring>.av-ini,html.av-ds.av-fr-custom:root:root .avo-v2 .avo-dot{border-color:var(--avfriends)!important}
+.avib{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:12px 16px;border-radius:16px;background:color-mix(in srgb,var(--accent) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line))}
+.avib-t{display:flex;flex-direction:column;gap:2px;flex:1;min-width:220px}
+.avib-t strong{color:var(--heading);font-size:14px}
+.avib-t span{color:var(--text-2);font-size:12.5px}

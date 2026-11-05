@@ -432,7 +432,7 @@ sub("e.name]})}),ed.map(t=>(0,q.jsx)(`td`,{className:`mono`", "e.name,Wi.auth?.m
 # ---- Tela inicial enxuta: só o dia, números, horas e quem está online ----
 cut("(0,q.jsxs)(`div`,{className:`dh-chips`", "]}),(0,q.jsx)(Fu,{done:u.doneToday.length,total:m})", "")
 cut("p.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsxs)(`h3`,{className:`day-sec suggest`", "u.doneToday.length>0&&(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)(`h3`,{className:`day-sec done`", "")
-sub("(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`", "(0,q.jsx)(AvNotifyAsk,{}),(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`div`,{className:`av-col`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`")
+sub("(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`", "(0,q.jsx)(AvImportBanner,{}),(0,q.jsx)(AvNotifyAsk,{}),(0,q.jsxs)(`div`,{className:`day-grid`,children:[(0,q.jsxs)(`div`,{className:`av-col`,children:[(0,q.jsxs)(`section`,{className:`day-list-card`")
 sub("(0,q.jsx)(cl,{rows:5})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[", "(0,q.jsx)(cl,{rows:5})]}),(0,q.jsx)(AvHomeDash,{lists:{done:u.doneToday.map(t=>t.title),todo:[...u.dueToday,...u.doing].filter((t,i,a)=>a.findIndex(z=>z.id===t.id)===i).map(t=>t.title),late:u.late.map(t=>t.title)},waiting:u.waiting})]}),(0,q.jsxs)(`div`,{className:`day-side`,children:[")
 cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onChange:t})", "")
 # foto de perfil: botão da conta, menu e janela
@@ -448,8 +448,8 @@ sub("e.setProperty(`--accent`,t),e.setProperty(`--accent-strong`", "__avInk(l,b)
 sub("[b,l.accent,l.font,l.scale,l.wallpaper]", "[b,l.accent,l.accent2,l.deep,l.card,l.bg,l.hero,l.palette,JSON.stringify(l.areas||{}),l.density,l.radius,l.boldFocus,l.friends,l.font,l.scale,l.wallpaper]")
 
 # ---- Desempenho: papel de parede animado mais leve (30 quadros/s e resolução 1x) ----
-sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=1")
-sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnimationFrame(g)}", "g=e=>{p=requestAnimationFrame(g);if(e-(g.l||0)<40||window.__avScrolling)return;g.l=e;let t=Math.min(.1,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t)}")
+sub("u=nu[e](l),d=Math.min(2,window.devicePixelRatio||1)", "u=nu[e](l),d=__avWallRes(e)")
+sub("g=e=>{let t=Math.min(.05,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t),p=requestAnimationFrame(g)}", "g=e=>{p=requestAnimationFrame(g);if(e-(g.l||0)<50||window.__avScrolling||document.hidden)return;g.l=e;let t=Math.min(.1,(e-m)/1e3);m=e,u.draw(s,(e-h)/1e3,t)}")
 
 # ---- Agenda de hoje: compromissos + tarefas com prazo hoje (minhas e da equipe) ----
 sub('children:h.length?(0,q.jsx)(`ul`,{className:`today-events`,children:h.map(e=>(0,q.jsxs)(`li`,{className:`clickable`,onClick:()=>i(`/agenda?evento=${e.id}`),children:[(0,q.jsx)(`span`,{className:`te-time`,children:e.all_day?`Dia todo`:fa(e.start_at)}),(0,q.jsxs)(`span`,{children:[(0,q.jsx)(`strong`,{children:e.title}),e.location&&(0,q.jsxs)(`small`,{className:`muted`,children:[` · `,e.location]})]})]},e.id))}):(0,q.jsx)(`p`,{className:`small muted`,style:{padding:`4px 20px 16px`},children:`Nenhum compromisso na agenda hoje.`})', 'children:(0,q.jsx)(AvAgendaToday,{events:h,mine:u.dueToday,today:c,go:i})')
