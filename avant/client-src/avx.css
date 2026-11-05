@@ -1184,3 +1184,147 @@ html.av-ds:root:root:not([data-avant-theme=dark]) .tlist{background:var(--surfac
 html.av-ds.has-wallpaper:root:root:not([data-avant-theme=dark]) .tlist{background:color-mix(in srgb,var(--surface-2) 94%,transparent)!important}
 html.av-ds:root .tlist>header{border-bottom:1px solid var(--line);margin:0 -10px 10px;padding:4px 16px 10px!important}
 html.av-ds:root:root:not([data-avant-theme=dark]) .tcard{border-color:var(--line-strong)!important}
+/* modal Importar do sistema antigo */
+.avi{display:flex;flex-direction:column;gap:10px}
+.avi-lead{margin:0;color:var(--text-2);font-size:13.5px;line-height:1.5}
+.avi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.avi-grid .field{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--text-2)}
+.avi-h{margin:6px 0 0;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
+.avi-opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--surface-2)}
+.avi-opt input{margin-top:3px;accent-color:var(--accent)}
+.avi-opt span{display:flex;flex-direction:column;gap:2px}
+.avi-opt strong{font-size:13.5px;color:var(--heading)}
+.avi-opt small{font-size:12px;color:var(--text-3)}
+.avi-sub{margin-left:26px}
+.avi-res ul{list-style:none;padding:0;margin:8px 0 10px;display:flex;flex-direction:column;gap:8px}
+.avi-res li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.avi-res li i{font-style:normal;font-weight:800;color:var(--text-3)}
+.avi-res li.ok i{color:#16a34a}
+@media (max-width:600px){.avi-grid{grid-template-columns:1fr}}
+
+/* =====================================================================
+   v7 — menu metálico/vidro, faixa de colegas de volta (todos + quem está online),
+   assistente em "orbe" de cor, calendário redesenhado e divisórias nas listas
+   ===================================================================== */
+/* cápsula do menu: metal polido */
+@media (min-width:821px){
+  html.av-ds:root:root #root .rail .rail-nav{
+    background:linear-gradient(180deg,color-mix(in srgb,#fff 7%,var(--surface)),var(--surface) 45%,color-mix(in srgb,#000 6%,var(--surface)))!important;
+    border:1px solid var(--line-strong)!important;border-top-color:color-mix(in srgb,#fff 35%,var(--line))!important;
+    box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 45%,transparent),inset 0 -1px 0 color-mix(in srgb,#000 8%,transparent),0 10px 26px color-mix(in srgb,var(--text) 10%,transparent)!important}
+  html.av-ds[data-avant-theme=dark]:root:root #root .rail .rail-nav{
+    background:linear-gradient(180deg,color-mix(in srgb,#fff 9%,var(--surface)),var(--surface) 40%,color-mix(in srgb,#000 30%,var(--surface)))!important;
+    border-color:#ffffff14!important;border-top-color:#ffffff2e!important;box-shadow:inset 0 1px 0 #ffffff1f,0 14px 30px #00000080!important}
+  html.av-ds:root:root #root .rail .rail-item:hover{background:linear-gradient(180deg,color-mix(in srgb,var(--text) 9%,transparent),color-mix(in srgb,var(--text) 4%,transparent))!important;box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 30%,transparent)!important}
+  /* aba ativa: botão de vidro/metal com reflexo */
+  html.av-ds:root:root #root .rail .rail-item.active{
+    background:radial-gradient(120% 80% at 30% 0%,#ffffff70,#ffffff00 55%),linear-gradient(165deg,color-mix(in srgb,#fff 22%,var(--accent)),var(--accent) 48%,color-mix(in srgb,#000 32%,var(--accent)))!important;
+    box-shadow:inset 0 1px 0 #ffffff80,inset 0 -3px 8px #00000038,0 0 0 1px color-mix(in srgb,#000 18%,var(--accent)),0 8px 18px color-mix(in srgb,var(--accent) 40%,transparent)!important}
+  html.av-ds:root:root #root .rail .rail-brand .brand-mark{filter:drop-shadow(0 4px 10px color-mix(in srgb,var(--accent) 35%,transparent))}
+}
+
+/* faixa de colegas (todos, online primeiro) — cápsula do mesmo material do menu, presa na borda direita */
+html.av-ds:root:root .avo-strip.avo-v2{display:flex!important}
+@media (min-width:821px){
+  html.av-ds:root:root #root .main{padding-right:92px}
+  html.av-ds:root:root body>.avo-strip.avo-v2{position:fixed!important;right:12px!important;top:84px!important;bottom:auto!important;max-height:calc(100vh - 170px);z-index:40;
+    display:flex!important;flex-direction:column;align-items:center;gap:10px;padding:12px 8px 14px!important;width:72px;border-radius:24px!important;overflow:hidden!important;
+    background:linear-gradient(180deg,color-mix(in srgb,#fff 7%,var(--surface)),var(--surface) 45%,color-mix(in srgb,#000 6%,var(--surface)))!important;
+    border:1px solid var(--line-strong)!important;border-top-color:color-mix(in srgb,#fff 35%,var(--line))!important;
+    box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 45%,transparent),0 10px 26px color-mix(in srgb,var(--text) 10%,transparent)!important}
+  html.av-ds[data-avant-theme=dark]:root:root body>.avo-strip.avo-v2{background:linear-gradient(180deg,color-mix(in srgb,#fff 9%,var(--surface)),var(--surface) 40%,color-mix(in srgb,#000 30%,var(--surface)))!important;border-color:#ffffff14!important;border-top-color:#ffffff2e!important;box-shadow:inset 0 1px 0 #ffffff1f,0 14px 30px #00000080!important}
+  html.av-ds:root:root body>.avo-strip.avo-v2:before,html.av-ds:root:root body>.avo-strip.avo-v2:after{display:none!important}
+}
+.avo-v2 .avo-count{display:flex;align-items:center;gap:3px;font:700 12px/1 var(--font,system-ui);color:var(--heading);padding:4px 8px;border-radius:999px;background:color-mix(in srgb,#22c55e 14%,transparent)}
+.avo-v2 .avo-count i{width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:3px;box-shadow:0 0 0 3px color-mix(in srgb,#22c55e 25%,transparent)}
+.avo-v2 .avo-count small{color:var(--text-3);font-weight:600}
+.avo-v2 .avo-list{display:flex;flex-direction:column;align-items:center;gap:10px;overflow-y:auto;scrollbar-width:none;padding:2px 0}
+.avo-v2 .avo-list::-webkit-scrollbar{display:none}
+html.av-ds:root:root .avo-v2 .avo-face{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;padding:0;cursor:pointer}
+html.av-ds:root:root .avo-v2 .avo-ring{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--line);padding:2px}
+html.av-ds:root:root .avo-v2 .avo-ring.on{background:conic-gradient(from 200deg,#22c55e,#16a34a,#4ade80,#22c55e)}
+html.av-ds:root:root .avo-v2 .avo-ring>.av-img,html.av-ds:root:root .avo-v2 .avo-ring>.av-ini{width:38px!important;height:38px!important;border:2px solid var(--surface)!important;box-shadow:none!important}
+html.av-ds:root:root .avo-v2 .avo-dot{position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:var(--text-3);border:2px solid var(--surface)!important}
+html.av-ds:root:root .avo-v2 .avo-dot.on{background:#22c55e}
+html.av-ds:root:root .avo-v2 .avo-face.off .avo-ring{opacity:.55;filter:grayscale(.6)}
+html.av-ds:root:root .avo-v2 .avo-nm{display:block!important;font:600 10.5px/1.1 var(--font,system-ui);color:var(--text-2)!important;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html.av-ds:root:root .avo-v2 .avo-face.is-on .avo-nm{color:var(--heading)!important}
+html.av-ds:root:root .avo-v2 .avo-face:not(:disabled):hover .avo-ring{transform:scale(1.07)}
+@media (max-width:820px){
+  html.av-ds:root:root .avo-strip.avo-v2{position:static!important;flex-direction:row;align-items:center;gap:10px;padding:8px 12px!important;margin:0 0 12px;border-radius:16px!important;background:var(--surface)!important;border:1px solid var(--line)!important;overflow-x:auto}
+  html.av-ds:root:root .avo-v2 .avo-list{flex-direction:row;overflow-x:auto}
+  html.av-ds:root:root .avo-v2 .avo-nm{display:none!important}
+}
+
+/* assistente: "orbe" só de cores (sem desenho), cores do tema em movimento lento */
+html.av-ds:root .ava-fab{width:56px!important;height:56px!important;border-radius:18px!important;padding:0!important;overflow:hidden;background:var(--accent)!important;box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 38%,transparent),0 2px 6px #00000026!important}
+.ava-orb{position:absolute;inset:-30%;border-radius:inherit;
+  background:radial-gradient(42% 42% at 30% 22%,color-mix(in srgb,#000 70%,var(--accent)) 0%,transparent 70%),
+    radial-gradient(50% 50% at 75% 80%,color-mix(in srgb,var(--accent2) 92%,#fff) 0%,transparent 72%),
+    radial-gradient(60% 60% at 20% 85%,color-mix(in srgb,var(--accent) 55%,#ff4fd8) 0%,transparent 70%),
+    radial-gradient(55% 55% at 85% 20%,color-mix(in srgb,var(--accent) 60%,#7c4dff) 0%,transparent 70%),var(--accent);
+  filter:blur(6px) saturate(1.15);animation:avOrb 14s ease-in-out infinite alternate}
+html.av-ds:root .ava-fab .ava-orb{inset:-20%}
+html.av-ds:root .ava-fab:after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 #ffffff59,inset 0 0 0 1px #ffffff22;pointer-events:none}
+@keyframes avOrb{0%{transform:rotate(0) scale(1)}50%{transform:rotate(140deg) scale(1.08)}100%{transform:rotate(260deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.ava-orb{animation:none}}
+html.av-ds:root .ava-ico{width:28px;height:28px;border-radius:9px;overflow:hidden;position:relative;display:inline-block;flex:none}
+html.av-ds:root .ava-ico>svg{display:none}
+html.av-ds:root .ava-ico:before{content:"";position:absolute;inset:-25%;background:radial-gradient(45% 45% at 30% 25%,color-mix(in srgb,#000 65%,var(--accent)),transparent 70%),radial-gradient(50% 50% at 75% 80%,var(--accent2),transparent 72%),radial-gradient(55% 55% at 85% 20%,color-mix(in srgb,var(--accent) 60%,#7c4dff),transparent 70%),var(--accent);filter:blur(4px)}
+
+/* divisórias: título dos painéis e itens de lista separados por linha */
+html.av-ds:root .panel-head{border-bottom:1px solid var(--line)!important;padding-bottom:12px!important;margin-bottom:0}
+html.av-ds:root .list-simple>li{border-bottom:1px solid var(--line)!important}
+html.av-ds:root .list-simple>li:last-child{border-bottom:0!important}
+html.av-ds:root .day-items>li+li{border-top:1px solid var(--line)}
+html.av-ds:root :is(.today-events,.avc2-list)>li+li{border-top:1px solid var(--line)}
+html.av-ds:root .day-sec{border-bottom:1px solid var(--line);padding-bottom:6px!important;margin-bottom:6px!important}
+html.av-ds:root button.day-sec.avfold{border-bottom:1px solid var(--line)!important;border-radius:8px 8px 0 0}
+
+/* ===== Calendário redesenhado ===== */
+html.av-ds:root .avc2-head{padding-bottom:14px;margin-bottom:12px!important;border-bottom:1px solid var(--line)}
+html.av-ds:root .avc2-title{font-size:24px!important}
+html.av-ds:root .avc2-ctl{gap:8px!important}
+html.av-ds:root .avc2-ctl select{height:36px;border-radius:10px!important}
+html.av-ds:root:root .avc2-round{width:34px!important;height:34px!important;border-radius:10px!important;background:var(--surface-2)!important;color:var(--text)!important;border:1px solid var(--line-strong)!important;box-shadow:none!important;font-size:18px!important}
+html.av-ds:root:root .avc2-round:hover{background:var(--accent)!important;color:var(--avaccentink)!important;border-color:transparent!important}
+html.av-ds:root .avc2-today{height:34px!important;border-radius:10px!important;background:var(--surface-2)!important;border:1px solid var(--line-strong)!important;color:var(--text)!important}
+html.av-ds:root .avc2-grid{gap:6px!important}
+html.av-ds:root .avc2-dow{font-size:11px!important;color:var(--text-3)!important;padding-bottom:8px!important}
+html.av-ds:root:root .avc2-cell{min-height:100px;border-radius:12px!important;background:var(--surface)!important;border:1px solid var(--line)!important;box-shadow:none!important;padding:8px!important;transition:border-color .15s,background .15s}
+html.av-ds[data-avant-theme=dark]:root:root .avc2-cell{background:color-mix(in srgb,#fff 3%,var(--surface))!important}
+html.av-ds:root:root .avc2-cell.wknd{background:var(--surface-2)!important}
+html.av-ds[data-avant-theme=dark]:root:root .avc2-cell.wknd{background:color-mix(in srgb,#000 18%,var(--surface))!important}
+html.av-ds:root:root .avc2-cell:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))!important;background:color-mix(in srgb,var(--accent) 5%,var(--surface))!important;transform:none!important}
+html.av-ds:root:root .avc2-cell.empty{background:transparent!important;border:0!important}
+html.av-ds:root:root .avc2-n{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:8px;font-size:13px!important;color:var(--text-2)}
+html.av-ds:root:root .avc2-cell.today{background:color-mix(in srgb,var(--accent) 7%,var(--surface))!important;border:1.5px solid var(--accent)!important;color:var(--text)!important}
+html.av-ds:root:root .avc2-cell.today .avc2-n{background:var(--accent);color:var(--avaccentink)}
+html.av-ds:root:root .avc2-cell.today .avc2-chip{color:inherit!important;background:color-mix(in srgb,var(--accent) 14%,transparent)!important}
+html.av-ds:root:root .avc2-cell.today .avc2-more{color:var(--text-2)!important}
+html.av-ds:root:root .avc2-cell.sel{outline:none!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)!important;border-color:var(--accent)!important}
+html.av-ds:root .avc2-side{border-radius:var(--avradius,18px)!important}
+html.av-ds:root .avc2-side-head{padding-bottom:12px;margin-bottom:10px;border-bottom:1px solid var(--line)}
+html.av-ds:root .avc2-side-head h2{font-size:20px!important;color:var(--heading)}
+/* ===== v8: orbe realista da I.A. e aba ativa sóbria ===== */
+html.av-ds:root .ava-fab{width:58px!important;height:58px!important;border-radius:50%!important;background:transparent!important;border:0!important;overflow:visible!important;box-shadow:none!important}
+html.av-ds:root .ava-fab:after{display:none!important}
+html.av-ds:root .ava-fab .av-orb{display:block;filter:drop-shadow(0 10px 16px color-mix(in srgb,var(--accent) 40%,transparent)) drop-shadow(0 3px 4px #0000004d);transition:transform .2s}
+html.av-ds:root .ava-fab:hover .av-orb{transform:scale(1.06)}
+.av-orb-swirl{transform-origin:50px 50px;animation:avOrbSpin 18s linear infinite}
+@keyframes avOrbSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.av-orb-swirl{animation:none}}
+html.av-ds:root .ava-ico{width:28px;height:28px;border-radius:50%;overflow:visible}
+html.av-ds:root .ava-ico:before{display:none}
+html.av-ds:root .ava-ico .av-orb{display:block}
+/* aba ativa do menu: botão elevado e discreto (sem bolha brilhante); ícone na cor de destaque + marcador */
+@media (min-width:821px){
+  html.av-ds:root:root #root .rail .rail-item.active{
+    background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),color-mix(in srgb,var(--accent) 9%,var(--surface)))!important;
+    color:var(--accent)!important;
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 50%,transparent)!important}
+  html.av-ds[data-avant-theme=dark]:root:root #root .rail .rail-item.active{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 26%,var(--surface)),color-mix(in srgb,var(--accent) 16%,var(--surface)))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 40%,transparent),inset 0 1px 0 #ffffff1a!important}
+  html.av-ds:root:root #root .rail .rail-item.active svg{color:var(--accent)!important}
+  html.av-ds:root:root #root .rail .rail-item.active:before{display:block!important;content:""!important;position:absolute!important;left:-9px!important;top:12px!important;bottom:12px!important;right:auto!important;width:3px!important;height:auto!important;border-radius:3px!important;background:var(--accent)!important}
+  html.av-ds:root:root #root .rail .rail-item.active:after{display:none!important}
+}

@@ -297,3 +297,44 @@ test("importar do site antigo: junta no quadro de quem já tem conta e guarda pa
   assert.equal(ayla.items.length, 1);
   assert.equal(ayla.items[0].title, "Atualizar painel");
 });
+
+test("importar do sistema antigo (como importar favoritos): entra com o login antigo e traz quadro, tarefas compartilhadas e dados pessoais", async () => {
+  const { makeCtx: mk, register: reg, body: bd } = await import("./helpers.mjs");
+  const { handle } = await import("../netlify/functions/lib/app.mjs");
+  // sistema antigo
+  const old = mk();
+  const oV = await reg(old, "Victor Andrade", "Antiga@2026");
+  const oA = await reg(old, "Ana Souza");
+  const oVid = oV.data.user.id;
+  await oV.c.put(`/team/${oVid}`, { base: [], items: [{ id: "v1", title: "Fechar presença", status: "concluida" }] });
+  await oV.c.post(`/team/${oA.data.user.id}/cards`, { cards: [{ id: "a1", title: "Revisar revista" }] });
+  await oV.c.post("/shared-tasks", { title: "Reunião de alinhamento", visibility: "equipe", due_date: "2026-11-10" });
+  const pessoal = new TextEncoder().encode('{"tasks":[1,2,3]}');
+  const put = await oV.c.call("PUT", "/data", pessoal, { "x-force": "1" });
+  assert.equal(put.status, 200);
+  // sistema novo, ligado ao antigo
+  const neo = mk();
+  neo.fetch = (url, init) => handle(new Request(url, init), old);
+  const nV = await reg(neo, "Victor Andrade");
+  await reg(neo, "Ana Souza");
+  // senha errada do antigo
+  const bad = await nV.c.post("/import/old", { name: "Victor Andrade", password: "errada" });
+  assert.equal(bad.status, 400);
+  const r = await nV.c.post("/import/old", { name: "Victor Andrade", password: "Antiga@2026" });
+  assert.equal(r.status, 200);
+  const j = await bd(r);
+  assert.equal(j.team.cards, 2);
+  assert.equal(j.shared.added, 1);
+  assert.equal(j.mine.status, "importado");
+  const team = await bd(await nV.c.get("/team"));
+  assert.ok(team.people.find((p) => p.name === "Ana Souza").items.some((i) => i.title === "Revisar revista"));
+  const st = await bd(await nV.c.get("/shared-tasks"));
+  assert.ok(st.tasks.some((t) => t.title === "Reunião de alinhamento" && t.owner === nV.data.user.id));
+  const data = await nV.c.get("/data");
+  assert.equal(new TextDecoder().decode(new Uint8Array(await data.arrayBuffer())), '{"tasks":[1,2,3]}');
+  // de novo: não duplica e não sobrescreve os dados pessoais sem pedir
+  const j2 = await bd(await nV.c.post("/import/old", { name: "Victor Andrade", password: "Antiga@2026" }));
+  assert.equal(j2.team.cards, 0);
+  assert.equal(j2.shared.added, 0);
+  assert.equal(j2.mine.status, "ja_tem_dados");
+});

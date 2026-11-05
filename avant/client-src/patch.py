@@ -438,7 +438,7 @@ cut("(0,q.jsxs)(`div`,{className:`day-bottom`,", "]})}function zu({value:e,onCha
 # foto de perfil: botão da conta, menu e janela
 sub("children:l.trim().charAt(0).toUpperCase()});return e?", "children:(0,q.jsx)(AvPhoto,{id:window.__avUid,name:l,fallback:l.trim().charAt(0).toUpperCase()})});return e?")
 sub("(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))", "(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new CustomEvent(`prumo:chat`,{detail:{}}))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Conversas`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.Notification&&Notification.requestPermission().then(p=>alert(p===`granted`?`Notificações ativadas.`:p===`denied`?`As notificações estão bloqueadas no navegador. Libere nas permissões do site (cadeado ao lado do endereço).`:`Notificações não ativadas.`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Ativar notificações`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:avatar`))),children:[(0,q.jsx)(ac,{\"aria-hidden\":!0}),` Meu perfil (nome e foto)`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`prumo:code`)))")
-sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),(0,q.jsx)(AvChat,{}),(0,q.jsx)(AvAssistant,{}),(0,q.jsx)(AvLightbox,{}),(0,q.jsx)(AvNotifier,{}),")
+sub("(0,q.jsx)(AvCodeModal,{}),", "(0,q.jsx)(AvCodeModal,{}),(0,q.jsx)(AvAvatarModal,{}),(0,q.jsx)(AvChat,{}),(0,q.jsx)(AvOnline,{}),(0,q.jsx)(AvAssistant,{}),(0,q.jsx)(AvLightbox,{}),(0,q.jsx)(AvNotifier,{}),")
 
 # ---- Paletas prontas + cores secundárias vivas ----
 sub("className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`", "className:`pz-sec`,children:[(0,q.jsx)(`h3`,{children:`Papel de parede`")
@@ -484,14 +484,22 @@ sub("</style>", AVX_CSS + "\n</style>") if s.count("</style>") == 1 else None
 
 # ---- Novo nome (Zênite) e novo logotipo (azul, branco e amarelo) ----
 import re as _re, urllib.parse as _up
-LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-            '<rect x="2" y="2" width="60" height="60" rx="17" fill="#2563eb"/>'
-            '<path d="M20 20H44L20 44H44" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>'
-            '<circle cx="46" cy="18" r="4" fill="#f5b301"/></svg>')
-NEW_FU = ("function fu({size:e=44}){return(0,q.jsxs)(`svg`,{viewBox:`0 0 64 64`,width:e,height:e,\"aria-hidden\":!0,className:`brand-mark`,children:["
-          "(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`17`,fill:`var(--accent,#2563eb)`}),"
-          "(0,q.jsx)(`path`,{d:`M20 20H44L20 44H44`,fill:`none`,stroke:`var(--avaccentink,#fff)`,strokeWidth:`6.5`,strokeLinecap:`round`,strokeLinejoin:`round`}),"
-          "(0,q.jsx)(`circle`,{cx:`46`,cy:`18`,r:`4`,fill:`var(--accent2,#f5b301)`})]})}")
+LOGO_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>'
+            '<linearGradient id="b" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#7aa2f7"/><stop offset=".5" stop-color="#2563eb"/><stop offset="1" stop-color="#14317e"/></linearGradient>'
+            '<linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>'
+            '<rect x="2" y="2" width="60" height="60" rx="18" fill="url(#b)"/><path d="M4 20C4 10 10 4 20 4H44C54 4 60 10 60 20V24C46 30 18 30 4 24Z" fill="url(#h)"/>'
+            '<path d="M12 36H20L24.5 26L31 44L36.5 31L40.5 37L52 23" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'
+            '<circle cx="52" cy="23" r="3.6" fill="#f5b301" stroke="#fff" stroke-width="1.4"/></svg>')
+NEW_FU = ("function fu({size:e=44}){let k=(0,x.useRef)(`r`+Math.random().toString(36).slice(2,7)).current;return(0,q.jsxs)(`svg`,{viewBox:`0 0 64 64`,width:e,height:e,\"aria-hidden\":!0,className:`brand-mark`,children:[(0,q.jsxs)(`defs`,{children:["
+          "(0,q.jsxs)(`linearGradient`,{id:k+`b`,x1:`0`,y1:`0`,x2:`.4`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,style:{stopColor:`color-mix(in srgb,var(--accent,#2563eb) 70%,#fff)`}}),(0,q.jsx)(`stop`,{offset:`.5`,style:{stopColor:`var(--accent,#2563eb)`}}),(0,q.jsx)(`stop`,{offset:`1`,style:{stopColor:`color-mix(in srgb,var(--accent,#2563eb) 55%,#04050a)`}})]}),"
+          "(0,q.jsxs)(`linearGradient`,{id:k+`h`,x1:`0`,y1:`0`,x2:`0`,y2:`1`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#fff`,stopOpacity:`.55`}),(0,q.jsx)(`stop`,{offset:`1`,stopColor:`#fff`,stopOpacity:`0`})]}),"
+          "(0,q.jsxs)(`linearGradient`,{id:k+`l`,x1:`0`,y1:`0`,x2:`1`,y2:`0`,children:[(0,q.jsx)(`stop`,{offset:`0`,stopColor:`#fff`,stopOpacity:`.75`}),(0,q.jsx)(`stop`,{offset:`.6`,stopColor:`#fff`}),(0,q.jsx)(`stop`,{offset:`1`,style:{stopColor:`color-mix(in srgb,var(--accent2,#f5b301) 70%,#fff)`}})]}),"
+          "(0,q.jsx)(`filter`,{id:k+`s`,x:`-20%`,y:`-20%`,width:`140%`,height:`140%`,children:(0,q.jsx)(`feDropShadow`,{dx:`0`,dy:`1.6`,stdDeviation:`1.4`,floodColor:`#000`,floodOpacity:`.35`})})]}),"
+          "(0,q.jsx)(`rect`,{x:`2`,y:`2`,width:`60`,height:`60`,rx:`18`,fill:`url(#${k}b)`}),"
+          "(0,q.jsx)(`rect`,{x:`2.5`,y:`2.5`,width:`59`,height:`59`,rx:`17.5`,fill:`none`,stroke:`#fff`,strokeOpacity:`.28`}),"
+          "(0,q.jsx)(`path`,{d:`M4 20C4 10 10 4 20 4H44C54 4 60 10 60 20V24C46 30 18 30 4 24Z`,fill:`url(#${k}h)`}),"
+          "(0,q.jsx)(`path`,{d:`M12 36H20L24.5 26L31 44L36.5 31L40.5 37L52 23`,fill:`none`,stroke:`url(#${k}l)`,strokeWidth:`5`,strokeLinecap:`round`,strokeLinejoin:`round`,filter:`url(#${k}s)`}),"
+          "(0,q.jsx)(`circle`,{cx:`52`,cy:`23`,r:`3.6`,style:{fill:`var(--accent2,#f5b301)`},stroke:`#fff`,strokeWidth:`1.4`})]})}")
 _i = s.index("function fu({size:e=44}){"); _j = s.index("function ", _i + 10)
 s = s[:_i] + NEW_FU + s[_j:]
 _m = _re.search(r'<link rel="icon" type="image/svg\+xml" href="data:image/svg\+xml,[^"]*">', s)
@@ -561,7 +569,17 @@ sub("document.documentElement.classList.toggle(`has-wallpaper`,l.wallpaper!==`ne
 sub("t.map(({it:e,m:t})=>{let n=e.due&&r", "__avDayGroups(e.key,t,({it:e,m:t})=>{let n=e.due&&r")
 
 # Equipe online: cartão pequeno no topo da coluna direita da Home
-sub("(0,q.jsxs)(`div`,{className:`day-side`,children:[(0,q.jsx)(Lu,{today:c}),", "(0,q.jsxs)(`div`,{className:`day-side`,children:[(0,q.jsx)(AvFriends,{}),(0,q.jsx)(Lu,{today:c}),")
+
+# ---- Novo nome: Ritmo (rotina diária da equipe) ----
+s = s.replace("Zênite · Central de Trabalho</title>", "Ritmo · Rotina da equipe</title>")
+s = s.replace("className:`rb-word`,children:`zênite`", "className:`rb-word`,children:`ritmo`")
+s = s.replace("Zênite", "Ritmo")
+s = s.replace("Central de Acompanhamento do Trabalho", "Rotina da equipe")
+
+
+# Menu da conta: "Importar do sistema antigo" (igual a importar favoritos de outro navegador)
+sub("children:[(0,q.jsx)(Ns,{\"aria-hidden\":!0}),` Personalizar`]}),", "children:[(0,q.jsx)(Ns,{\"aria-hidden\":!0}),` Personalizar`]}),(0,q.jsxs)(`button`,{role:`menuitem`,onClick:()=>(r(!1),window.dispatchEvent(new Event(`av:import`))),children:[(0,q.jsx)(AvIcon,{n:`file`,s:16}),` Importar do sistema antigo`]}),")
+sub("(0,q.jsx)(AvLightbox,{}),", "(0,q.jsx)(AvLightbox,{}),(0,q.jsx)(AvImportOld,{}),")
 _bid = _hl.sha256(s.encode("utf8")).hexdigest()[:12]
 s = s.replace("<head>", '<head><meta name="av-build" content="' + _bid + '">', 1)
 OUT.parent.mkdir(parents=True, exist_ok=True)

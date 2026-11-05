@@ -1034,13 +1034,17 @@ async function handleImportTeam(request, ctx) {
   if (user.role !== "admin") throw new ApiError(403, "sem_permissao", "Somente o administrador pode importar.");
   const body = await readJson(request);
   if (!Array.isArray(body.people) || body.people.length > 200) throw new ApiError(400, "pessoas", "Lista de pessoas inválida.");
+  return json(200, await importTeamPeople(ctx, body.people));
+}
+
+async function importTeamPeople(ctx, people) {
   const clean = (list) => {
     validateCards(list, "importados");
     return list.map((c) => ({ ...c, id: String(c.id).slice(0, 80), title: String(c.title ?? "").slice(0, 200) || "Sem título" }));
   };
   const out = { merged: [], pending: [], cards: 0, skipped: 0 };
   const byUid = new Map();
-  for (const p of body.people) {
+  for (const p of people) {
     const name = normalizeName(String(p?.name ?? "").replace(/ \(conta removida\)$/, ""));
     if (!name) continue;
     const items = clean(Array.isArray(p.items) ? p.items : []);
@@ -1079,6 +1083,103 @@ async function handleImportTeam(request, ctx) {
       board.version++;
       return board;
     });
+  }
+  return out;
+}
+
+/** "Importar do sistema antigo" (igual a importar favoritos de outro navegador): a pessoa informa o login
+ *  do sistema antigo; o servidor entra lá em nome dela, lê o que ela tem acesso e traz para cá.
+ *  A senha não é guardada. */
+const OLD_SITE = "https://avant-central-trabalho.netlify.app";
+async function handleImportOld(request, ctx) {
+  const user = await requireUser(request, ctx);
+  const body = await readJson(request);
+  const want = { team: body.team !== false, shared: body.shared !== false, mine: body.mine !== false };
+  const base = String(ctx.env.AVANT_OLD_URL || OLD_SITE).replace(/\/$/, "");
+  const doFetch = ctx.fetch ?? fetch;
+  if (typeof body.name !== "string" || !body.name.trim() || typeof body.password !== "string" || !body.password) {
+    throw new ApiError(400, "login", "Informe o nome e a senha que você usava no sistema antigo.");
+  }
+  let login;
+  try {
+    login = await doFetch(`${base}/api/auth/login`, { method: "POST", headers: { "content-type": "application/json", "x-avant": "1" }, body: JSON.stringify({ name: body.name, password: body.password }) });
+  } catch {
+    throw new ApiError(502, "antigo_fora", "Não foi possível falar com o sistema antigo agora. Tente de novo em instantes.");
+  }
+  if (!login.ok) {
+    const j = await login.json().catch(() => ({}));
+    throw new ApiError(400, "login_antigo", j.message ? `Sistema antigo: ${j.message}` : "Nome ou senha do sistema antigo não conferem.");
+  }
+  const raw = (login.headers.getSetCookie?.() ?? [login.headers.get("set-cookie") ?? ""]).filter(Boolean);
+  const cookie = raw.map((c) => c.split(";")[0]).join("; ");
+  const get = (path) => doFetch(`${base}/api${path}`, { headers: { cookie, "x-avant": "1" } });
+  const oldMe = (await login.json().catch(() => ({})))?.user ?? {};
+  const out = { team: null, shared: null, mine: null };
+  try {
+    if (want.team) {
+      const r = await get("/team");
+      if (r.ok) {
+        const j = await r.json();
+        const mineKey = nameKey(normalizeName(user.name));
+        const oldKey = nameKey(normalizeName(String(oldMe.name ?? body.name)));
+        // administrador traz o quadro de todos; os demais, só os próprios cartões
+        const people = (j.people ?? []).filter((p) => user.role === "admin" || nameKey(normalizeName(String(p.name ?? "").replace(/ \(conta removida\)$/, ""))) === oldKey)
+          .map((p) => (user.role !== "admin" ? { ...p, name: user.name } : p));
+        out.team = await importTeamPeople(ctx, people);
+        void mineKey;
+      }
+    }
+    if (want.shared) {
+      const r = await get("/shared-tasks");
+      if (r.ok) {
+        const j = await r.json();
+        const idByName = new Map();
+        const resolve = async (name) => {
+          if (!name) return null;
+          const k = nameKey(normalizeName(String(name)));
+          if (!idByName.has(k)) idByName.set(k, (await getJSON(ctx.store, `names/${k}`))?.value?.id ?? null);
+          return idByName.get(k);
+        };
+        const incoming = [];
+        for (const t of j.tasks ?? []) {
+          if (!t || typeof t.id !== "string" || !t.title) continue;
+          const owner = (await resolve(t.owner_name)) ?? user.id;
+          const assignee = await resolve(t.assignee_name);
+          incoming.push({ ...t, owner, owner_name: owner === user.id && !(await resolve(t.owner_name)) ? user.name : t.owner_name, assignee, assignee_name: assignee ? t.assignee_name : null });
+        }
+        let added = 0;
+        await updateJSON(ctx.store, TASKS_KEY, (doc) => {
+          doc ??= emptyTasks();
+          added = 0;
+          for (const t of incoming) {
+            if (doc.tasks[t.id]) continue;
+            if (Object.keys(doc.tasks).length >= TASK_LIMITS.tasks) break;
+            doc.tasks[t.id] = t; added++;
+          }
+          doc.version++;
+          return doc;
+        });
+        out.shared = { added, total: incoming.length };
+      }
+    }
+    if (want.mine) {
+      const r = await get("/data");
+      if (r.status === 204) out.mine = { status: "vazio" };
+      else if (r.ok) {
+        const bytes = new Uint8Array(await r.arrayBuffer());
+        const gz = r.headers.get("x-gz") === "1";
+        const key = dataKey(user.id);
+        const meta = await ctx.store.getMeta(key);
+        if (meta && !body.replaceMine) out.mine = { status: "ja_tem_dados" };
+        else {
+          const gen = `${ctx.now().toString(36)}-${newId().slice(0, 6)}`;
+          await ctx.store.put(key, bytes, { metadata: { gen, savedAt: new Date(ctx.now()).toISOString(), gz }, ...(meta ? { ifMatch: meta.etag } : { ifNew: true }) });
+          out.mine = { status: "importado", bytes: bytes.length };
+        }
+      }
+    }
+  } finally {
+    await doFetch(`${base}/api/auth/logout`, { method: "POST", headers: { cookie, "x-avant": "1" } }).catch(() => {});
   }
   return json(200, out);
 }
@@ -1339,6 +1440,7 @@ export async function handle(request, ctx) {
 
     if (method === "GET" && path === "/team") return await handleGetTeam(request, ctx);
     if (method === "POST" && path === "/admin/import-team") return await handleImportTeam(request, ctx);
+    if (method === "POST" && path === "/import/old") return await handleImportOld(request, ctx);
     if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards$/))) return await handleAddTeamCards(request, ctx, m[1]);
     if (method === "POST" && (m = path.match(/^\/team\/([0-9a-f]{24})\/cards\/([^/]{1,80})\/atender$/))) return await handleAttendCard(request, ctx, m[1], decodeURIComponent(m[2]));
     if (method === "PUT" && (m = path.match(/^\/team\/([0-9a-f]{24})$/))) return await handlePutTeam(request, ctx, m[1]);

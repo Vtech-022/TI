@@ -593,17 +593,17 @@ function AvHomeDash({lists,waiting}){
 function AvOnline(){
   const{people}=usePresence();
   const{peers}=useChatSummary();
+  const[,re]=x.useState(0);
+  x.useEffect(()=>{const f=()=>re(n=>n+1);addEventListener("resize",f);return()=>removeEventListener("resize",f)},[]);
   if(!people)return null;
   const me=window.__avUid;
-  const list=[...people].sort((a,b)=>(b.online?1:0)-(a.online?1:0));
-  const shown=list.slice(0,9),extra=list.length-shown.length;
-  const total=Object.values(peers).reduce((s,v)=>s+v.unread,0);
+  const list=[...people].sort((a,b)=>(b.online?1:0)-(a.online?1:0)||(a.id===me?-1:b.id===me?1:0)||a.name.localeCompare(b.name,"pt-BR"));
+  const on=list.filter(p=>p.online).length;
   const open=id=>window.dispatchEvent(new CustomEvent("prumo:chat",{detail:{peer:id}}));
-  const wide=typeof window!=="undefined"&&innerWidth>820;
-  const el=(0,q.jsxs)("aside",{className:"avo-strip","aria-label":"Equipe online",children:[
-    shown.map(p=>{const u=peers[p.id]&&peers[p.id].unread;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?"":" off"),disabled:p.id===me,onClick:()=>open(p.id),title:p.name+(p.id===me?" (você)":" · clique para conversar")+(p.online?" · online":" · offline"),children:[(0,q.jsxs)("span",{className:"avo-ring"+(p.online?" on":""),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]}),(0,q.jsx)("small",{className:"avo-nm",children:p.id===me?"Você":p.name.split(" ")[0]})]},p.id)}),
-    extra>0&&(0,q.jsx)("span",{className:"avo-more",title:extra+" pessoas a mais",children:"+"+extra})]});
-  /* na tela larga fica presa à borda direita da janela (fora das animações da página) */
+  const wide=innerWidth>820;
+  const el=(0,q.jsxs)("aside",{className:"avo-strip avo-v2","aria-label":"Equipe online",children:[
+    (0,q.jsxs)("div",{className:"avo-count",title:on+" de "+list.length+" online",children:[(0,q.jsx)("i",{}),(0,q.jsx)("b",{children:on}),(0,q.jsxs)("small",{children:["/",list.length]})]}),
+    (0,q.jsx)("div",{className:"avo-list",children:list.map(p=>{const u=peers[p.id]&&peers[p.id].unread,mine=p.id===me;return(0,q.jsxs)("button",{className:"avo-face"+(p.online?" is-on":" off"),disabled:mine,onClick:()=>open(p.id),title:p.name+(mine?" (você)":" · clique para conversar")+(p.online?(p.working?" · trabalhando agora":" · online"):" · offline"),children:[(0,q.jsxs)("span",{className:"avo-ring"+(p.online?" on":""),children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:38}),(0,q.jsx)("i",{className:"avo-dot"+(p.online?" on":"")}),u>0&&(0,q.jsx)("b",{className:"avc-badge avo-unread",children:u})]}),(0,q.jsx)("small",{className:"avo-nm",children:mine?"Você":p.name.split(" ")[0]})]},p.id)})})]});
   return wide?Vi.createPortal(el,document.body):el;
 }
 
@@ -1098,7 +1098,7 @@ function __avParseOrders(text,people,base){
     let title=line;
     const strip=re=>{title=title.replace(re," ")};
     [date&&date.frag,time&&time.frag].filter(Boolean).forEach(f=>{const i=__avNo(title).indexOf(f);if(i>=0)title=title.slice(0,i)+" "+title.slice(i+f.length)});
-    strip(/\b(z[eê]nite)\b[,:]?/gi);
+    strip(/\b(z[eê]nite)\b[,:]?/gi);strip(/^\s*ritmo\b[,:]?/i);
     strip(/^\s*(por favor|favor)\b/i);
     strip(/^\s*(coloque|coloca|crie|cria|criar|adicione|adiciona|passe|passa|mande|manda|registre|registra|agende|agenda)\b( essas?| estas?| as| a| uma| um)?( tarefas?| atividades?)?/i);
     strip(/\b(com |de )?(prioridade|impacto) (alta|media|média|baixa)\b/gi);strip(/\b(urgente|sem pressa)\b/gi);
@@ -1122,7 +1122,7 @@ function AvAssistant(){
   const[open,setOpen]=x.useState(!1);
   x.useEffect(()=>{const f=()=>setOpen(!0);window.addEventListener("prumo:assist",f);return()=>window.removeEventListener("prumo:assist",f)},[]);
   return(0,q.jsxs)(q.Fragment,{children:[
-    (0,q.jsx)("button",{className:"ava-fab"+(open?" on":""),onClick:()=>setOpen(o=>!o),title:"Assistente Zênite: escreva um pedido e ele monta as atividades da equipe","aria-label":"Abrir assistente Zênite",children:(0,q.jsxs)("svg",{viewBox:"0 0 24 24",width:22,height:22,"aria-hidden":!0,fill:"none",stroke:"currentColor",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round",children:[(0,q.jsx)("path",{d:"M5 5.5A2.5 2.5 0 0 1 7.5 3h9A2.5 2.5 0 0 1 19 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A1.5 1.5 0 0 1 5 13.5z"}),(0,q.jsx)("path",{d:"M9 9h.01M12 9h.01M15 9h.01",strokeWidth:2.6})]})}),
+    (0,q.jsx)("button",{className:"ava-fab"+(open?" on":""),onClick:()=>setOpen(o=>!o),title:"Assistente Ritmo: escreva um pedido e ele monta as atividades da equipe","aria-label":"Abrir assistente Ritmo",children:(0,q.jsx)(AvOrb,{size:58})}),
     open&&(0,q.jsx)(AvAssistantPanel,{onClose:()=>setOpen(!1)})]});
 }
 function AvAssistantPanel({onClose}){
@@ -1153,7 +1153,7 @@ function AvAssistantPanel({onClose}){
   };
   const imp={"":"Não informado",baixo:"Baixo",medio:"Médio",alto:"Alto"};
   return(0,q.jsxs)("section",{className:"avc-panel ava-panel",ref:box,role:"dialog","aria-label":"Assistente Zênite",children:[
-    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("span",{className:"ava-ico",children:(0,q.jsx)(AvIcon,{n:"spark",s:18})}),(0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:"Assistente Zênite"}),(0,q.jsx)("small",{children:"Escreva o pedido e ele monta as atividades da equipe"})]})]}),
+    (0,q.jsxs)("header",{className:"avc-head",children:[(0,q.jsx)("span",{className:"ava-ico",children:(0,q.jsx)(AvOrb,{size:28})}),(0,q.jsxs)("span",{className:"avc-who",children:[(0,q.jsx)("strong",{children:"Assistente Zênite"}),(0,q.jsx)("small",{children:"Escreva o pedido e ele monta as atividades da equipe"})]})]}),
     (0,q.jsx)("button",{className:"avc-close",onClick:()=>setOpen(!1),"aria-label":"Fechar assistente",children:"×"}),
     (0,q.jsxs)("div",{className:"ava-body",children:[
       done!==null&&(0,q.jsxs)("div",{className:"ava-done",children:[(0,q.jsx)("strong",{children:done+(done===1?" tarefa criada.":" tarefas criadas.")}),(0,q.jsx)("span",{children:"Já aparecem em Atividades da equipe, na coluna “A fazer” de cada responsável."}),(0,q.jsx)("button",{className:"btn sm",onClick:()=>{nav("/equipe");setOpen(!1)},children:"Ver em Atividades da equipe"})]}),
@@ -1202,8 +1202,8 @@ function AvPersonalize({open,onClose}){
   const[mode,setMode]=x.useState(()=>document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light");
   x.useEffect(()=>{if(open)setMode(document.documentElement.getAttribute("data-avant-theme")==="dark"?"dark":"light")},[open]);
   const[adv,setAdv]=x.useState(!1);
-  const areas=n.areas||{};const cur=areas[mode]||{};
-  const setArea=(k,v)=>{const m={...(areas[mode]||{})};if(v)m[k]=v;else delete m[k];r({areas:{...areas,[mode]:m}})};
+  const areas=n.areasV===2?(n.areas||{}):{};const cur=areas[mode]||{};
+  const setArea=(k,v)=>{const base=n.areasV===2?areas:{},m={...(base[mode]||{})};if(v)m[k]=v;else delete m[k];r({areas:{...base,[mode]:m},areasV:2})};
   const cssv=k=>{try{return getComputedStyle(document.documentElement).getPropertyValue(k).trim()}catch{return""}};
   const now=k=>__avHex(cur[k])?cur[k]:({bg:cssv("--avbg"),rail:cssv("--avrail"),card:cssv("--avcard"),hero:cssv("--avhero1"),strip:cssv("--avstrip1"),accent:cssv("--accent")}[k]||"#888888");
   const A=__avHex(n.accent)?n.accent:"#2563eb",B=__avHex(n.accent2)?n.accent2:"#f5b301";
@@ -1334,7 +1334,7 @@ function AvPersonalize({open,onClose}){
   const on=()=>{window.__avScrolling=!0;clearTimeout(tm);tm=setTimeout(()=>{window.__avScrolling=!1},180)};
   window.addEventListener("scroll",on,{passive:!0,capture:!0});window.addEventListener("wheel",on,{passive:!0});window.addEventListener("touchmove",on,{passive:!0});})();
 
-function __avAccentFor(l,dark){const ar=((l.areas||{})[dark?"dark":"light"])||{};const h=/^#[0-9a-f]{6}$/i;return h.test(ar.accent||"")?ar.accent:h.test(l.accent||"")?l.accent:"#2563eb"}
+function __avAccentFor(l,dark){const ar=(l.areasV===2&&(l.areas||{})[dark?"dark":"light"])||{};const h=/^#[0-9a-f]{6}$/i;return h.test(ar.accent||"")?ar.accent:h.test(l.accent||"")?l.accent:"#2563eb"}
 
 
 /* ===== Menu lateral v5: rótulos, aba ativa na cor da página, recolher e tema no rodapé ===== */
@@ -1467,7 +1467,7 @@ function AvWallPicker({prefs:n,set:r,accent,dark}){
 function __avShade(c,toward,minC,against){let x=c;for(let i=0;i<24&&__avContrast(x,against)<minC;i++)x=__avMix(x,toward,.88);return x}
 function __avDS(l,dark){
   const root=document.documentElement,st=root.style;
-  const ar=((l.areas||{})[dark?"dark":"light"])||{};
+  const ar=(l.areasV===2&&(l.areas||{})[dark?"dark":"light"])||{};
   const A=__avHex(ar.accent)?ar.accent:__avHex(l.accent)?l.accent:"#2563eb",B=__avHex(l.accent2)?l.accent2:A;
   const T={};
   if(dark){
@@ -1583,4 +1583,59 @@ function AvFriends(){
         (0,q.jsxs)("span",{className:"avf-ph",children:[(0,q.jsx)(AvPhoto,{id:p.id,name:p.name,size:34}),(0,q.jsx)("i",{className:"avf-dot"})]}),
         (0,q.jsxs)("span",{className:"avf-t",children:[(0,q.jsx)("strong",{children:mine?p.name+" (você)":p.name}),(0,q.jsx)("small",{children:p.online?(p.working?"Trabalhando agora":"Online"):"Offline"})]}),
         u>0?(0,q.jsx)("b",{className:"avf-u",children:u}):!mine&&(0,q.jsx)("svg",{className:"avf-go",viewBox:"0 0 24 24",width:16,height:16,"aria-hidden":!0,children:(0,q.jsx)("path",{d:"M4 5h16v11H8l-4 4z",fill:"none",stroke:"currentColor",strokeWidth:1.8,strokeLinejoin:"round"})})]})},p.id)})})]});
+}
+
+/* Importar do sistema antigo — como "importar favoritos" de outro navegador */
+function AvImportOld(){
+  const[open,setOpen]=x.useState(!1);
+  const[f,setF]=x.useState({name:"",password:"",team:!0,shared:!0,mine:!0,replaceMine:!1});
+  const[busy,setBusy]=x.useState(!1),[res,setRes]=x.useState(null),[err,setErr]=x.useState("");
+  const isAdmin=(()=>{try{return Wi.auth?.me?.role==="admin"}catch{return!1}})();
+  x.useEffect(()=>{const o=()=>{setOpen(!0);setRes(null);setErr("");setF(v=>({...v,password:"",name:v.name||Wi.auth?.me?.name||""}))};addEventListener("av:import",o);return()=>removeEventListener("av:import",o)},[]);
+  const go=async()=>{setBusy(!0);setErr("");try{const j=await __avJson("/import/old",{method:"POST",body:f});setRes(j);setF(v=>({...v,password:""}))}catch(e){setErr(e.message||"Não foi possível importar.")}finally{setBusy(!1)}};
+  const chk=(k,label,hint)=>(0,q.jsxs)("label",{className:"avi-opt",children:[(0,q.jsx)("input",{type:"checkbox",checked:!!f[k],onChange:e=>setF({...f,[k]:e.target.checked})}),(0,q.jsxs)("span",{children:[(0,q.jsx)("strong",{children:label}),(0,q.jsx)("small",{children:hint})]})]});
+  const line=(ok,txt)=>(0,q.jsxs)("li",{className:ok?"ok":"",children:[(0,q.jsx)("i",{children:ok?"✓":"–"}),txt]});
+  return (0,q.jsx)(dl,{open,title:"Importar do sistema antigo",label:"Importar do sistema antigo",onClose:()=>setOpen(!1),className:"avi-modal",footer:res?(0,q.jsx)("button",{className:"btn primary",onClick:()=>location.reload(),children:"Concluir e atualizar"}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("button",{className:"btn",onClick:()=>setOpen(!1),children:"Cancelar"}),(0,q.jsx)("button",{className:"btn primary",disabled:busy||!f.name.trim()||!f.password||!(f.team||f.shared||f.mine),onClick:go,children:busy?"Importando…":"Importar"})]}),children:res?(0,q.jsxs)("div",{className:"avi-res",children:[
+      (0,q.jsx)("p",{children:"Pronto! Veja o que veio:"}),
+      (0,q.jsxs)("ul",{children:[
+        res.team&&line(res.team.cards>0,`Atividades da equipe: ${res.team.cards} cartão(ões) novo(s)`+(res.team.pending&&res.team.pending.length?` · guardados para quem ainda vai criar conta: ${res.team.pending.join(", ")}`:"")),
+        res.shared&&line(res.shared.added>0,`Tarefas do calendário: ${res.shared.added} nova(s)`),
+        res.mine&&line(res.mine.status==="importado",res.mine.status==="importado"?"Minhas tarefas, projetos e esperas: importados":res.mine.status==="ja_tem_dados"?"Minhas tarefas: você já tem dados aqui — marque “Substituir” para trazer os do sistema antigo":"Minhas tarefas: nada para trazer")]}),
+      (0,q.jsx)("small",{className:"muted",children:"Pode importar de novo quando quiser: o que já foi trazido não se repete."})]}):(0,q.jsxs)("div",{className:"avi",children:[
+      (0,q.jsx)("p",{className:"avi-lead",children:"Traga suas tarefas do sistema antigo (avant-central-trabalho) para cá, como quem importa os favoritos de outro navegador. Use o nome e a senha que você usava lá — a senha não fica guardada."}),
+      (0,q.jsxs)("div",{className:"avi-grid",children:[
+        (0,q.jsxs)("label",{className:"field",children:[(0,q.jsx)("span",{children:"Nome no sistema antigo"}),(0,q.jsx)("input",{className:"input",value:f.name,onChange:e=>setF({...f,name:e.target.value}),autoComplete:"off"})]}),
+        (0,q.jsxs)("label",{className:"field",children:[(0,q.jsx)("span",{children:"Senha do sistema antigo"}),(0,q.jsx)("input",{className:"input",type:"password",value:f.password,onChange:e=>setF({...f,password:e.target.value}),autoComplete:"off",onKeyDown:e=>e.key==="Enter"&&go()})]})]}),
+      (0,q.jsx)("h4",{className:"avi-h",children:"O que importar"}),
+      chk("team","Atividades da equipe",isAdmin?"O quadro de toda a equipe (você é administrador)":"Os seus cartões do quadro da equipe"),
+      chk("shared","Tarefas do calendário da equipe","Tarefas compartilhadas que você enxergava"),
+      chk("mine","Minhas tarefas, projetos e esperas","Seus dados pessoais do sistema antigo"),
+      f.mine&&(0,q.jsx)("div",{className:"avi-sub",children:chk("replaceMine","Substituir o que já tenho aqui","Só se você já criou tarefas pessoais no sistema novo e prefere as do antigo")}),
+      err&&(0,q.jsx)("div",{className:"error-box",children:err})]})});
+}
+
+/* Orbe da I.A.: esfera de vidro com cores do tema girando por dentro, brilho especular e borda de luz */
+function AvOrb({size=56}){
+  const id=x.useRef("o"+Math.random().toString(36).slice(2,8)).current;
+  const S=(c)=>({stopColor:c});
+  return (0,q.jsxs)("svg",{className:"av-orb",viewBox:"0 0 100 100",width:size,height:size,"aria-hidden":!0,children:[
+    (0,q.jsxs)("defs",{children:[
+      (0,q.jsx)("clipPath",{id:id+"c",children:(0,q.jsx)("circle",{cx:"50",cy:"50",r:"46"})}),
+      (0,q.jsxs)("radialGradient",{id:id+"b",cx:"50%",cy:"45%",r:"60%",children:[(0,q.jsx)("stop",{offset:"0",style:S("color-mix(in srgb,var(--accent) 55%,#fff)")}),(0,q.jsx)("stop",{offset:".55",style:S("var(--accent)")}),(0,q.jsx)("stop",{offset:"1",style:S("color-mix(in srgb,var(--accent) 35%,#05060c)")})]}),
+      (0,q.jsx)("filter",{id:id+"f",x:"-50%",y:"-50%",width:"200%",height:"200%",children:(0,q.jsx)("feGaussianBlur",{stdDeviation:"7"})}),
+      (0,q.jsx)("filter",{id:id+"g",x:"-50%",y:"-50%",width:"200%",height:"200%",children:(0,q.jsx)("feGaussianBlur",{stdDeviation:"2.2"})}),
+      (0,q.jsxs)("radialGradient",{id:id+"v",cx:"50%",cy:"50%",r:"50%",children:[(0,q.jsx)("stop",{offset:".62",stopColor:"#000",stopOpacity:"0"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#000",stopOpacity:".55"})]}),
+      (0,q.jsxs)("linearGradient",{id:id+"r",x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:".55",stopColor:"#fff",stopOpacity:"0"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#fff",stopOpacity:".75"})]})]}),
+    (0,q.jsxs)("g",{clipPath:"url(#"+id+"c)",children:[
+      (0,q.jsx)("rect",{width:"100",height:"100",fill:"url(#"+id+"b)"}),
+      (0,q.jsxs)("g",{className:"av-orb-swirl",filter:"url(#"+id+"f)",children:[
+        (0,q.jsx)("ellipse",{cx:"36",cy:"62",rx:"30",ry:"14",transform:"rotate(-35 36 62)",style:{fill:"var(--accent2)"},opacity:".95"}),
+        (0,q.jsx)("ellipse",{cx:"66",cy:"40",rx:"26",ry:"12",transform:"rotate(30 66 40)",style:{fill:"color-mix(in srgb,var(--accent) 45%,#ff3fd0)"},opacity:".9"}),
+        (0,q.jsx)("ellipse",{cx:"52",cy:"30",rx:"16",ry:"9",style:{fill:"color-mix(in srgb,var(--accent) 50%,#06070f)"},opacity:".85"}),
+        (0,q.jsx)("ellipse",{cx:"58",cy:"74",rx:"18",ry:"8",transform:"rotate(-10 58 74)",style:{fill:"color-mix(in srgb,var(--accent) 60%,#7c4dff)"},opacity:".9"})]}),
+      (0,q.jsx)("rect",{width:"100",height:"100",fill:"url(#"+id+"v)"}),
+      (0,q.jsx)("path",{d:"M12 58a40 40 0 0 0 64 26a44 44 0 0 1-64-26z",fill:"url(#"+id+"r)",opacity:".55",filter:"url(#"+id+"g)"}),
+      (0,q.jsx)("ellipse",{cx:"34",cy:"26",rx:"17",ry:"10",transform:"rotate(-28 34 26)",fill:"#fff",opacity:".55",filter:"url(#"+id+"g)"}),
+      (0,q.jsx)("ellipse",{cx:"30",cy:"23",rx:"6",ry:"3.2",transform:"rotate(-28 30 23)",fill:"#fff",opacity:".9"})]}),
+    (0,q.jsx)("circle",{cx:"50",cy:"50",r:"45.5",fill:"none",stroke:"#fff",strokeOpacity:".28",strokeWidth:"1"})]});
 }
