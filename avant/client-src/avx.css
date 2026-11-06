@@ -1386,3 +1386,8 @@ html.av-ds:root:root .topbar .greet:empty:before,html.av-ds:root:root .topbar .g
 }
 html.av-ds:root:root .avo-v2 .avo-count{border-radius:calc(var(--avradius,20px) * .6)}
 html.av-ds:root:root .avo-v2 .avo-ring,html.av-ds:root:root .avo-v2 .avo-ring>.av-img,html.av-ds:root:root .avo-v2 .avo-ring>.av-ini{border-radius:calc(var(--avradius,20px) * 2.2)!important}
+/* menus do topo (perfil, avisos) ficam por cima da faixa de colegas */
+html.av-ds:root:root .topbar{position:relative;z-index:60}
+html.av-ds:root:root .topbar :is(.account-pop,.notif-pop,[role=menu]){z-index:70!important}
+@media (min-width:821px){html.av-ds:root:root body>.avo-strip.avo-v2{z-index:30!important}}
+html.av-ds:root:root:has(.topbar .account-pop,.topbar [role=menu]) body>.avo-strip{opacity:0!important;visibility:hidden!important;transition:opacity .15s}
