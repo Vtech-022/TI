@@ -1391,3 +1391,8 @@ html.av-ds:root:root .topbar{position:relative;z-index:60}
 html.av-ds:root:root .topbar :is(.account-pop,.notif-pop,[role=menu]){z-index:70!important}
 @media (min-width:821px){html.av-ds:root:root body>.avo-strip.avo-v2{z-index:30!important}}
 html.av-ds:root:root:has(.topbar .account-pop,.topbar [role=menu]) body>.avo-strip{opacity:0!important;visibility:hidden!important;transition:opacity .15s}
+/* assistente e conversas abrem ao lado da faixa de colegas (sem ficar por baixo dela) */
+@media (min-width:821px){
+  html.av-ds:root:root :is(.ava-panel,.avc-panel){right:98px!important}
+  html.av-ds:root:root .ava-panel{bottom:16px!important;max-width:calc(100vw - 220px)}
+}
