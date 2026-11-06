@@ -556,37 +556,47 @@ function __avCount(v){
 }
 function AvHomeDash({lists,waiting}){
   const L=lists||{done:[],todo:[],late:[]};
+  const I=(d,extra)=>(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:22,height:22,fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d})});
   const cats=[
-    {k:"done",label:"Concluídas",n:L.done.length,g:["var(--accent)","var(--accent)"],tips:L.done},
-    {k:"todo",label:"A fazer hoje",n:L.todo.length,g:["var(--avdonut-todo)","var(--avdonut-todo)"],tips:L.todo},
-    {k:"late",label:"Atrasadas",n:L.late.length,g:["var(--avdonut-late)","var(--avdonut-late)"],tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",n:waiting||0,g:["var(--avdonut-wait)","var(--avdonut-wait)"],tips:[]}
+    {k:"done",label:"Concluídas",sub:"Tarefas finalizadas com sucesso",n:L.done.length,c1:"var(--accent)",ico:"M5 12.5l4.2 4.2L19 7",tips:L.done},
+    {k:"todo",label:"A fazer hoje",sub:"Tarefas pendentes para hoje",n:L.todo.length,c1:"#f2a516",ico:"M12 7v5l3 2M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.todo},
+    {k:"late",label:"Atrasadas",sub:"Tarefas que passaram do prazo",n:L.late.length,c1:"#e5484d",ico:"M12 7.5v5.5M12 16.5h.01M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.late},
+    {k:"wait",label:"Aguardando terceiros",sub:"Dependem de outra pessoa",n:waiting||0,c1:"#8b95a7",ico:"M10 9v6M14 9v6M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:[]}
   ];
-  const sum=cats.reduce((s,c)=>s+c.n,0);
-  const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
+  const sum=cats.reduce((a,c)=>a+c.n,0);
+  const[go,setGo]=x.useState(!1),[hv,setHv]=x.useState(null);
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),80);return()=>clearTimeout(t)},[]);
   const totalDay=L.done.length+L.todo.length+L.late.length;
-  const nDone=__avCount(L.done.length);
-  const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
-  const R=74,C=2*Math.PI*R,GAP=sum>1?14:0;
+  const R=80,C=2*Math.PI*R,GAP=sum>1?6:0;
   let acc=0;
-  const segs=cats.filter(c=>c.n>0).map(c=>{const len=Math.max(1,C*c.n/sum-GAP);const s={...c,len,off:acc};acc+=C*c.n/sum;return s});
-  const cur=hv?cats.find(c=>c.k===hv):null;
-  return(0,q.jsx)("section",{className:"avh panel avh2","aria-label":"Seu dia em números",children:(0,q.jsxs)("div",{className:"avh2-wrap",children:[
-    (0,q.jsxs)("div",{className:"avh2-donut",onMouseLeave:()=>setHv(null),children:[
-      (0,q.jsxs)("svg",{viewBox:"0 0 200 200",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",children:[
-        (0,q.jsx)("defs",{children:cats.map(c=>(0,q.jsxs)("linearGradient",{id:"avg-"+c.k,x1:"0",y1:"0",x2:"1",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:c.g[0]}),(0,q.jsx)("stop",{offset:"1",stopColor:c.g[1]})]},c.k))}),
-        (0,q.jsx)("circle",{cx:"100",cy:"100",r:R,fill:"none",stroke:"#ffffff0d",strokeWidth:"22"}),
-        segs.map((s,i)=>(0,q.jsx)("circle",{className:"avh2-seg"+(hv===s.k?" on":hv?" dim":""),cx:"100",cy:"100",r:R,fill:"none",stroke:"url(#avg-"+s.k+")",strokeWidth:"22",strokeLinecap:"round",
-          strokeDasharray:go?s.len+" "+(C-s.len):"0 "+C,strokeDashoffset:-s.off-GAP/2,transform:"rotate(-90 100 100)",style:{transitionDelay:i*140+"ms","--glow":s.g[0]},onMouseEnter:()=>setHv(s.k)},s.k)),
-        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"url(#avh2-core)"}),
-        (0,q.jsx)("defs",{children:(0,q.jsxs)("radialGradient",{id:"avh2-core",cx:"35%",cy:"30%",r:"80%",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"color-mix(in srgb,var(--avhero,#18181c) 100%,#fff 12%)"}),(0,q.jsx)("stop",{offset:"1",stopColor:"color-mix(in srgb,var(--avhero,#18181c) 55%,#000)"})]})}),
-        (0,q.jsx)("circle",{cx:"100",cy:"100",r:"54",fill:"none",stroke:"#ffffff1c",strokeWidth:"1"})]}),
-      (0,q.jsx)("div",{className:"avh2-center",children:cur?(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:cur.n}),(0,q.jsx)("small",{children:cur.label})]}):(0,q.jsxs)(q.Fragment,{children:[(0,q.jsx)("strong",{children:pct+"%"}),(0,q.jsx)("small",{children:"do dia"})]})})]}),
-    (0,q.jsxs)("div",{className:"avh2-info",children:[
-      (0,q.jsx)("h2",{children:"Seu dia em números"}),
-      (0,q.jsxs)("div",{className:"avh2-big",children:[(0,q.jsx)("b",{children:nDone}),(0,q.jsx)("span",{children:"/"+totalDay}),(0,q.jsx)("em",{children:"atividades concluídas hoje"})]}),
-      (0,q.jsx)("ul",{className:"avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:hv===c.k?"on":"",onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[(0,q.jsx)("i",{style:{background:"linear-gradient(135deg,"+c.g[0]+","+c.g[1]+")",boxShadow:"0 0 12px color-mix(in srgb,"+c.g[0]+" 55%,transparent)"}}),(0,q.jsx)("span",{children:c.label}),(0,q.jsx)("b",{children:c.n})]},c.k))})]})]})});
+  const segs=cats.filter(c=>c.n>0).map(c=>{const len=Math.max(2,C*c.n/sum-GAP);const o={...c,len,off:acc};acc+=C*c.n/sum;return o});
+  const pc=c=>sum?Math.round(100*c.n/sum):0;
+  return (0,q.jsxs)("section",{className:"avd3","aria-label":"Seu dia em números",children:[
+    (0,q.jsx)("i",{className:"avd3-glow","aria-hidden":!0}),
+    (0,q.jsxs)("header",{className:"avd3-head",children:[
+      (0,q.jsx)("span",{className:"avd3-tile",children:(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:26,height:26,fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d:"M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"})})}),
+      (0,q.jsxs)("div",{className:"avd3-tt",children:[(0,q.jsxs)("h2",{children:["Seu dia em ",(0,q.jsx)("em",{children:"números"})]}),(0,q.jsx)("p",{children:"Acompanhe o resumo das suas atividades de hoje"})]}),
+      (0,q.jsxs)("span",{className:"avd3-chip",title:"Resumo de hoje",children:[(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"none",stroke:"currentColor",strokeWidth:2,"aria-hidden":!0,children:(0,q.jsx)("path",{d:"M7 3v3M17 3v3M4 9h16M5 5h14v15H5z"})}),"Hoje"]})]}),
+    (0,q.jsxs)("div",{className:"avd3-body",children:[
+      (0,q.jsxs)("div",{className:"avd3-ring",onMouseLeave:()=>setHv(null),children:[
+        (0,q.jsxs)("svg",{viewBox:"0 0 220 220",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",children:[
+          (0,q.jsxs)("defs",{children:[cats.map(c=>(0,q.jsxs)("linearGradient",{id:"avd3g-"+c.k,x1:"0",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",style:{stopColor:"color-mix(in srgb,"+c.c1+" 68%,#fff)"}}),(0,q.jsx)("stop",{offset:".55",style:{stopColor:c.c1}}),(0,q.jsx)("stop",{offset:"1",style:{stopColor:"color-mix(in srgb,"+c.c1+" 72%,#000)"}})]},c.k)),
+            (0,q.jsxs)("linearGradient",{id:"avd3-hl",x1:"0",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#fff",stopOpacity:".55"}),(0,q.jsx)("stop",{offset:".5",stopColor:"#fff",stopOpacity:".06"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#fff",stopOpacity:"0"})]}),
+            (0,q.jsx)("filter",{id:"avd3-sh",x:"-20%",y:"-20%",width:"140%",height:"140%",children:(0,q.jsx)("feDropShadow",{dx:"0",dy:"5",stdDeviation:"5",floodColor:"#0b1020",floodOpacity:".28"})})]}),
+          (0,q.jsx)("circle",{className:"avd3-track",cx:"110",cy:"110",r:R,fill:"none",strokeWidth:"34"}),
+          segs.map((g,i)=>(0,q.jsx)("circle",{className:"avd3-seg"+(hv===g.k?" on":hv?" dim":""),cx:"110",cy:"110",r:R,fill:"none",stroke:"url(#avd3g-"+g.k+")",filter:"url(#avd3-sh)",strokeWidth:"34",strokeLinecap:"butt",
+            strokeDasharray:go?g.len+" "+(C-g.len):"0 "+C,strokeDashoffset:-g.off-GAP/2,transform:"rotate(-90 110 110)",style:{transitionDelay:i*140+"ms"},onMouseEnter:()=>setHv(g.k)},g.k)),
+          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R,fill:"none",stroke:"url(#avd3-hl)",strokeWidth:"34",style:{pointerEvents:"none"}}),
+          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R-17,fill:"none",stroke:"#000",strokeOpacity:".14",strokeWidth:"1.5"}),
+          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R+17,fill:"none",stroke:"#fff",strokeOpacity:".18",strokeWidth:"1"}),
+          (0,q.jsx)("circle",{className:"avd3-core",cx:"110",cy:"110",r:"56"})]}),
+        (0,q.jsxs)("div",{className:"avd3-center",children:[
+                    (0,q.jsxs)("div",{className:"avd3-num",children:[(0,q.jsx)("b",{children:__avCount(L.done.length)}),(0,q.jsx)("i",{children:"/"}),(0,q.jsx)("b",{className:"avd3-tot",children:totalDay})]}),
+          (0,q.jsx)("small",{className:"avd3-kicker",children:"concluídas"}),(0,q.jsxs)("small",{className:"avd3-pct",children:[(totalDay?Math.round(100*L.done.length/totalDay):0)+"% do dia"]})]})]}),
+      (0,q.jsx)("ul",{className:"avd3-list avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd3-card k-"+c.k+(hv===c.k?" on":""),style:{"--c1":c.c1,"--p":pc(c)+"%"},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[
+        (0,q.jsx)("span",{className:"avd3-ico",children:I(c.ico)}),
+        (0,q.jsxs)("span",{className:"avd3-lbl",children:[(0,q.jsx)("strong",{children:c.label}),(0,q.jsx)("small",{children:c.sub})]}),
+        (0,q.jsxs)("span",{className:"avd3-val",children:[(0,q.jsx)("b",{children:c.n}),(0,q.jsx)("small",{children:pc(c)+"%"})]}),(0,q.jsx)("i",{className:"avd3-bar","aria-hidden":!0})]},c.k))})]})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
@@ -1659,3 +1669,53 @@ function AvImportBanner(){
 
 /* marca quando a Home está aberta (o grupo de configurações do topo só aparece nela) */
 function AvHomeFlag(){x.useEffect(()=>{const r=document.documentElement;r.classList.add("av-on-home");return()=>r.classList.remove("av-on-home")},[]);return null}
+
+/* Relatórios → PDF: gera um arquivo PDF de verdade (jsPDF) com indicadores, semanas, prioridades,
+   status e projetos. Se a biblioteca não carregar, abre a versão para imprimir/salvar como PDF. */
+function __avLoadScript(src){return new Promise((ok,no)=>{if(document.querySelector('script[src="'+src+'"]'))return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function __avReportPdf(e){
+  const hoje=new Date(),dt=hoje.toLocaleDateString("pt-BR"),hr=hoje.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  const who=(()=>{try{return Wi.auth?.me?.name||""}catch{return""}})();
+  const ent=(o,lab)=>Object.entries(o||{}).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[lab?.[k]??k,String(v)]);
+  const kpis=[["Tarefas registradas",e.totals.tasks,e.totals.open+" abertas"],["Concluídas",e.totals.completed,e.totals.cancelled+" cancelada(s)"],["Atrasadas",e.overdue,"entre as abertas"],["Sem prazo",e.without_due,"abertas sem data"],["Tempo médio até concluir",e.avg_lead_time_days??"—",e.avg_lead_time_days==null?"ainda sem conclusões":"dias corridos"]];
+  const weeks=(e.weeks||[]).map(w=>[new Date(w.week+"T12:00:00").toLocaleDateString("pt-BR"),String(w.created),String(w.completed),String(w.captures)]);
+  const projs=(e.projects||[]).map(p=>[p.name,`${p.progress.done}/${p.progress.total} (${p.progress.percent??0}%)`,String(p.open),String(p.overdue)]);
+  const nome=`relatorio-ritmo-${hoje.toISOString().slice(0,10)}.pdf`;
+  try{
+    await __avLoadScript("/vendor/jspdf.umd.min.js");
+    await __avLoadScript("/vendor/jspdf.plugin.autotable.min.js");
+    const{jsPDF}=window.jspdf;const d=new jsPDF({unit:"pt",format:"a4"});const W=d.internal.pageSize.getWidth();
+    const ac=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#2563eb";
+    const rgb=h=>{h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]};const A=/^#[0-9a-f]{6}$/i.test(ac)?rgb(ac):[37,99,235];
+    d.setFillColor(...A);d.rect(0,0,W,78,"F");
+    d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(20);d.text("Relatório de acompanhamento",40,40);
+    d.setFont("helvetica","normal");d.setFontSize(10);d.text(`Ritmo · Rotina da equipe  —  gerado em ${dt} às ${hr}${who?"  por "+who:""}`,40,60);
+    let y=104;d.setTextColor(30,33,40);
+    const bw=(W-80-16)/5;kpis.forEach((k,i)=>{const x=40+i*(bw+4);d.setDrawColor(225,229,236);d.setFillColor(247,248,251);d.roundedRect(x,y,bw,64,6,6,"FD");
+      d.setFontSize(7.5);d.setTextColor(110,116,130);d.text(String(k[0]).toUpperCase(),x+8,y+15,{maxWidth:bw-12});
+      d.setFontSize(18);d.setTextColor(20,22,28);d.setFont("helvetica","bold");d.text(String(k[1]),x+8,y+40);d.setFont("helvetica","normal");
+      d.setFontSize(7.5);d.setTextColor(120,126,140);d.text(String(k[2]),x+8,y+55,{maxWidth:bw-12})});
+    y+=88;
+    const sec=(t)=>{d.setFont("helvetica","bold");d.setFontSize(12);d.setTextColor(20,22,28);d.text(t,40,y);d.setFont("helvetica","normal");y+=8};
+    const tbl=(head,body,opts={})=>{d.autoTable({startY:y,head:[head],body:body.length?body:[[{content:"Sem dados",colSpan:head.length}]],margin:{left:40,right:40},theme:"grid",
+      headStyles:{fillColor:A,textColor:255,fontStyle:"bold",fontSize:9},bodyStyles:{fontSize:9,textColor:[35,38,46]},alternateRowStyles:{fillColor:[247,248,251]},styles:{lineColor:[225,229,236],lineWidth:.5,cellPadding:5},...opts});y=d.lastAutoTable.finalY+22};
+    sec("Ritmo das últimas 8 semanas");tbl(["Semana de","Criadas","Concluídas","Capturas"],weeks);
+    sec("Abertas por prioridade");tbl(["Prioridade","Quantidade"],ent(e.by_priority,typeof Yc!=="undefined"?Yc:null));
+    sec("Todas por status");tbl(["Status","Quantidade"],ent(e.by_status,typeof Jc!=="undefined"?Jc:null));
+    sec("Projetos");tbl(["Projeto","Progresso real","Abertas","Atrasadas"],projs);
+    if(e.by_responsible){sec("Abertas por responsável");tbl(["Responsável","Quantidade"],ent(e.by_responsible))}
+    if(e.by_category){sec("Abertas por categoria");tbl(["Categoria","Quantidade"],ent(e.by_category))}
+    const n=d.getNumberOfPages();for(let i=1;i<=n;i++){d.setPage(i);d.setFontSize(8);d.setTextColor(140,146,160);d.text(`Página ${i} de ${n}`,W-40,d.internal.pageSize.getHeight()-20,{align:"right"});d.text("Números calculados dos registros atuais do sistema",40,d.internal.pageSize.getHeight()-20)}
+    d.save(nome);return!0;
+  }catch(err){
+    const esc=t=>String(t).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
+    const t=(h,b)=>`<table><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${(b.length?b:[["Sem dados"]]).map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    const w=window.open("","_blank");if(!w)return!1;
+    w.document.write(`<!doctype html><meta charset="utf-8"><title>${nome}</title><style>body{font:13px system-ui;margin:32px;color:#1d2028}h1{margin:0 0 4px}small{color:#667}table{width:100%;border-collapse:collapse;margin:8px 0 22px}th,td{border:1px solid #e1e5ec;padding:6px 8px;text-align:left}th{background:#2563eb;color:#fff}.k{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0}.k div{border:1px solid #e1e5ec;border-radius:8px;padding:10px}.k b{font-size:20px;display:block}<\/style><h1>Relatório de acompanhamento</h1><small>Ritmo · gerado em ${dt} às ${hr}</small><div class="k">${kpis.map(k=>`<div><small>${esc(k[0])}</small><b>${esc(k[1])}</b><small>${esc(k[2])}</small></div>`).join("")}</div><h3>Ritmo das últimas 8 semanas</h3>${t(["Semana de","Criadas","Concluídas","Capturas"],weeks)}<h3>Abertas por prioridade</h3>${t(["Prioridade","Quantidade"],ent(e.by_priority))}<h3>Todas por status</h3>${t(["Status","Quantidade"],ent(e.by_status))}<h3>Projetos</h3>${t(["Projeto","Progresso","Abertas","Atrasadas"],projs)}<script>setTimeout(()=>print(),300)<\/script>`);
+    w.document.close();return!0;
+  }
+}
+function AvReportPdfBtn({data}){
+  const[b,setB]=x.useState(!1);
+  return (0,q.jsxs)("button",{type:"button",className:"btn primary",disabled:b||!data,onClick:async()=>{setB(!0);try{await __avReportPdf(data)}finally{setB(!1)}},children:[(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d:"M12 4v11M7 10l5 5l5-5M5 20h14"})})," ",b?"Gerando PDF…":"Baixar relatório (PDF)"]});
+}

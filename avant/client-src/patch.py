@@ -570,6 +570,9 @@ sub("t.map(({it:e,m:t})=>{let n=e.due&&r", "__avDayGroups(e.key,t,({it:e,m:t})=>
 
 # Equipe online: cartão pequeno no topo da coluna direita da Home
 
+
+# Relatórios: baixar em PDF (no lugar do JSON)
+sub("(0,q.jsx)(`a`,{className:`btn`,href:`/api/export`,children:`Exportar cópia de segurança (JSON)`})", "(0,q.jsx)(AvReportPdfBtn,{data:e})")
 # ---- Novo nome: Ritmo (rotina diária da equipe) ----
 s = s.replace("Zênite · Central de Trabalho</title>", "Ritmo · Rotina da equipe</title>")
 s = s.replace("className:`rb-word`,children:`zênite`", "className:`rb-word`,children:`ritmo`")

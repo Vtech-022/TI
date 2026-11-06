@@ -1396,3 +1396,120 @@ html.av-ds:root:root:has(.topbar .account-pop,.topbar [role=menu]) body>.avo-str
   html.av-ds:root:root :is(.ava-panel,.avc-panel){right:98px!important}
   html.av-ds:root:root .ava-panel{bottom:16px!important;max-width:calc(100vw - 220px)}
 }
+
+/* ===== "Seu dia em números" — cartão de destaque (néon sobre azul-noite), nos dois modos ===== */
+.avd3{position:relative;overflow:hidden;isolation:isolate;border-radius:var(--avradius,22px);padding:20px 22px 22px;color:#eef3ff;
+  background:radial-gradient(70% 90% at 0% 100%,#1f5bff40,#0000 60%),radial-gradient(60% 80% at 100% 0%,#f5b30120,#0000 60%),linear-gradient(160deg,#0d1836,#070b1a 70%);
+  border:1px solid #6ea8ff2e;box-shadow:inset 0 1px 0 #ffffff1a,0 18px 44px #030a2a59}
+.avd3-glow{position:absolute;inset:auto auto -40% -15%;width:70%;height:90%;border-radius:50%;background:radial-gradient(closest-side,#2f7bff45,#0000);filter:blur(10px);z-index:-1;pointer-events:none}
+.avd3-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.avd3-tile{width:52px;height:52px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(160deg,#3d86ff,#1747c9);box-shadow:inset 0 1px 0 #ffffff59,0 8px 20px #1f5bff59}
+.avd3-tt{flex:1;min-width:0;border-left:1px solid #ffffff2b;padding-left:14px}
+html.av-ds:root:root .avd3 h2{margin:0;font-size:clamp(20px,2.2vw,28px);font-weight:800;letter-spacing:-.01em;color:#fff!important}
+.avd3 h2 em{font-style:normal;background:linear-gradient(180deg,#ffe066,#f5b301);-webkit-background-clip:text;background-clip:text;color:transparent}
+html.av-ds:root:root .avd3-tt p{margin:2px 0 0;font-size:13px;color:#b8c4e0!important}
+.avd3-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;color:#e6ecff;background:#ffffff0f;border:1px solid #ffffff21}
+.avd3-body{display:grid;grid-template-columns:minmax(200px,250px) 1fr;gap:22px;align-items:center}
+.avd3-ring{position:relative;aspect-ratio:1}
+.avd3-ring svg{width:100%;height:100%;display:block;overflow:visible}
+.avd3-track{stroke:#ffffff12}
+.avd3-seg{transition:stroke-dasharray .9s cubic-bezier(.2,.8,.2,1),opacity .2s;filter:drop-shadow(0 0 6px currentColor) drop-shadow(0 0 14px currentColor)}
+.avd3-seg.dim{opacity:.35}
+.avd3-core{fill:#081127;stroke:#ffffff1a;stroke-width:1}
+.avd3-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;pointer-events:none}
+.avd3-ok{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;border:2px solid #fff;box-shadow:0 0 12px #5ec8ff80}
+.avd3-ok svg{width:18px;height:18px}
+.avd3-num{display:flex;align-items:baseline;gap:6px;line-height:1}
+html.av-ds:root:root .avd3-num b{font-size:clamp(30px,3.4vw,44px);font-weight:800;color:#fff!important}
+html.av-ds:root:root .avd3-num b.avd3-tot{color:#a8b7d8!important}
+.avd3-num i{font-style:normal;font-size:28px;color:#8fa0c4}
+html.av-ds:root:root .avd3-center small{font-size:12px;color:#b8c4e0!important}
+.avd3-center u{display:block;width:60px;height:3px;border-radius:3px;margin-top:6px;background:linear-gradient(90deg,#2f7bff,#ffd84d)}
+.avd3-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.avd3-card{position:relative;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;padding:12px 14px;border-radius:calc(var(--avradius,20px) * .8);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c1) 26%,#0a1124),color-mix(in srgb,var(--c1) 8%,#0a1124));
+  border:1.5px solid color-mix(in srgb,var(--c1) 70%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--c1) 20%,transparent) inset,0 0 18px color-mix(in srgb,var(--c1) 32%,transparent);transition:transform .15s,box-shadow .15s}
+.avd3-card.on,.avd3-card:hover{transform:translateX(3px);box-shadow:0 0 0 1px color-mix(in srgb,var(--c1) 40%,transparent) inset,0 0 26px color-mix(in srgb,var(--c1) 50%,transparent)}
+.avd3-ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 35% 30%,var(--c2),var(--c1));box-shadow:0 0 14px color-mix(in srgb,var(--c1) 70%,transparent)}
+.avd3-card.k-todo .avd3-ico,.avd3-card.k-wait .avd3-ico{color:#141821}
+.avd3-lbl{display:flex;flex-direction:column;gap:2px;min-width:0;border-left:1px solid #ffffff24;padding-left:12px}
+html.av-ds:root:root .avd3-lbl strong{font-size:15px;color:#fff!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.av-ds:root:root .avd3-lbl small{font-size:11.5px;color:#b8c4e0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avd3-val{display:flex;flex-direction:column;align-items:center;gap:4px}
+html.av-ds:root:root .avd3-val b{font-size:28px;font-weight:800;line-height:1;color:var(--c2)!important;text-shadow:0 0 14px color-mix(in srgb,var(--c1) 70%,transparent)}
+html.av-ds:root:root .avd3-val small{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#ffffff17;color:#dfe6f5!important}
+@media (max-width:700px){.avd3-body{grid-template-columns:1fr}.avd3-ring{max-width:240px;margin:0 auto}.avd3-chip{display:none}}
+html.av-ds:root:root .avd3 h2 em{background:none!important;color:#ffc928!important;-webkit-text-fill-color:#ffc928!important;text-shadow:0 0 18px #f5b30166}
+html.av-ds:root:root .avd3-card{display:grid!important;grid-template-columns:44px minmax(0,1fr) auto!important}
+html.av-ds:root:root .avd3-ico{width:42px!important;height:42px!important;min-width:0!important;padding:0!important;justify-self:start}
+
+/* ===== "Seu dia em números" v4 — no idioma do site (superfícies e cores do tema), refinado ===== */
+html.av-ds:root:root .avd3{color:var(--text);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-1),0 10px 28px color-mix(in srgb,var(--text) 6%,transparent);padding:20px 22px}
+html.av-ds[data-avant-theme=dark]:root:root .avd3{background:linear-gradient(180deg,#ffffff08,#ffffff00 38%),var(--surface);box-shadow:0 1px 0 #ffffff0a inset,0 14px 34px #00000073}
+html.av-ds:root:root .avd3-glow{display:none}
+html.av-ds:root:root .avd3-head{padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+html.av-ds:root:root .avd3-tile{width:40px;height:40px;border-radius:12px;color:var(--accent);background:var(--avaccentsoft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent)}
+html.av-ds:root:root .avd3-tile svg{width:20px;height:20px}
+html.av-ds:root:root .avd3-tt{border:0;padding:0}
+html.av-ds:root:root .avd3 h2{font-size:17px;font-weight:700;color:var(--heading)!important;letter-spacing:0}
+html.av-ds:root:root .avd3 h2 em{color:var(--heading)!important;-webkit-text-fill-color:currentColor!important;text-shadow:none;font-style:normal}
+html.av-ds:root:root .avd3-tt p{font-size:12.5px;color:var(--text-3)!important}
+html.av-ds:root:root .avd3-chip{color:var(--text-2);background:var(--surface-2);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:12px}
+html.av-ds:root:root .avd3-body{grid-template-columns:minmax(170px,210px) 1fr;gap:24px}
+html.av-ds:root:root .avd3-track{stroke:color-mix(in srgb,var(--text) 8%,transparent)}
+html.av-ds:root:root .avd3-seg{filter:none}
+html.av-ds:root:root .avd3-core{fill:none;stroke:none}
+html.av-ds:root:root .avd3-center{gap:2px}
+html.av-ds:root:root .avd3-kicker{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3)!important}
+html.av-ds:root:root .avd3-num b{font-size:40px;font-weight:700;letter-spacing:-.02em;color:var(--heading)!important}
+html.av-ds:root:root .avd3-num b.avd3-tot{font-size:22px;color:var(--text-3)!important;font-weight:600}
+html.av-ds:root:root .avd3-num i{font-size:20px;color:var(--text-3)}
+html.av-ds:root:root .avd3-pct{margin-top:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;color:var(--accent)!important;background:var(--avaccentsoft)}
+html.av-ds:root:root .avd3-list{gap:8px}
+html.av-ds:root:root .avd3-card{position:relative;overflow:hidden;grid-template-columns:36px minmax(0,1fr) auto!important;gap:12px;padding:11px 14px 13px;border-radius:calc(var(--avradius,20px) * .6);
+  background:var(--surface-2);border:1px solid var(--line);box-shadow:none;transform:none}
+html.av-ds[data-avant-theme=dark]:root:root .avd3-card{background:color-mix(in srgb,#fff 3%,var(--surface))}
+html.av-ds:root:root .avd3-card:hover,html.av-ds:root:root .avd3-card.on{transform:none;border-color:color-mix(in srgb,var(--c1) 45%,var(--line));box-shadow:0 4px 14px color-mix(in srgb,var(--text) 8%,transparent)}
+html.av-ds:root:root .avd3-ico{width:36px!important;height:36px!important;border-radius:10px;color:var(--c1)!important;background:color-mix(in srgb,var(--c1) 14%,transparent);box-shadow:none}
+html.av-ds:root:root .avd3-ico svg{width:18px;height:18px}
+html.av-ds:root:root .avd3-lbl{border:0;padding:0}
+html.av-ds:root:root .avd3-lbl strong{font-size:13.5px;font-weight:600;color:var(--heading)!important}
+html.av-ds:root:root .avd3-lbl small{font-size:11.5px;color:var(--text-3)!important}
+html.av-ds:root:root .avd3-val{flex-direction:row;align-items:baseline;gap:8px}
+html.av-ds:root:root .avd3-val b{font-size:22px;font-weight:700;color:var(--heading)!important;text-shadow:none}
+html.av-ds:root:root .avd3-val small{background:none;padding:0;color:var(--text-3)!important;font-size:11.5px;font-weight:600}
+.avd3-bar{position:absolute;left:14px;right:14px;bottom:6px;height:3px;border-radius:3px;background:color-mix(in srgb,var(--text) 7%,transparent);overflow:hidden}
+.avd3-bar:after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p,0%);border-radius:inherit;background:var(--c1);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+html.av-ds:root:root .avd3-card>i.avd3-bar{position:absolute!important;left:14px!important;right:14px!important;bottom:6px!important;width:auto!important;height:3px!important;margin:0!important;background:color-mix(in srgb,var(--text) 7%,transparent)!important;box-shadow:none!important;border-radius:3px!important}
+html.av-ds:root:root .avd3-kicker{text-transform:none;letter-spacing:0;font-size:12px;font-weight:500}
+html.av-ds:root:root .avd3-seg.dim{opacity:.4}
+/* rosca 3D: mais grossa, com volume (degradê claro→escuro, brilho em cima, sombra suave) — sem néon */
+html.av-ds:root:root .avd3-track{stroke:color-mix(in srgb,var(--text) 7%,transparent)}
+html.av-ds:root:root .avd3-core{fill:var(--surface);stroke:var(--line);stroke-width:1;filter:drop-shadow(0 4px 10px color-mix(in srgb,#000 18%,transparent))}
+html.av-ds:root:root .avd3-seg.on{transform-origin:110px 110px}
+/* ícones dos cartões com volume */
+html.av-ds:root:root .avd3-ico{color:#fff!important;background:radial-gradient(120% 120% at 30% 20%,color-mix(in srgb,var(--c1) 65%,#fff),var(--c1) 55%,color-mix(in srgb,var(--c1) 70%,#000))!important;box-shadow:inset 0 1px 0 #ffffff66,inset 0 -2px 4px #00000030,0 4px 10px color-mix(in srgb,var(--c1) 30%,transparent)!important}
+html.av-ds:root:root .avd3-tile{color:#fff;background:radial-gradient(120% 120% at 30% 20%,color-mix(in srgb,var(--accent) 65%,#fff),var(--accent) 55%,color-mix(in srgb,var(--accent) 70%,#000));box-shadow:inset 0 1px 0 #ffffff66,inset 0 -2px 4px #00000030,0 4px 10px color-mix(in srgb,var(--accent) 30%,transparent)}
+.avd3-bar:after{background:linear-gradient(180deg,color-mix(in srgb,var(--c1) 70%,#fff),var(--c1))!important}
+html.av-ds:root:root .avd3-card>i.avd3-bar{height:4px!important}
+/* ===== v5 (modelo aprovado): faixa de título escura, rosca bem grossa, ícones sólidos ===== */
+html.av-ds:root:root .avd3{padding:0;overflow:hidden}
+html.av-ds:root:root .avd3-head{margin:0;padding:14px 20px;border:0;
+  background:radial-gradient(120% 200% at 100% 0%,color-mix(in srgb,var(--accent) 35%,transparent),#0000 60%),linear-gradient(120deg,color-mix(in srgb,var(--accent) 28%,#0a1020),#0b1222);
+  box-shadow:inset 0 -1px 0 #ffffff12}
+html.av-ds:root:root .avd3-head .avd3-tile{width:42px;height:42px;background:#ffffff14!important;box-shadow:inset 0 0 0 1px #ffffff26!important;color:#fff}
+html.av-ds:root:root .avd3-head .avd3-tt{border-left:1px solid #ffffff2e;padding-left:14px}
+html.av-ds:root:root .avd3-head h2{color:#fff!important;font-size:18px}
+html.av-ds:root:root .avd3-head h2 em{color:#fff!important;-webkit-text-fill-color:#fff!important}
+html.av-ds:root:root .avd3-head .avd3-tt p{color:#c3cbe0!important}
+html.av-ds:root:root .avd3-head .avd3-chip{background:#ffffff12;border-color:#ffffff2b;color:#fff}
+html.av-ds:root:root .avd3-body{padding:20px 22px 22px;grid-template-columns:minmax(190px,230px) 1fr;gap:26px}
+html.av-ds:root:root .avd3-core{fill:var(--surface);stroke:color-mix(in srgb,var(--text) 8%,transparent)}
+html.av-ds:root:root .avd3-num b{font-size:42px}
+html.av-ds:root:root .avd3-card{background:var(--surface)!important;border:1px solid var(--line-strong)!important;padding:12px 16px 15px;transition:transform .15s,box-shadow .15s,border-color .15s}
+html.av-ds[data-avant-theme=dark]:root:root .avd3-card{background:color-mix(in srgb,#fff 4%,var(--surface))!important;border-color:var(--line)!important}
+html.av-ds:root:root .avd3-card:hover,html.av-ds:root:root .avd3-card.on{transform:translateY(-1px)!important;box-shadow:0 8px 20px color-mix(in srgb,var(--text) 10%,transparent)!important;border-color:color-mix(in srgb,var(--c1) 50%,var(--line))!important}
+html.av-ds:root:root .avd3-ico{width:38px!important;height:38px!important;border-radius:11px!important;background:linear-gradient(160deg,color-mix(in srgb,var(--c1) 82%,#fff),var(--c1) 50%,color-mix(in srgb,var(--c1) 80%,#000))!important}
+html.av-ds:root:root .avd3-card.k-done .avd3-ico{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 40%,#1a2547),#0f1a36)!important}
+html.av-ds:root:root .avd3-val b{font-size:26px}
+html.av-ds:root:root .avd3-card>i.avd3-bar{height:5px!important;bottom:7px!important;left:16px!important;right:16px!important}
