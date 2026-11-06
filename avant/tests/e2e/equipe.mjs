@@ -281,7 +281,8 @@ try {
   const optCor = await v.locator("select[aria-label='Ordenação'] option").first().evaluate((e) => { const c = getComputedStyle(e); return c.color + " / " + c.backgroundColor; });
   check("opções de ordenação com texto escuro sobre fundo claro", /rgb\(19, 33, 58\) \/ rgb\(255, 255, 255\)/.test(optCor), optCor);
 
-  // ---- gerar código de recuperação pelo menu da conta
+  // ---- gerar código de recuperação pelo menu da conta (o menu da conta fica na Home)
+  await ir(v, "Home");
   await v.locator(".account-btn, button[aria-haspopup], .topbar button:has-text('V')").first().click().catch(() => {});
   if (!(await v.locator(".account-pop").count())) await v.locator("header button").last().click();
   await v.locator('.account-pop button:has-text("Código de recuperação")').click();
@@ -301,7 +302,7 @@ try {
   check("faixa de colegas mostra a Ana online", await v.locator('.avo-strip .avo-face[title^="Ana Souza"] .avo-dot.on').count() === 1);
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
-  check("painel do dia: rosca segmentada com legenda", await v.locator(".avd3-seg").count() >= 1 && (await v.locator(".avd3-card").count()) === 4);
+  check("painel do dia: rosca segmentada com legenda", await v.locator(".avd4-seg").count() >= 1 && (await v.locator(".avd4-card").count()) === 4);
   const t0 = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme"));
   await v.locator('button[aria-label^="Ativar modo"]').click();
   await v.waitForFunction(() => document.querySelector(".av-wave") || document.documentElement.classList.contains("av-vt"), null, { timeout: 3000 });

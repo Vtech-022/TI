@@ -1513,3 +1513,30 @@ html.av-ds:root:root .avd3-ico{width:38px!important;height:38px!important;border
 html.av-ds:root:root .avd3-card.k-done .avd3-ico{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 40%,#1a2547),#0f1a36)!important}
 html.av-ds:root:root .avd3-val b{font-size:26px}
 html.av-ds:root:root .avd3-card>i.avd3-bar{height:5px!important;bottom:7px!important;left:16px!important;right:16px!important}
+
+/* ===== "Seu dia em números" — opção A escolhida: número grande, barra dividida e blocos suaves ===== */
+html.av-ds:root:root .avd4{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:var(--avradius,20px);padding:20px 22px 22px;box-shadow:var(--shadow-1),0 10px 28px color-mix(in srgb,var(--text) 6%,transparent)}
+html.av-ds[data-avant-theme=dark]:root:root .avd4{background:linear-gradient(180deg,#ffffff07,#ffffff00 38%),var(--surface);box-shadow:0 1px 0 #ffffff0a inset,0 14px 34px #00000073}
+.avd4-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+html.av-ds:root:root .avd4-hd h2{margin:0;font-size:17px;font-weight:700;color:var(--heading)!important}
+html.av-ds:root:root .avd4-hd p{margin:2px 0 0;font-size:12.5px;color:var(--text-3)!important}
+.avd4-chip{font-size:12px;font-weight:600;color:var(--text-2);border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:999px}
+.avd4-big{display:flex;align-items:baseline;gap:8px;margin:14px 0 10px}
+html.av-ds:root:root .avd4-big b{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--heading)!important}
+html.av-ds:root:root .avd4-big span{font-size:22px;font-weight:600;color:var(--text-3)!important}
+html.av-ds:root:root .avd4-big em{font-style:normal;margin-left:8px;font-size:13px;color:var(--text-3)!important}
+.avd4-stack{display:flex;gap:3px;height:16px;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--text) 8%,transparent);margin-bottom:18px}
+.avd4-seg{display:block;flex-basis:0;min-width:6px;transition:flex-grow .8s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.avd4-seg.dim{opacity:.35}
+.avd4-empty{flex:1}
+.avd4-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html.av-ds:root:root .avd4-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:calc(var(--avradius,20px) * .8);border:1px solid transparent;
+  background:color-mix(in srgb,var(--c) 13%,var(--surface));transition:transform .15s,box-shadow .15s,border-color .15s;cursor:default}
+html.av-ds[data-avant-theme=dark]:root:root .avd4-card{background:color-mix(in srgb,var(--c) 17%,var(--surface))}
+html.av-ds:root:root .avd4-card.on,html.av-ds:root:root .avd4-card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--c) 40%,transparent);box-shadow:0 8px 18px color-mix(in srgb,var(--c) 16%,transparent)}
+.avd4-ic{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--c);box-shadow:0 4px 10px color-mix(in srgb,var(--c) 30%,transparent)}
+.avd4-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+html.av-ds:root:root .avd4-tx strong{font-size:13.5px;font-weight:600;color:var(--heading)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.av-ds:root:root .avd4-tx small{font-size:11.5px;color:var(--text-3)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.av-ds:root:root .avd4-n{font-size:26px;font-weight:800;color:var(--heading)!important}
+@media (max-width:600px){.avd4-grid{grid-template-columns:1fr}}

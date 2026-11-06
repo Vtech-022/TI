@@ -556,47 +556,26 @@ function __avCount(v){
 }
 function AvHomeDash({lists,waiting}){
   const L=lists||{done:[],todo:[],late:[]};
-  const I=(d,extra)=>(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:22,height:22,fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d})});
+  const I=d=>(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:18,height:18,fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d})});
   const cats=[
-    {k:"done",label:"Concluídas",sub:"Tarefas finalizadas com sucesso",n:L.done.length,c1:"var(--accent)",ico:"M5 12.5l4.2 4.2L19 7",tips:L.done},
-    {k:"todo",label:"A fazer hoje",sub:"Tarefas pendentes para hoje",n:L.todo.length,c1:"#f2a516",ico:"M12 7v5l3 2M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.todo},
-    {k:"late",label:"Atrasadas",sub:"Tarefas que passaram do prazo",n:L.late.length,c1:"#e5484d",ico:"M12 7.5v5.5M12 16.5h.01M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.late},
-    {k:"wait",label:"Aguardando terceiros",sub:"Dependem de outra pessoa",n:waiting||0,c1:"#8b95a7",ico:"M10 9v6M14 9v6M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:[]}
+    {k:"done",label:"Concluídas",sub:"finalizadas hoje",n:L.done.length,c:"var(--accent)",ico:"M5 12.5l4.2 4.2L19 7",tips:L.done},
+    {k:"todo",label:"A fazer hoje",sub:"pendentes para hoje",n:L.todo.length,c:"#f59e0b",ico:"M12 7v5l3 2M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.todo},
+    {k:"late",label:"Atrasadas",sub:"passaram do prazo",n:L.late.length,c:"#ef4444",ico:"M12 7.5v5.5M12 16.5h.01M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:L.late},
+    {k:"wait",label:"Aguardando terceiros",sub:"dependem de outra pessoa",n:waiting||0,c:"#64748b",ico:"M10 9v6M14 9v6M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z",tips:[]}
   ];
   const sum=cats.reduce((a,c)=>a+c.n,0);
-  const[go,setGo]=x.useState(!1),[hv,setHv]=x.useState(null);
-  x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),80);return()=>clearTimeout(t)},[]);
   const totalDay=L.done.length+L.todo.length+L.late.length;
-  const R=80,C=2*Math.PI*R,GAP=sum>1?6:0;
-  let acc=0;
-  const segs=cats.filter(c=>c.n>0).map(c=>{const len=Math.max(2,C*c.n/sum-GAP);const o={...c,len,off:acc};acc+=C*c.n/sum;return o});
-  const pc=c=>sum?Math.round(100*c.n/sum):0;
-  return (0,q.jsxs)("section",{className:"avd3","aria-label":"Seu dia em números",children:[
-    (0,q.jsx)("i",{className:"avd3-glow","aria-hidden":!0}),
-    (0,q.jsxs)("header",{className:"avd3-head",children:[
-      (0,q.jsx)("span",{className:"avd3-tile",children:(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:26,height:26,fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d:"M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"})})}),
-      (0,q.jsxs)("div",{className:"avd3-tt",children:[(0,q.jsxs)("h2",{children:["Seu dia em ",(0,q.jsx)("em",{children:"números"})]}),(0,q.jsx)("p",{children:"Acompanhe o resumo das suas atividades de hoje"})]}),
-      (0,q.jsxs)("span",{className:"avd3-chip",title:"Resumo de hoje",children:[(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"none",stroke:"currentColor",strokeWidth:2,"aria-hidden":!0,children:(0,q.jsx)("path",{d:"M7 3v3M17 3v3M4 9h16M5 5h14v15H5z"})}),"Hoje"]})]}),
-    (0,q.jsxs)("div",{className:"avd3-body",children:[
-      (0,q.jsxs)("div",{className:"avd3-ring",onMouseLeave:()=>setHv(null),children:[
-        (0,q.jsxs)("svg",{viewBox:"0 0 220 220",role:"img","aria-label":L.done.length+" concluídas, "+L.todo.length+" a fazer, "+L.late.length+" atrasadas, "+(waiting||0)+" aguardando",children:[
-          (0,q.jsxs)("defs",{children:[cats.map(c=>(0,q.jsxs)("linearGradient",{id:"avd3g-"+c.k,x1:"0",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",style:{stopColor:"color-mix(in srgb,"+c.c1+" 68%,#fff)"}}),(0,q.jsx)("stop",{offset:".55",style:{stopColor:c.c1}}),(0,q.jsx)("stop",{offset:"1",style:{stopColor:"color-mix(in srgb,"+c.c1+" 72%,#000)"}})]},c.k)),
-            (0,q.jsxs)("linearGradient",{id:"avd3-hl",x1:"0",y1:"0",x2:"0",y2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#fff",stopOpacity:".55"}),(0,q.jsx)("stop",{offset:".5",stopColor:"#fff",stopOpacity:".06"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#fff",stopOpacity:"0"})]}),
-            (0,q.jsx)("filter",{id:"avd3-sh",x:"-20%",y:"-20%",width:"140%",height:"140%",children:(0,q.jsx)("feDropShadow",{dx:"0",dy:"5",stdDeviation:"5",floodColor:"#0b1020",floodOpacity:".28"})})]}),
-          (0,q.jsx)("circle",{className:"avd3-track",cx:"110",cy:"110",r:R,fill:"none",strokeWidth:"34"}),
-          segs.map((g,i)=>(0,q.jsx)("circle",{className:"avd3-seg"+(hv===g.k?" on":hv?" dim":""),cx:"110",cy:"110",r:R,fill:"none",stroke:"url(#avd3g-"+g.k+")",filter:"url(#avd3-sh)",strokeWidth:"34",strokeLinecap:"butt",
-            strokeDasharray:go?g.len+" "+(C-g.len):"0 "+C,strokeDashoffset:-g.off-GAP/2,transform:"rotate(-90 110 110)",style:{transitionDelay:i*140+"ms"},onMouseEnter:()=>setHv(g.k)},g.k)),
-          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R,fill:"none",stroke:"url(#avd3-hl)",strokeWidth:"34",style:{pointerEvents:"none"}}),
-          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R-17,fill:"none",stroke:"#000",strokeOpacity:".14",strokeWidth:"1.5"}),
-          (0,q.jsx)("circle",{cx:"110",cy:"110",r:R+17,fill:"none",stroke:"#fff",strokeOpacity:".18",strokeWidth:"1"}),
-          (0,q.jsx)("circle",{className:"avd3-core",cx:"110",cy:"110",r:"56"})]}),
-        (0,q.jsxs)("div",{className:"avd3-center",children:[
-                    (0,q.jsxs)("div",{className:"avd3-num",children:[(0,q.jsx)("b",{children:__avCount(L.done.length)}),(0,q.jsx)("i",{children:"/"}),(0,q.jsx)("b",{className:"avd3-tot",children:totalDay})]}),
-          (0,q.jsx)("small",{className:"avd3-kicker",children:"concluídas"}),(0,q.jsxs)("small",{className:"avd3-pct",children:[(totalDay?Math.round(100*L.done.length/totalDay):0)+"% do dia"]})]})]}),
-      (0,q.jsx)("ul",{className:"avd3-list avh2-legend",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd3-card k-"+c.k+(hv===c.k?" on":""),style:{"--c1":c.c1,"--p":pc(c)+"%"},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[
-        (0,q.jsx)("span",{className:"avd3-ico",children:I(c.ico)}),
-        (0,q.jsxs)("span",{className:"avd3-lbl",children:[(0,q.jsx)("strong",{children:c.label}),(0,q.jsx)("small",{children:c.sub})]}),
-        (0,q.jsxs)("span",{className:"avd3-val",children:[(0,q.jsx)("b",{children:c.n}),(0,q.jsx)("small",{children:pc(c)+"%"})]}),(0,q.jsx)("i",{className:"avd3-bar","aria-hidden":!0})]},c.k))})]})]});
+  const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
+  const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
+  x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
+  return (0,q.jsxs)("section",{className:"avd4","aria-label":"Seu dia em números",children:[
+    (0,q.jsxs)("header",{className:"avd4-hd",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("h2",{children:"Seu dia em números"}),(0,q.jsx)("p",{children:"Resumo das suas atividades de hoje"})]}),(0,q.jsx)("span",{className:"avd4-chip",children:"Hoje"})]}),
+    (0,q.jsxs)("div",{className:"avd4-big",children:[(0,q.jsx)("b",{children:__avCount(L.done.length)}),(0,q.jsx)("span",{children:"/ "+totalDay}),(0,q.jsx)("em",{children:"concluídas · "+pct+"% do dia"})]}),
+    (0,q.jsx)("div",{className:"avd4-stack",role:"img","aria-label":cats.map(c=>c.n+" "+c.label.toLowerCase()).join(", "),onMouseLeave:()=>setHv(null),children:sum?cats.filter(c=>c.n>0).map(c=>(0,q.jsx)("i",{className:"avd4-seg"+(hv&&hv!==c.k?" dim":""),style:{flexGrow:go?c.n:0,background:c.c},title:c.label+": "+c.n,onMouseEnter:()=>setHv(c.k)},c.k)):(0,q.jsx)("i",{className:"avd4-empty"})}),
+    (0,q.jsx)("ul",{className:"avd4-grid",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd4-card k-"+c.k+(hv===c.k?" on":""),style:{"--c":c.c},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[
+      (0,q.jsx)("span",{className:"avd4-ic",children:I(c.ico)}),
+      (0,q.jsxs)("span",{className:"avd4-tx",children:[(0,q.jsx)("strong",{children:c.label}),(0,q.jsx)("small",{children:c.sub})]}),
+      (0,q.jsx)("b",{className:"avd4-n",children:c.n})]},c.k))})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */
