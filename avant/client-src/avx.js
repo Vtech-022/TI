@@ -567,15 +567,20 @@ function AvHomeDash({lists,waiting}){
   const totalDay=L.done.length+L.todo.length+L.late.length;
   const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
   const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
+  const nav=ir();
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
+  /* cada bloco leva para a área de origem */
+  const dest={done:"/pendencias?status=concluida&include_closed=1",late:"/pendencias?due=atrasadas",wait:"/terceiros"};
+  const open=k=>{if(dest[k])return nav(dest[k]);const el=document.querySelector(".day-list-card");if(el){el.scrollIntoView({behavior:"smooth",block:"start"});el.classList.remove("avd4-flash");void el.offsetWidth;el.classList.add("avd4-flash")}};
+  const hint={done:"Ver tarefas concluídas",todo:"Ir para Meu dia",late:"Ver tarefas atrasadas",wait:"Ir para Aguardando Terceiros"};
   return (0,q.jsxs)("section",{className:"avd4","aria-label":"Seu dia em números",children:[
     (0,q.jsxs)("header",{className:"avd4-hd",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("h2",{children:"Seu dia em números"}),(0,q.jsx)("p",{children:"Resumo das suas atividades de hoje"})]}),(0,q.jsx)("span",{className:"avd4-chip",children:"Hoje"})]}),
     (0,q.jsxs)("div",{className:"avd4-big",children:[(0,q.jsx)("b",{children:__avCount(L.done.length)}),(0,q.jsx)("span",{children:"/ "+totalDay}),(0,q.jsx)("em",{children:"concluídas · "+pct+"% do dia"})]}),
     (0,q.jsx)("div",{className:"avd4-stack",role:"img","aria-label":cats.map(c=>c.n+" "+c.label.toLowerCase()).join(", "),onMouseLeave:()=>setHv(null),children:sum?cats.filter(c=>c.n>0).map(c=>(0,q.jsx)("i",{className:"avd4-seg"+(hv&&hv!==c.k?" dim":""),style:{flexGrow:go?c.n:0,background:c.c},title:c.label+": "+c.n,onMouseEnter:()=>setHv(c.k)},c.k)):(0,q.jsx)("i",{className:"avd4-empty"})}),
-    (0,q.jsx)("ul",{className:"avd4-grid",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd4-card k-"+c.k+(hv===c.k?" on":""),style:{"--c":c.c},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[
+    (0,q.jsx)("ul",{className:"avd4-grid",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd4-card k-"+c.k+(hv===c.k?" on":""),style:{"--c":c.c},role:"button",tabIndex:0,"aria-label":c.label+": "+c.n+" — "+hint[c.k],onClick:()=>open(c.k),onKeyDown:e=>{(e.key==="Enter"||e.key===" ")&&(e.preventDefault(),open(c.k))},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:hint[c.k]+(c.tips.length?"\n\n"+c.label+":\n• "+c.tips.slice(0,8).join("\n• "):""),children:[
       (0,q.jsx)("span",{className:"avd4-ic",children:I(c.ico)}),
       (0,q.jsxs)("span",{className:"avd4-tx",children:[(0,q.jsx)("strong",{children:c.label}),(0,q.jsx)("small",{children:c.sub})]}),
-      (0,q.jsx)("b",{className:"avd4-n",children:c.n})]},c.k))})]});
+      (0,q.jsx)("b",{className:"avd4-n",children:c.n}),(0,q.jsx)("svg",{className:"avd4-go",viewBox:"0 0 24 24",width:16,height:16,"aria-hidden":!0,fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round",children:(0,q.jsx)("path",{d:"M9 6l6 6-6 6"})})]},c.k))})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */

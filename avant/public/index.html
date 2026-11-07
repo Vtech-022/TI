@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta name="av-build" content="7524eef2e8df">
+<head><meta name="av-build" content="0ec038bc9aeb">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.4%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237aa2f7%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%232563eb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2314317e%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22h%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.55%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2218%22%20fill%3D%22url%28%23b%29%22%2F%3E%3Cpath%20d%3D%22M4%2020C4%2010%2010%204%2020%204H44C54%204%2060%2010%2060%2020V24C46%2030%2018%2030%204%2024Z%22%20fill%3D%22url%28%23h%29%22%2F%3E%3Cpath%20d%3D%22M12%2036H20L24.5%2026L31%2044L36.5%2031L40.5%2037L52%2023%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2252%22%20cy%3D%2223%22%20r%3D%223.6%22%20fill%3D%22%23f5b301%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.4%22%2F%3E%3C%2Fsvg%3E">
@@ -1554,6 +1554,13 @@ html.av-ds:root:root .avd4-tx strong{font-size:13.5px;font-weight:600;color:var(
 html.av-ds:root:root .avd4-tx small{font-size:11.5px;color:var(--text-3)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.av-ds:root:root .avd4-n{font-size:26px;font-weight:800;color:var(--heading)!important}
 @media (max-width:600px){.avd4-grid{grid-template-columns:1fr}}
+/* blocos do "Seu dia em números" levam à área de origem */
+html.av-ds:root:root .avd4-card{cursor:pointer}
+html.av-ds:root:root .avd4-card:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.avd4-go{flex:none;color:var(--text-3);opacity:0;transform:translateX(-4px);transition:opacity .15s,transform .15s}
+.avd4-card:hover .avd4-go,.avd4-card:focus-visible .avd4-go{opacity:1;transform:none}
+@keyframes avd4Flash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+.day-list-card.avd4-flash{animation:avd4Flash 1s ease-out 2}
 
 </style>
 </head>
@@ -2752,15 +2759,20 @@ function AvHomeDash({lists,waiting}){
   const totalDay=L.done.length+L.todo.length+L.late.length;
   const pct=totalDay?Math.round(100*L.done.length/totalDay):0;
   const[hv,setHv]=x.useState(null),[go,setGo]=x.useState(!1);
+  const nav=ir();
   x.useEffect(()=>{const t=setTimeout(()=>setGo(!0),60);return()=>clearTimeout(t)},[]);
+  /* cada bloco leva para a área de origem */
+  const dest={done:"/pendencias?status=concluida&include_closed=1",late:"/pendencias?due=atrasadas",wait:"/terceiros"};
+  const open=k=>{if(dest[k])return nav(dest[k]);const el=document.querySelector(".day-list-card");if(el){el.scrollIntoView({behavior:"smooth",block:"start"});el.classList.remove("avd4-flash");void el.offsetWidth;el.classList.add("avd4-flash")}};
+  const hint={done:"Ver tarefas concluídas",todo:"Ir para Meu dia",late:"Ver tarefas atrasadas",wait:"Ir para Aguardando Terceiros"};
   return (0,q.jsxs)("section",{className:"avd4","aria-label":"Seu dia em números",children:[
     (0,q.jsxs)("header",{className:"avd4-hd",children:[(0,q.jsxs)("div",{children:[(0,q.jsx)("h2",{children:"Seu dia em números"}),(0,q.jsx)("p",{children:"Resumo das suas atividades de hoje"})]}),(0,q.jsx)("span",{className:"avd4-chip",children:"Hoje"})]}),
     (0,q.jsxs)("div",{className:"avd4-big",children:[(0,q.jsx)("b",{children:__avCount(L.done.length)}),(0,q.jsx)("span",{children:"/ "+totalDay}),(0,q.jsx)("em",{children:"concluídas · "+pct+"% do dia"})]}),
     (0,q.jsx)("div",{className:"avd4-stack",role:"img","aria-label":cats.map(c=>c.n+" "+c.label.toLowerCase()).join(", "),onMouseLeave:()=>setHv(null),children:sum?cats.filter(c=>c.n>0).map(c=>(0,q.jsx)("i",{className:"avd4-seg"+(hv&&hv!==c.k?" dim":""),style:{flexGrow:go?c.n:0,background:c.c},title:c.label+": "+c.n,onMouseEnter:()=>setHv(c.k)},c.k)):(0,q.jsx)("i",{className:"avd4-empty"})}),
-    (0,q.jsx)("ul",{className:"avd4-grid",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd4-card k-"+c.k+(hv===c.k?" on":""),style:{"--c":c.c},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:c.tips.length?c.label+":\n• "+c.tips.slice(0,8).join("\n• "):c.label,children:[
+    (0,q.jsx)("ul",{className:"avd4-grid",children:cats.map(c=>(0,q.jsxs)("li",{className:"avd4-card k-"+c.k+(hv===c.k?" on":""),style:{"--c":c.c},role:"button",tabIndex:0,"aria-label":c.label+": "+c.n+" — "+hint[c.k],onClick:()=>open(c.k),onKeyDown:e=>{(e.key==="Enter"||e.key===" ")&&(e.preventDefault(),open(c.k))},onMouseEnter:()=>setHv(c.k),onMouseLeave:()=>setHv(null),title:hint[c.k]+(c.tips.length?"\n\n"+c.label+":\n• "+c.tips.slice(0,8).join("\n• "):""),children:[
       (0,q.jsx)("span",{className:"avd4-ic",children:I(c.ico)}),
       (0,q.jsxs)("span",{className:"avd4-tx",children:[(0,q.jsx)("strong",{children:c.label}),(0,q.jsx)("small",{children:c.sub})]}),
-      (0,q.jsx)("b",{className:"avd4-n",children:c.n})]},c.k))})]});
+      (0,q.jsx)("b",{className:"avd4-n",children:c.n}),(0,q.jsx)("svg",{className:"avd4-go",viewBox:"0 0 24 24",width:16,height:16,"aria-hidden":!0,fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round",children:(0,q.jsx)("path",{d:"M9 6l6 6-6 6"})})]},c.k))})]});
 }
 
 /* ---- Quem está online: faixa vertical centralizada; clicar abre a conversa ---- */

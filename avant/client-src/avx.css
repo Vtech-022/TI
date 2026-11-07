@@ -1540,3 +1540,10 @@ html.av-ds:root:root .avd4-tx strong{font-size:13.5px;font-weight:600;color:var(
 html.av-ds:root:root .avd4-tx small{font-size:11.5px;color:var(--text-3)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.av-ds:root:root .avd4-n{font-size:26px;font-weight:800;color:var(--heading)!important}
 @media (max-width:600px){.avd4-grid{grid-template-columns:1fr}}
+/* blocos do "Seu dia em números" levam à área de origem */
+html.av-ds:root:root .avd4-card{cursor:pointer}
+html.av-ds:root:root .avd4-card:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.avd4-go{flex:none;color:var(--text-3);opacity:0;transform:translateX(-4px);transition:opacity .15s,transform .15s}
+.avd4-card:hover .avd4-go,.avd4-card:focus-visible .avd4-go{opacity:1;transform:none}
+@keyframes avd4Flash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+.day-list-card.avd4-flash{animation:avd4Flash 1s ease-out 2}
