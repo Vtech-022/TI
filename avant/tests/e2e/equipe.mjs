@@ -303,6 +303,12 @@ try {
   check("início mostra painel do dia (sem cronômetro)", /Seu dia em números/.test(home) && !/Horas hoje/.test(home));
   check("início sem blocos poluídos (sugestões / ritmo da semana)", !/Ritmo da semana|Sugest/i.test(home));
   check("painel do dia: rosca segmentada com legenda", await v.locator(".avd4-seg").count() >= 1 && (await v.locator(".avd4-card").count()) === 4);
+  await v.locator(".avd4-card.k-wait").click(); await v.waitForTimeout(900);
+  check("bloco 'Aguardando terceiros' leva para a área de origem", /\/terceiros/.test(v.url()), v.url());
+  await ir(v, "Home");
+  await v.locator(".avd4-card.k-done").click(); await v.waitForTimeout(900);
+  check("bloco 'Concluídas' abre Minhas tarefas filtrando concluídas", /pendencias\?status=concluida/.test(v.url()), v.url());
+  await ir(v, "Home");
   const t0 = await v.evaluate(() => document.documentElement.getAttribute("data-avant-theme"));
   await v.locator('button[aria-label^="Ativar modo"]').click();
   await v.waitForFunction(() => document.querySelector(".av-wave") || document.documentElement.classList.contains("av-vt"), null, { timeout: 3000 });
