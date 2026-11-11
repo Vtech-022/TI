@@ -481,6 +481,9 @@ try {
   const conc = a.locator('section.tlist[aria-label="Concluída"] .tcard:has-text("Ajuda com o Forms")');
   check("colega conclui e aparece 'Concluída por'", (await conc.count()) === 1 && /Concluída por Ana Souza/.test(await conc.innerText()));
   await shot(a, "quadro-atender");
+  await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
+  await v.waitForTimeout(300);
+  check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);
   // ---- coluna longa: mostra 6 e "Ver mais"
   await v.evaluate(async () => {
     const team = await (await fetch("/api/team", { headers: { "x-avant": "1" } })).json();
@@ -495,9 +498,7 @@ try {
   await colA.locator(".avmore").click(); await v.waitForTimeout(300);
   check("'Ver mais' mostra o resto da coluna", (await colA.locator(".tcard").count()) > 6);
   await colA.locator(".avmore").click();
-  await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
-  await v.waitForTimeout(300);
-  check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);
+  await ir(v, "Home");
 
   // ---- chat: fecha ao clicar fora, colar foto, ver foto completa
   await v.locator('.avo-strip .avo-face[title^="Ana Souza"]').click();
