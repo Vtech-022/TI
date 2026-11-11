@@ -1547,3 +1547,6 @@ html.av-ds:root:root .avd4-card:focus-visible{outline:2px solid var(--c);outline
 .avd4-card:hover .avd4-go,.avd4-card:focus-visible .avd4-go{opacity:1;transform:none}
 @keyframes avd4Flash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .day-list-card.avd4-flash{animation:avd4Flash 1s ease-out 2}
+/* botão "Ver mais" nas colunas longas do quadro */
+.avmore{width:100%;border:1px dashed var(--line-strong);background:transparent;color:var(--text-2);font:600 12.5px/1 var(--font,system-ui);padding:10px;border-radius:calc(var(--avradius,20px) * .5);cursor:pointer}
+.avmore:hover{border-style:solid;border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}

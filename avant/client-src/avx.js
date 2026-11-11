@@ -1552,8 +1552,17 @@ function AvDayGroup({gk,label,count,defOpen,children}){
       (0,q.jsx)("span",{children:label}),(0,q.jsx)("span",{className:"avdg-n",children:count})]}),
     open?(0,q.jsx)("div",{className:"avdg-items",children}):null]});
 }
+/* colunas longas: mostra os 6 primeiros e um botão "Ver mais" (lembra a escolha por coluna) */
+function AvMore({col,rest,render}){
+  const key="av-more-"+col;
+  const[open,setOpen]=x.useState(()=>{try{return localStorage.getItem(key)==="1"}catch{return!1}});
+  const flip=()=>setOpen(v=>{const n=!v;try{localStorage.setItem(key,n?"1":"0")}catch{}return n});
+  return (0,q.jsxs)(q.Fragment,{children:[open?rest.map(render):null,
+    (0,q.jsx)("button",{type:"button",className:"avmore",onClick:flip,"aria-expanded":open,children:open?"Mostrar menos":"Ver mais "+rest.length+(rest.length===1?" cartão":" cartões")})]});
+}
 function __avDayGroups(col,list,render){
-  if(col!=="concluida"||list.length<2)return list.map(render);
+  if(col!=="concluida")return list.length>6?[...list.slice(0,6).map(render),(0,q.jsx)(AvMore,{col,rest:list.slice(6),render},"av-more")]:list.map(render);
+  if(list.length<2)return list.map(render);
   const groups=new Map();
   [...list].sort((a,b)=>String(b.it.completed_at||b.it.updated_at||"").localeCompare(String(a.it.completed_at||a.it.updated_at||""))).forEach(o=>{
     const k=__avDayKey(o.it.completed_at||o.it.updated_at);if(!groups.has(k.key))groups.set(k.key,{...k,items:[]});groups.get(k.key).items.push(o)});

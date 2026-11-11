@@ -481,6 +481,20 @@ try {
   const conc = a.locator('section.tlist[aria-label="Concluída"] .tcard:has-text("Ajuda com o Forms")');
   check("colega conclui e aparece 'Concluída por'", (await conc.count()) === 1 && /Concluída por Ana Souza/.test(await conc.innerText()));
   await shot(a, "quadro-atender");
+  // ---- coluna longa: mostra 6 e "Ver mais"
+  await v.evaluate(async () => {
+    const team = await (await fetch("/api/team", { headers: { "x-avant": "1" } })).json();
+    const mine = team.people.find(p => /Victor Andrade/.test(p.name));
+    const extra = Array.from({ length: 8 }, (_, i) => ({ id: "lote" + i, title: "Item do lote " + (i + 1), status: "a_fazer" }));
+    await fetch(`/api/team/${mine.id}`, { method: "PUT", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ base: mine.items, items: [...mine.items, ...extra] }) });
+  });
+  await ir(v, "Atividades da equipe"); await v.waitForTimeout(1200);
+  const colA = v.locator('section.tlist[aria-label="A fazer"]');
+  const antes = await colA.locator(".tcard").count();
+  check("coluna longa mostra só 6 cartões e o botão 'Ver mais'", antes === 6 && (await colA.locator(".avmore").count()) === 1, String(antes));
+  await colA.locator(".avmore").click(); await v.waitForTimeout(300);
+  check("'Ver mais' mostra o resto da coluna", (await colA.locator(".tcard").count()) > 6);
+  await colA.locator(".avmore").click();
   await v.locator(".day-hero").click({ position: { x: 20, y: 20 } });
   await v.waitForTimeout(300);
   check("assistente fecha ao clicar fora", (await v.locator(".ava-panel").count()) === 0);
