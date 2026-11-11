@@ -490,8 +490,8 @@ try {
   });
   await ir(v, "Atividades da equipe"); await v.waitForTimeout(1200);
   const colA = v.locator('section.tlist[aria-label="A fazer"]');
-  const antes = await colA.locator(".tcard").count();
-  check("coluna longa mostra só 6 cartões e o botão 'Ver mais'", antes === 6 && (await colA.locator(".avmore").count()) === 1, String(antes));
+  const qtdCol = await colA.locator(".tcard").count();
+  check("coluna longa mostra só 6 cartões e o botão Ver mais", qtdCol === 6 && (await colA.locator(".avmore").count()) === 1, String(qtdCol));
   await colA.locator(".avmore").click(); await v.waitForTimeout(300);
   check("'Ver mais' mostra o resto da coluna", (await colA.locator(".tcard").count()) > 6);
   await colA.locator(".avmore").click();
