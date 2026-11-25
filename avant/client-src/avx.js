@@ -1712,3 +1712,24 @@ function AvReportPdfBtn({data}){
   const[b,setB]=x.useState(!1);
   return (0,q.jsxs)("button",{type:"button",className:"btn primary",disabled:b||!data,onClick:async()=>{setB(!0);try{await __avReportPdf(data)}finally{setB(!1)}},children:[(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d:"M12 4v11M7 10l5 5l5-5M5 20h14"})})," ",b?"Gerando PDF…":"Baixar relatório (PDF)"]});
 }
+
+/* Tela de entrada: painel da marca (lado esquerdo) */
+function AvGateBrand(){
+  const ic=d=>(0,q.jsx)("svg",{viewBox:"0 0 24 24",width:18,height:18,fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round","aria-hidden":!0,children:(0,q.jsx)("path",{d})});
+  return (0,q.jsxs)("aside",{className:"gx-brand","aria-hidden":!0,children:[
+    (0,q.jsx)("i",{className:"gx-orb gx-orb1"}),(0,q.jsx)("i",{className:"gx-orb gx-orb2"}),
+    (0,q.jsxs)("div",{className:"gx-top",children:[(0,q.jsx)(fu,{size:44}),(0,q.jsx)("b",{children:"Ritmo"})]}),
+    (0,q.jsxs)("div",{className:"gx-mid",children:[
+      (0,q.jsxs)("h2",{children:["A rotina da equipe,",(0,q.jsx)("br",{}),(0,q.jsx)("em",{children:"em sintonia."})]}),
+      (0,q.jsx)("p",{children:"Tarefas, prazos e conversas do time num só lugar — cada um sabe o que fazer, e todos veem o que andou."}),
+      (0,q.jsx)("svg",{className:"gx-wave",viewBox:"0 0 520 90",preserveAspectRatio:"none",children:(0,q.jsx)("path",{d:"M0 60 H120 L150 20 L190 80 L222 38 L248 60 H330 L352 44 L372 60 H520",fill:"none",stroke:"url(#gxw)",strokeWidth:"3.5",strokeLinecap:"round",strokeLinejoin:"round"})}),
+      (0,q.jsx)("svg",{width:"0",height:"0",style:{position:"absolute"},children:(0,q.jsx)("defs",{children:(0,q.jsxs)("linearGradient",{id:"gxw",x1:"0",x2:"1",children:[(0,q.jsx)("stop",{offset:"0",stopColor:"#ffffff",stopOpacity:".15"}),(0,q.jsx)("stop",{offset:".55",stopColor:"#ffffff"}),(0,q.jsx)("stop",{offset:"1",stopColor:"#ffc93c"})]})})}),
+      (0,q.jsxs)("ul",{className:"gx-feat",children:[
+        (0,q.jsxs)("li",{children:[(0,q.jsx)("span",{children:ic("M4 5h6v14H4zM14 5h6v8h-6z")}),"Quadro da equipe em tempo real"]}),
+        (0,q.jsxs)("li",{children:[(0,q.jsx)("span",{children:ic("M7 3v3M17 3v3M4 9h16M5 5h14v15H5z")}),"Calendário, prazos e lembretes"]}),
+        (0,q.jsxs)("li",{children:[(0,q.jsx)("span",{children:ic("M5 5h14v10H9l-4 4z")}),"Conversas e assistente para montar tarefas"]})]})]}),
+    (0,q.jsxs)("div",{className:"gx-card",children:[
+      (0,q.jsxs)("div",{className:"gx-card-h",children:[(0,q.jsx)("span",{children:"Hoje"}),(0,q.jsx)("b",{children:"4 de 6 concluídas"})]}),
+      (0,q.jsx)("div",{className:"gx-bar",children:(0,q.jsx)("i",{})}),
+      (0,q.jsxs)("div",{className:"gx-ppl",children:[(0,q.jsx)("i",{style:{background:"#3b82f6"},children:"AS"}),(0,q.jsx)("i",{style:{background:"#f59e0b"},children:"BL"}),(0,q.jsx)("i",{style:{background:"#10b981"},children:"LS"}),(0,q.jsx)("small",{children:"3 pessoas online"})]})]})]});
+}

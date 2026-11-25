@@ -237,7 +237,7 @@ sub("try{localStorage.setItem(Ca(),JSON.stringify(n))}catch{}", "try{localStorag
 TEAM = r'''function Mz(me){
   const subs=new Set(),errs=new Set(),last={};
   let people=[],tag=null,loaded=!1;
-  const view=()=>people.map(p=>({id:p.id,name:(p.name||"Colaborador")+(p.removed?" (conta removida)":""),avatarUrl:null,isMe:p.id===me.id,items:p.items}));
+  const view=()=>people.map(p=>({id:p.id,name:(p.name||"Colaborador")+(p.removed?" (conta removida)":""),removed:!!p.removed,avatarUrl:null,isMe:p.id===me.id,items:p.items}));
   const emit=()=>{const v=view();subs.forEach(f=>f(v))};
   async function load(force){
     const res=await __avFetch("/team",{headers:tag&&!force?{"if-none-match":tag}:{}});
@@ -577,6 +577,10 @@ sub("(0,q.jsx)(`a`,{className:`btn`,href:`/api/export`,children:`Exportar cópia
 # Atividades da equipe: contas removidas saem dos filtros e do quadro
 sub("A=(0,x.useMemo)(()=>k.filter(e=>!u||e.id===u).flatMap(", "A=(0,x.useMemo)(()=>k.filter(e=>!e.removed&&(!u||e.id===u)).flatMap(")
 sub("k.map(e=>(0,q.jsxs)(`button`,{className:`person-chip${u===e.id?` on`:``}`", "k.filter(e=>!e.removed).map(e=>(0,q.jsxs)(`button`,{className:`person-chip${u===e.id?` on`:``}`")
+
+# Tela de entrada nova: painel da marca + formulário
+sub("return(0,q.jsx)(`div`,{className:`gate`,children:(0,q.jsxs)(`form`,{className:`gate-card`,onSubmit:S,noValidate:!0,children:[(0,q.jsx)(fu,{size:64}),", "return(0,q.jsxs)(`div`,{className:`gate gx`,children:[(0,q.jsx)(AvGateBrand,{}),(0,q.jsxs)(`form`,{className:`gate-card`,onSubmit:S,noValidate:!0,children:[(0,q.jsx)(`span`,{className:`gx-hello`,children:a===`entrar`?`Bem-vindo de volta`:`Primeiro acesso`}),")
+sub("children:`Esqueci minha senha`})]})})}function Wz", "children:`Esqueci minha senha`})]})]})}function Wz")
 # ---- Novo nome: Ritmo (rotina diária da equipe) ----
 s = s.replace("Zênite · Central de Trabalho</title>", "Ritmo · Rotina da equipe</title>")
 s = s.replace("className:`rb-word`,children:`zênite`", "className:`rb-word`,children:`ritmo`")

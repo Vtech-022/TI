@@ -498,6 +498,20 @@ try {
   await colA.locator(".avmore").click(); await v.waitForTimeout(300);
   check("'Ver mais' mostra o resto da coluna", (await colA.locator(".tcard").count()) > 6);
   await colA.locator(".avmore").click();
+  // ---- conta excluída some dos filtros e do quadro
+  const x3 = await novo();
+  await criar(x3, "Conta Temporaria", "Av@2026");
+  await x3.close();
+  await v.evaluate(async () => {
+    const team = await (await fetch("/api/team", { headers: { "x-avant": "1" } })).json();
+    const t = team.people.find(p => p.name === "Conta Temporaria");
+    await fetch(`/api/team/${t.id}/cards`, { method: "POST", headers: { "x-avant": "1", "content-type": "application/json" }, body: JSON.stringify({ cards: [{ id: "tmp1", title: "Cartão da conta excluída" }] }) });
+    await fetch(`/api/users/${t.id}`, { method: "DELETE", headers: { "x-avant": "1" } });
+  });
+  await ir(v, "Home"); await ir(v, "Atividades da equipe"); await v.waitForTimeout(7000);
+  const barra = await v.locator(".people-bar").innerText();
+  check("conta excluída não aparece nos filtros de Atividades da equipe", !/Conta Temporaria|conta removida/.test(barra), barra.replace(/\s+/g, " "));
+  check("cartões da conta excluída saem do quadro", (await v.locator('.tcard:has-text("Cartão da conta excluída")').count()) === 0);
   await ir(v, "Home");
 
   // ---- chat: fecha ao clicar fora, colar foto, ver foto completa
